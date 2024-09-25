@@ -1,6 +1,0 @@
-version: '3.8'
-services:
-  app:
-    image: openjdk:21-jdk-slim
-    container_name: spring_app
-    working_dir: /app

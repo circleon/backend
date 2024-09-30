@@ -47,7 +47,7 @@ jobs:
           username: ${{ secrets.EC2_DEV_USER }}
           key: ${{ secrets.EC2_DEV_SSH_KEY }}
           port: 22
-          env:
+          envs: |
             DB_URL: ${{ secrets.DB_URL_DEV }}
             DB_USERNAME: ${{ secrets.DB_USERNAME_DEV }}
             DB_PASSWORD: ${{ secrets.DB_PASSWORD_DEV }}

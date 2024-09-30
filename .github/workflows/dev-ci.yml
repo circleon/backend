@@ -25,6 +25,9 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean build
 
+      - name: Verify JAR file existence
+        run: ls -l build/libs
+
       # 4. Docker 관련 파일을 EC2 서버로 복사합니다.
       - name: Deploy Docker files to EC2
         uses: appleboy/scp-action@v0.1.7

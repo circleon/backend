@@ -21,7 +21,7 @@ jobs:
           java-version: '21'
           distribution: 'zulu'
 
-      # 3. 의존성을 설치하고 애플리케이션 빌드
+      # 3. 애플리케이션 빌드
       - name: Build with Gradle
         run: ./gradlew clean build
 

@@ -40,7 +40,7 @@ jobs:
           AWS_SES_SECRET_ACCESS_KEY: ${{ secrets.AWS_SES_SECRET_ACCESS_KEY }}
 
       - name: Close SSH Tunnel
-        run: pkill -f "ssh
+        run: pkill -f "ssh"
 
       - name: Verify SSH Tunnel is Closed
         run: |

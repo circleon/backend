@@ -10,21 +10,24 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      # 1. GitHub 저장소의 코드를 체크아웃합니다.
+
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Java 21을 설치합니다.
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'zulu'
 
-      - name: Set up SSH Tunnel for RDS
-        run: ssh -i ${{ secrets.EC2_DEV_SSH_KEY }} -f -N -L 13306:${{ secrets.RDS_DEV_HOST }} ${{ secrets.EC2_DEV_USER }}@${{ secrets.EC2_DEV_HOST }}
+      - name: Save SSH key and set permissions
+        run: |
+          echo "${{ secrets.EC2_DEV_SSH_KEY }}" > /tmp/ssh_key.pem
+          chmod 600 /tmp/ssh_key.pem
 
-      # 3. 애플리케이션 빌드
+      - name: Set up SSH Tunnel for RDS
+        run: ssh -i ssh_key.pem -f -N -L 13306:${{ secrets.RDS_DEV_HOST }} ${{ secrets.EC2_DEV_USER }}@${{ secrets.EC2_DEV_HOST }}
+
       - name: Build with Gradle
         run: ./gradlew clean build
         env:
@@ -46,7 +49,9 @@ jobs:
             echo "SSH Tunnel closed"
           fi
 
-      # 4. Docker 관련 파일을 EC2 서버로 복사합니다.
+      - name: Remove SSH KEY
+        run: rm /tmp/ssh_key.pem
+
       - name: Deploy Docker files to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -57,7 +62,6 @@ jobs:
           source: "Dockerfile,docker-compose.yml,build/libs/circle-on-0.0.1-SNAPSHOT.jar"
           target: "~/circle-on"
 
-      # 5. EC2에서 Docker Compose 실행
       - name: Run Docker Compose on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:

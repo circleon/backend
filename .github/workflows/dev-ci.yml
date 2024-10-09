@@ -39,18 +39,6 @@ jobs:
           AWS_SES_ACCESS_KEY: ${{ secrets.AWS_SES_ACCESS_KEY }}
           AWS_SES_SECRET_ACCESS_KEY: ${{ secrets.AWS_SES_SECRET_ACCESS_KEY }}
 
-      - name: Close SSH Tunnel
-        run: pkill -f "ssh"
-
-      - name: Verify SSH Tunnel is Closed
-        run: |
-          if pgrep -f "ssh"; then
-            echo "SSH Tunnel still active"
-            exit 1
-          else
-            echo "SSH Tunnel closed"
-          fi
-
       - name: Remove SSH KEY
         run: rm /tmp/ssh_key.pem
 

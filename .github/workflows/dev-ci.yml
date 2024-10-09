@@ -20,8 +20,9 @@ jobs:
           java-version: '21'
           distribution: 'zulu'
 
-      - name: Save SSH key and set permissions
+      - name: Save SSH key
         run: |
+          mkdir -p ~/.ssh
           echo "${{ secrets.EC2_DEV_SSH_KEY }}" > /tmp/ssh_key.pem
           chmod 600 /tmp/ssh_key.pem
           sh-keyscan -H ${{ secrets.EC2_DEV_HOST }} >> ~/.ssh/known_hosts

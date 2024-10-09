@@ -40,11 +40,11 @@ jobs:
           AWS_SES_SECRET_ACCESS_KEY: ${{ secrets.AWS_SES_SECRET_ACCESS_KEY }}
 
       - name: Close SSH Tunnel
-        run: pkill -f "ssh -f -N -L"
+        run: pkill -f "ssh
 
       - name: Verify SSH Tunnel is Closed
         run: |
-          if pgrep -f "ssh -f -N -L"; then
+          if pgrep -f "ssh"; then
             echo "SSH Tunnel still active"
             exit 1
           else

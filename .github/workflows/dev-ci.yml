@@ -26,7 +26,7 @@ jobs:
           chmod 600 /tmp/ssh_key.pem
 
       - name: Set up SSH Tunnel for RDS
-        run: ssh -i ssh_key.pem -f -N -L 13306:${{ secrets.RDS_DEV_HOST }} ${{ secrets.EC2_DEV_USER }}@${{ secrets.EC2_DEV_HOST }}
+        run: ssh -i /tmp/ssh_key.pem -f -N -L 13306:${{ secrets.RDS_DEV_HOST }} ${{ secrets.EC2_DEV_USER }}@${{ secrets.EC2_DEV_HOST }}
 
       - name: Build with Gradle
         run: ./gradlew clean build

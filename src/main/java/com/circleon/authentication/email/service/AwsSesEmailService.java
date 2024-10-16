@@ -13,6 +13,7 @@ import java.util.UUID;
 @Slf4j
 @RequiredArgsConstructor
 public class AwsSesEmailService implements EmailService{
+
     private final SesClient sesClient;
 
     @Override
@@ -25,6 +26,7 @@ public class AwsSesEmailService implements EmailService{
             log.info("Email sent");
         }catch(Exception e){
             log.error("메시지 발생 중 오류 발생: {}", e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 

@@ -1,13 +1,18 @@
 package com.circleon.authentication.service;
 
 import com.circleon.authentication.AuthConstants;
-import com.circleon.authentication.dto.SignUpRequest;
+import com.circleon.authentication.dto.*;
 import com.circleon.authentication.email.dto.AwsSesEmailRequest;
 import com.circleon.authentication.email.dto.EmailVerificationRequest;
 import com.circleon.authentication.email.dto.VerificationCodeRequest;
 import com.circleon.authentication.email.service.EmailService;
 import com.circleon.authentication.entity.EmailVerification;
+import com.circleon.authentication.entity.RefreshToken;
+import com.circleon.authentication.jwt.JwtUtil;
 import com.circleon.authentication.repository.EmailVerificationRepository;
+import com.circleon.authentication.repository.RefreshTokenRepository;
+import com.circleon.common.CommonResponseStatus;
+import com.circleon.common.exception.CommonException;
 import com.circleon.domain.user.UserResponseStatus;
 import com.circleon.domain.user.entity.Role;
 import com.circleon.domain.user.entity.UnivCode;
@@ -15,14 +20,19 @@ import com.circleon.domain.user.entity.User;
 import com.circleon.domain.user.entity.UserStatus;
 import com.circleon.domain.user.exception.UserException;
 import com.circleon.domain.user.repository.UserRepository;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
@@ -33,8 +43,11 @@ public class AuthServiceImpl implements AuthService{
 
     private final UserRepository userRepository;
     private final EmailVerificationRepository emailVerificationRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
+
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final JwtUtil jwtUtil;
 
     @Override
     public void registerUser(SignUpRequest signUpRequest) {
@@ -59,7 +72,7 @@ public class AuthServiceImpl implements AuthService{
                 .password(encryptedPassword)
                 .username(signUpRequest.getUsername())
                 .univCode(foundUnivCode)
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .userStatus(UserStatus.ACTIVE)
                 .build();
 
@@ -175,5 +188,91 @@ public class AuthServiceImpl implements AuthService{
         existingVerification.setExpirationTime(LocalDateTime.now().plusMinutes(AuthConstants.EXPIRATION_TIME));
         existingVerification.setLastAttemptTime(LocalDateTime.now());
         existingVerification.setVerificationCode(verificationCode);
+    }
+
+    @Override
+    public LoginResponse login(LoginRequest loginRequest) {
+
+        User foundUser = userRepository.findByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new UserException(UserResponseStatus.EMAIL_NOT_FOUND));
+
+        //비밀번호 검증
+        if(!passwordEncoder.matches(loginRequest.getPassword(), foundUser.getPassword())){
+            throw new UserException(UserResponseStatus.PASSWORD_MISMATCH);
+        }
+
+        //token 생성
+        String newAccessToken = jwtUtil.createAccessToken(foundUser.getId(), foundUser.getRole().name());
+        String newRefreshToken = jwtUtil.createRefreshToken(foundUser.getId(), foundUser.getRole().name());
+
+        Date expiration = jwtUtil.getExpiration(newRefreshToken);
+
+        LocalDateTime expiresAt = getLocalDateTime(expiration);
+
+        RefreshToken refreshToken = RefreshToken.builder()
+                .refreshToken(newRefreshToken)
+                .accessToken(newAccessToken)
+                .expiresAt(expiresAt)
+                .user(foundUser)
+                .build();
+
+        refreshTokenRepository.save(refreshToken);
+
+        return LoginResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .userId(foundUser.getId())
+                .build();
+    }
+
+    private LocalDateTime getLocalDateTime(Date date) {
+        return date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+    }
+
+    @Override
+    public RefreshTokenResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
+
+        String refreshToken = refreshTokenRequest.getRefreshToken();
+
+        //리프레쉬 존재 여부 (로그아웃 됐는지)
+        RefreshToken foundRefreshToken = refreshTokenRepository.findByRefreshToken(refreshToken)
+                .orElseThrow(() -> new CommonException(CommonResponseStatus.REFRESH_TOKEN_INVALID));
+
+        //리프레쉬 토큰 검증 and 리프레쉬 토큰에 해당하는 액세스 토큰 만료 여부 확인 -> 만료 아니면 로그아웃 처리
+        if(isInvalidRefreshOrStillValidAccessToken(foundRefreshToken)){
+            refreshTokenRepository.delete(foundRefreshToken);
+            return null;
+        }
+
+        //새로운 액세스 토큰
+        try{
+            Long userId = jwtUtil.getUserId(foundRefreshToken.getRefreshToken());
+            String role = jwtUtil.getRole(foundRefreshToken.getRefreshToken());
+
+            String accessToken = jwtUtil.createAccessToken(userId, role);
+
+            foundRefreshToken.setAccessToken(accessToken);
+
+            return RefreshTokenResponse.builder()
+                    .accessToken(accessToken)
+                    .build();
+        }catch (Exception e){
+            refreshTokenRepository.delete(foundRefreshToken);
+            return null;
+        }
+
+    }
+
+    private boolean isInvalidRefreshOrStillValidAccessToken(RefreshToken foundRefreshToken) {
+        return !jwtUtil.validateToken(foundRefreshToken.getRefreshToken())
+                || jwtUtil.validateToken(foundRefreshToken.getAccessToken());
+    }
+
+    //TODO 좀 더 고민
+    @Override
+    public void logout(LogoutRequest logoutRequest) {
+        refreshTokenRepository.deleteByRefreshToken(logoutRequest.getRefreshToken());
     }
 }

@@ -38,8 +38,11 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    //TODO 프로필 이미지 url
+
     @Builder
-    public User(String username, String email, String password, UnivCode univCode, UserStatus userStatus,Role role) {
+    public User(Long id, String username, String email, String password, UnivCode univCode, UserStatus userStatus,Role role) {
+        this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;

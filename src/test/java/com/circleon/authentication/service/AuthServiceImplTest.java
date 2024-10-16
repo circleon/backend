@@ -1,12 +1,20 @@
 package com.circleon.authentication.service;
 
+import com.circleon.authentication.dto.LoginRequest;
+import com.circleon.authentication.dto.LoginResponse;
 import com.circleon.authentication.email.dto.AwsSesEmailRequest;
 import com.circleon.authentication.email.dto.EmailVerificationRequest;
 import com.circleon.authentication.email.dto.VerificationCodeRequest;
 import com.circleon.authentication.email.service.EmailService;
 import com.circleon.authentication.entity.EmailVerification;
+import com.circleon.authentication.entity.RefreshToken;
+import com.circleon.authentication.jwt.JwtUtil;
 import com.circleon.authentication.repository.EmailVerificationRepository;
+import com.circleon.authentication.repository.RefreshTokenRepository;
 import com.circleon.domain.user.UserResponseStatus;
+import com.circleon.domain.user.entity.Role;
+import com.circleon.domain.user.entity.User;
+import com.circleon.domain.user.entity.UserStatus;
 import com.circleon.domain.user.exception.UserException;
 import com.circleon.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +49,13 @@ class AuthServiceImplTest {
     private EmailVerificationRepository emailVerificationRepository;
 
     @Mock
+    private RefreshTokenRepository refreshTokenRepository;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private JwtUtil jwtUtil;
 
     @InjectMocks
     private AuthServiceImpl authServiceImpl;
@@ -298,4 +312,93 @@ class AuthServiceImplTest {
         verify(emailVerificationRepository, times(1)).findByEmail(request.getEmail());
         verify(passwordEncoder, times(1)).matches(request.getCode(), emailVerification.getVerificationCode());
     }
+
+    @Test
+    @DisplayName(value = "정상 로그인")
+    void testLoginWhenSuccess(){
+        
+        //given
+        User foundUser = User.builder()
+                .id(1L)
+                .email("test@example.com")
+                .username("test")
+                .password("test")
+                .role(Role.ROLE_USER)
+                .userStatus(UserStatus.ACTIVE)
+                .build();
+
+        LoginRequest loginRequest = LoginRequest.builder()
+                .email("test@example.com")
+                .password("test")
+                .build();
+
+        when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(Optional.of(foundUser));
+        when(passwordEncoder.matches(loginRequest.getPassword(), foundUser.getPassword())).thenReturn(true);
+        when(jwtUtil.createAccessToken(foundUser.getId(), foundUser.getRole().name())).thenReturn("access_token");
+        when(jwtUtil.createRefreshToken(foundUser.getId(), foundUser.getRole().name())).thenReturn("refresh_token");
+
+        String newAccessToken = jwtUtil.createAccessToken(foundUser.getId(), foundUser.getRole().name());
+        String newRefreshToken = jwtUtil.createRefreshToken(foundUser.getId(), foundUser.getRole().name());
+
+        RefreshToken refreshToken = RefreshToken.builder()
+                .user(foundUser)
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .build();
+
+        when(refreshTokenRepository.save(refreshToken)).thenReturn(refreshToken);
+
+        //when
+        LoginResponse loginResponse = authServiceImpl.login(loginRequest);
+
+        assertEquals("access_token", loginResponse.getAccessToken());
+        assertEquals("refresh_token", loginResponse.getRefreshToken());
+        assertEquals(foundUser.getId(), loginResponse.getUserId());
+        verify(refreshTokenRepository, times(1)).save(any(RefreshToken.class));
+
+    }
+
+    @Test
+    @DisplayName(value = "이메일 없는 경우")
+    void testLoginWhenUserNotFound(){
+
+        //given
+        LoginRequest loginRequest = LoginRequest.builder()
+                .email("test@example.com")
+                .password("test")
+                .build();
+        when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(Optional.empty());
+        //When,then
+        UserException exception = assertThrows(UserException.class, () -> authServiceImpl.login(loginRequest));
+        assertEquals(UserResponseStatus.EMAIL_NOT_FOUND, exception.getStatus());
+
+    }
+
+    @Test
+    @DisplayName(value = "비밀번호 불일치 테스트")
+    void testLoginWhenPasswordMismatch(){
+        //given
+        User foundUser = User.builder()
+                .id(1L)
+                .email("test@example.com")
+                .username("test")
+                .password("test")
+                .role(Role.ROLE_USER)
+                .userStatus(UserStatus.ACTIVE)
+                .build();
+
+        when(userRepository.findByEmail(foundUser.getEmail())).thenReturn(Optional.of(foundUser));
+        when(passwordEncoder.matches(foundUser.getPassword(), foundUser.getPassword())).thenReturn(false);
+
+        LoginRequest loginRequest = LoginRequest.builder()
+                .email("test@example.com")
+                .password("test")
+                .build();
+
+        UserException exception = assertThrows(UserException.class, () -> authServiceImpl.login(loginRequest));
+        assertEquals(UserResponseStatus.PASSWORD_MISMATCH, exception.getStatus());
+
+    }
+
+
 }

@@ -14,6 +14,8 @@ public enum CommonResponseStatus {
 
     ACCESS_TOKEN_INVALID(HttpStatus.UNAUTHORIZED.value(), "002", "Access 토큰 검증 실패"),
     REFRESH_TOKEN_INVALID(HttpStatus.UNAUTHORIZED.value(), "003", "Refresh 토큰 검증 실패"),
+    ACCESS_TOKEN_ALREADY_REFRESH(HttpStatus.UNAUTHORIZED.value(), "003", "Access 토큰 이미 재발급"),
+    FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN.value(), "004", "권한이 없습니다."),
 
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(), "5", "서버 에러");
 

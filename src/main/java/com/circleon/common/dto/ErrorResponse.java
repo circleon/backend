@@ -14,4 +14,5 @@ public class ErrorResponse {
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
     }
+
 }

@@ -8,6 +8,7 @@ import com.circleon.authentication.repository.RefreshTokenRepository;
 import com.circleon.domain.user.entity.User;
 import com.circleon.domain.user.repository.UserRepository;
 import jakarta.persistence.OptimisticLockException;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Transactional
 @SpringBootTest
 public class RefreshTokenConcurrencyTest {
 

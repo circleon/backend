@@ -189,6 +189,7 @@ public class AuthServiceImpl implements AuthService{
         existingVerification.setExpirationTime(LocalDateTime.now().plusMinutes(AuthConstants.EXPIRATION_TIME));
         existingVerification.setLastAttemptTime(LocalDateTime.now());
         existingVerification.setVerificationCode(verificationCode);
+        existingVerification.setVerified(false);
     }
 
     @Override

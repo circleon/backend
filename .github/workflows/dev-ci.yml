@@ -38,6 +38,7 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD_DEV }}
           AWS_SES_ACCESS_KEY: ${{ secrets.AWS_SES_ACCESS_KEY }}
           AWS_SES_SECRET_ACCESS_KEY: ${{ secrets.AWS_SES_SECRET_ACCESS_KEY }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
 
       - name: Remove SSH KEY
         run: rm /tmp/ssh_key.pem
@@ -66,5 +67,6 @@ jobs:
             export DB_PASSWORD=${{ secrets.DB_PASSWORD_DEV }}
             export AWS_SES_ACCESS_KEY=${{ secrets.AWS_SES_ACCESS_KEY }}
             export AWS_SES_SECRET_ACCESS_KEY=${{ secrets.AWS_SES_SECRET_ACCESS_KEY }}
+            export JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
             docker compose down
             docker compose up --build -d

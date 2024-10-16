@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -336,7 +337,7 @@ class AuthServiceImplTest {
         when(passwordEncoder.matches(loginRequest.getPassword(), foundUser.getPassword())).thenReturn(true);
         when(jwtUtil.createAccessToken(foundUser.getId(), foundUser.getRole().name())).thenReturn("access_token");
         when(jwtUtil.createRefreshToken(foundUser.getId(), foundUser.getRole().name())).thenReturn("refresh_token");
-
+        when(jwtUtil.getExpiration("refresh_token")).thenReturn(new Date());
         String newAccessToken = jwtUtil.createAccessToken(foundUser.getId(), foundUser.getRole().name());
         String newRefreshToken = jwtUtil.createRefreshToken(foundUser.getId(), foundUser.getRole().name());
 
@@ -344,6 +345,7 @@ class AuthServiceImplTest {
                 .user(foundUser)
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
+                .expiresAt(LocalDateTime.now().plusMinutes(10))
                 .build();
 
         when(refreshTokenRepository.save(refreshToken)).thenReturn(refreshToken);

@@ -37,7 +37,7 @@ public class EmailVerification {
     private boolean isVerified;
 
     @Builder
-    public EmailVerification(String email, String verificationCode, LocalDateTime expirationTime, int attemptCount, LocalDateTime lastAttemptTime) {
+    public EmailVerification(String email, String verificationCode, LocalDateTime expirationTime, int attemptCount, boolean isVerified, LocalDateTime lastAttemptTime) {
         this.email = email;
         this.verificationCode = verificationCode;
         this.expirationTime = expirationTime;

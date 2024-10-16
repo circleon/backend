@@ -160,6 +160,7 @@ public class AuthServiceImpl implements AuthService{
                 .verificationCode(verificationCode)
                 .expirationTime(LocalDateTime.now().plusMinutes(AuthConstants.EXPIRATION_TIME))
                 .attemptCount(1)
+                .isVerified(false)
                 .lastAttemptTime(LocalDateTime.now())
                 .build();
 

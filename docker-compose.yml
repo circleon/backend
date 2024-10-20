@@ -5,6 +5,8 @@ services:
     container_name: circle-on-app
     ports:
       - "8080:8080"
+    volumes:
+      - ${IMAGE_STORAGE_PATH}:/app/images
     environment:
       - DB_URL=${DB_URL}
       - DB_USERNAME=${DB_USERNAME}

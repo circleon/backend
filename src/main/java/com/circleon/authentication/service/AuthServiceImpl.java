@@ -20,12 +20,9 @@ import com.circleon.domain.user.entity.User;
 import com.circleon.domain.user.entity.UserStatus;
 import com.circleon.domain.user.exception.UserException;
 import com.circleon.domain.user.repository.UserRepository;
-import jakarta.persistence.OptimisticLockException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -53,7 +50,7 @@ public class AuthServiceImpl implements AuthService{
     public void registerUser(SignUpRequest signUpRequest) {
 
         // 이메일 중복 체크
-        if(userRepository.existsByEmail(signUpRequest.getEmail())) {
+        if(userRepository.existsByEmailAndStatus(signUpRequest.getEmail(), UserStatus.ACTIVE)) {
             throw new UserException(UserResponseStatus.EMAIL_DUPLICATE);
         }
 
@@ -73,7 +70,7 @@ public class AuthServiceImpl implements AuthService{
                 .username(signUpRequest.getUsername())
                 .univCode(foundUnivCode)
                 .role(Role.ROLE_USER)
-                .userStatus(UserStatus.ACTIVE)
+                .status(UserStatus.ACTIVE)
                 .build();
 
         userRepository.save(user);
@@ -103,7 +100,7 @@ public class AuthServiceImpl implements AuthService{
     public void sendVerificationEmail(EmailVerificationRequest emailVerificationRequest) {
 
         // 먼저 이메일 중복 여부 체크
-        if(userRepository.existsByEmail(emailVerificationRequest.getEmail())) {
+        if(userRepository.existsByEmailAndStatus(emailVerificationRequest.getEmail(), UserStatus.ACTIVE)) {
 
             throw new UserException(UserResponseStatus.EMAIL_DUPLICATE);
         }
@@ -195,7 +192,7 @@ public class AuthServiceImpl implements AuthService{
     @Override
     public LoginResponse login(LoginRequest loginRequest) {
 
-        User foundUser = userRepository.findByEmail(loginRequest.getEmail())
+        User foundUser = userRepository.findByEmailAndStatus(loginRequest.getEmail(), UserStatus.ACTIVE)
                 .orElseThrow(() -> new UserException(UserResponseStatus.EMAIL_NOT_FOUND));
 
         //비밀번호 검증

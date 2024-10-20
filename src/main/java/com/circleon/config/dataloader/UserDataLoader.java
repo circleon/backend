@@ -7,11 +7,13 @@ import com.circleon.domain.user.entity.UserStatus;
 import com.circleon.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Order(1)
 public class UserDataLoader implements CommandLineRunner {
 
     private final UserRepository userRepository;
@@ -31,7 +33,7 @@ public class UserDataLoader implements CommandLineRunner {
                         .password(passwordEncoder.encode(password))
                         .username(username)
                         .univCode(UnivCode.AJOU)
-                        .userStatus(UserStatus.ACTIVE)
+                        .status(UserStatus.ACTIVE)
                         .role(Role.ROLE_USER)
                         .build();
 

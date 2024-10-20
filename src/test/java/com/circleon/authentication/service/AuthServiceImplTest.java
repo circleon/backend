@@ -73,7 +73,7 @@ class AuthServiceImplTest {
         EmailVerificationRequest request = EmailVerificationRequest.builder()
                 .email("test@example.com")
                 .build();
-        when(userRepository.existsByEmail(request.getEmail())).thenReturn(true); // 이미 가입된 이메일
+        when(userRepository.existsByEmailAndStatus(request.getEmail(), UserStatus.ACTIVE)).thenReturn(true); // 이미 가입된 이메일
 
         // When & Then
         UserException exception = assertThrows(UserException.class, () -> authServiceImpl.sendVerificationEmail(request));
@@ -87,7 +87,7 @@ class AuthServiceImplTest {
         EmailVerificationRequest request = EmailVerificationRequest.builder()
                 .email("test@example.com")
                 .build();
-        when(userRepository.existsByEmail(request.getEmail())).thenReturn(false); // 이메일 미가입 상태
+        when(userRepository.existsByEmailAndStatus(request.getEmail(), UserStatus.ACTIVE)).thenReturn(false); // 이메일 미가입 상태
         when(emailVerificationRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty()); // 인증 데이터 없음
         String verificationCode = "123456";
         String encryptedCode = "encoded123456";
@@ -109,7 +109,7 @@ class AuthServiceImplTest {
         EmailVerificationRequest request = EmailVerificationRequest.builder()
                 .email("test@example.com")
                 .build();
-        when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
+        when(userRepository.existsByEmailAndStatus(request.getEmail(), UserStatus.ACTIVE)).thenReturn(false);
         EmailVerification existingVerification = EmailVerification.builder()
                 .email("test@example.com")
                 .verificationCode("654321")
@@ -130,7 +130,7 @@ class AuthServiceImplTest {
         EmailVerificationRequest request = EmailVerificationRequest.builder()
                 .email("test@example.com")
                 .build();
-        when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
+        when(userRepository.existsByEmailAndStatus(request.getEmail(), UserStatus.ACTIVE)).thenReturn(false);
         EmailVerification existingVerification = EmailVerification.builder()
                 .email("test@example.com")
                 .verificationCode("654321")
@@ -152,7 +152,7 @@ class AuthServiceImplTest {
         EmailVerificationRequest request = EmailVerificationRequest.builder()
                 .email("test@example.com")
                 .build();
-        when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
+        when(userRepository.existsByEmailAndStatus(request.getEmail(), UserStatus.ACTIVE)).thenReturn(false);
 
         // 하루 이상 지난 기존 인증 정보
         EmailVerification existingVerification = EmailVerification.builder()
@@ -186,7 +186,7 @@ class AuthServiceImplTest {
         EmailVerificationRequest request = EmailVerificationRequest.builder()
                 .email("test@example.com")
                 .build();
-        when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
+        when(userRepository.existsByEmailAndStatus(request.getEmail(), UserStatus.ACTIVE)).thenReturn(false);
 
         EmailVerification existingVerification = EmailVerification.builder()
                 .email("test@example.com")
@@ -325,7 +325,7 @@ class AuthServiceImplTest {
                 .username("test")
                 .password("test")
                 .role(Role.ROLE_USER)
-                .userStatus(UserStatus.ACTIVE)
+                .status(UserStatus.ACTIVE)
                 .build();
 
         LoginRequest loginRequest = LoginRequest.builder()
@@ -333,7 +333,7 @@ class AuthServiceImplTest {
                 .password("test")
                 .build();
 
-        when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(Optional.of(foundUser));
+        when(userRepository.findByEmailAndStatus(loginRequest.getEmail(), UserStatus.ACTIVE)).thenReturn(Optional.of(foundUser));
         when(passwordEncoder.matches(loginRequest.getPassword(), foundUser.getPassword())).thenReturn(true);
         when(jwtUtil.createAccessToken(foundUser.getId(), foundUser.getRole().name())).thenReturn("access_token");
         when(jwtUtil.createRefreshToken(foundUser.getId(), foundUser.getRole().name())).thenReturn("refresh_token");
@@ -369,7 +369,7 @@ class AuthServiceImplTest {
                 .email("test@example.com")
                 .password("test")
                 .build();
-        when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(Optional.empty());
+        when(userRepository.findByEmailAndStatus(loginRequest.getEmail(), UserStatus.ACTIVE)).thenReturn(Optional.empty());
         //When,then
         UserException exception = assertThrows(UserException.class, () -> authServiceImpl.login(loginRequest));
         assertEquals(UserResponseStatus.EMAIL_NOT_FOUND, exception.getStatus());
@@ -386,10 +386,10 @@ class AuthServiceImplTest {
                 .username("test")
                 .password("test")
                 .role(Role.ROLE_USER)
-                .userStatus(UserStatus.ACTIVE)
+                .status(UserStatus.ACTIVE)
                 .build();
 
-        when(userRepository.findByEmail(foundUser.getEmail())).thenReturn(Optional.of(foundUser));
+        when(userRepository.findByEmailAndStatus(foundUser.getEmail(), UserStatus.ACTIVE)).thenReturn(Optional.of(foundUser));
         when(passwordEncoder.matches(foundUser.getPassword(), foundUser.getPassword())).thenReturn(false);
 
         LoginRequest loginRequest = LoginRequest.builder()

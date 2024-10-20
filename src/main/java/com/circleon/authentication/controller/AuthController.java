@@ -74,13 +74,6 @@ public class AuthController {
         return ResponseEntity.ok(SuccessResponse.builder().message("로그아웃 성공").build());
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<SuccessResponse> test() {
-        return ResponseEntity.ok(SuccessResponse.builder().message("test").build());
-    }
-
-
-
     @ExceptionHandler(UserException.class)
     public ResponseEntity<ErrorResponse> handleUserException(UserException e) {
 

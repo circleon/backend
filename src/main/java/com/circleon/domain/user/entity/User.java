@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Entity
+@Setter
 @NoArgsConstructor
 public class User {
 
@@ -32,22 +33,23 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserStatus userStatus;
+    private UserStatus status;
 
-    @Setter
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Role role;
 
-    //TODO 프로필 이미지 url
+    @Column
+    private String profileImgUrl;
 
     @Builder
-    public User(Long id, String username, String email, String password, UnivCode univCode, UserStatus userStatus,Role role) {
+    public User(Long id, String username, String email, String password, UnivCode univCode, UserStatus status, Role role) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;
         this.univCode = univCode;
-        this.userStatus = userStatus;
+        this.status = status;
         this.role = role;
     }
 

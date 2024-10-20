@@ -68,5 +68,6 @@ jobs:
             export AWS_SES_ACCESS_KEY=${{ secrets.AWS_SES_ACCESS_KEY }}
             export AWS_SES_SECRET_ACCESS_KEY=${{ secrets.AWS_SES_SECRET_ACCESS_KEY }}
             export JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+            export IMAGE_STORAGE_PATH="~/circle-on/images"
             docker compose down
             docker compose up --build -d

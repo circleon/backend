@@ -1,11 +1,10 @@
 package com.circleon.domain.circle.entity;
 
+import com.circleon.domain.circle.CategoryType;
 import com.circleon.domain.circle.CircleStatus;
+import com.circleon.domain.user.entity.User;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -13,6 +12,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Circle {
 
     @Id
@@ -31,23 +32,20 @@ public class Circle {
     @Column
     private String thumbnailUrl;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private CircleStatus status;
+    private CircleStatus circleStatus;
 
+    @Column
+    private CategoryType categoryType;
+
+    //TODO 꼭 필요한가?
     @Lob
     @Column(columnDefinition = "TEXT")
     private String introduction;
 
-
-    @Builder
-    public Circle(String name, String profileImgUrl, String thumbnailUrl, CircleStatus status, String introduction) {
-        this.name = name;
-        this.profileImgUrl = profileImgUrl;
-        this.thumbnailUrl = thumbnailUrl;
-        this.status = status;
-        this.introduction = introduction;
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "applicant_id")
+    private User applicant;
 
     @PrePersist
     public void prePersist() {

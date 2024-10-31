@@ -17,12 +17,12 @@ public enum UserResponseStatus {
     VERIFICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST.value(), "029", "인증 코드가 만료되었습니다."),
     INVALID_UNIV_EMAIL_DOMAIN(HttpStatus.BAD_REQUEST.value(), "030", "허용된 대학 이메일 도메인이 아닙니다.");
 
-    private final int httpStatus;
+    private final int httpStatusCode;
     private final String code;
     private final String message;
 
-    UserResponseStatus(int httpStatus, String code, String message) {
-        this.httpStatus = httpStatus;
+    UserResponseStatus(int httpStatusCode, String code, String message) {
+        this.httpStatusCode = httpStatusCode;
         this.code = code;
         this.message = message;
     }

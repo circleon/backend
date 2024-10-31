@@ -1,26 +1,26 @@
-package com.circleon.domain.user.entity;
+package com.circleon.domain.circle;
 
 import com.circleon.common.converter.AbstractCommonEnumAttributeConverter;
 import com.circleon.common.converter.CommonEnum;
-
 import lombok.Getter;
 
 @Getter
-public enum UserStatus implements CommonEnum {
-    ACTIVE("활성화"),
-    DEACTIVATED("비활성화"),
-    PENDING("대기");
+public enum CircleRole implements CommonEnum {
+
+    PRESIDENT("회장"),
+    EXECUTIVE("임원"),
+    MEMBER("동아리원");
 
     private final String description;
 
-    UserStatus(String description) {
+    CircleRole(String description) {
         this.description = description;
     }
 
     @jakarta.persistence.Converter(autoApply = true)
-    public static class Converter extends AbstractCommonEnumAttributeConverter<UserStatus> {
+    public static class Converter extends AbstractCommonEnumAttributeConverter<CircleRole> {
         public Converter() {
-            super(UserStatus.class);
+            super(CircleRole.class);
         }
     }
 }

@@ -11,16 +11,13 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CircleCreateRequest {
+public class CircleUpdateRequest {
 
     @NotBlank
     private String circleName;
 
     @NotNull
-    private CategoryType category;
-
-    @NotBlank
-    private String introduction;
+    private CategoryType categoryType;
 
     private MultipartFile profileImg;
 }

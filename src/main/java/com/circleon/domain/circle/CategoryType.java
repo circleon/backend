@@ -1,8 +1,12 @@
 package com.circleon.domain.circle;
 
+import com.circleon.common.converter.AbstractCommonEnumAttributeConverter;
+import com.circleon.common.converter.CommonEnum;
+
 import lombok.Getter;
 
-public enum CategoryType {
+@Getter
+public enum CategoryType implements CommonEnum {
 
     IT_COMPUTER("IT/컴퓨터"),
     SPORTS("스포츠"),
@@ -15,11 +19,16 @@ public enum CategoryType {
     LANGUAGE("어학"),
     ETC("기타");
 
-    @Getter
     private final String description;
 
     CategoryType(String description) {
         this.description = description;
     }
 
+    @jakarta.persistence.Converter(autoApply = true)
+    public static class Converter extends AbstractCommonEnumAttributeConverter<CategoryType> {
+        public Converter() {
+            super(CategoryType.class);
+        }
+    }
 }

@@ -39,7 +39,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         String responseBody = objectMapper.writeValueAsString(errorResponse);
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setStatus(accessTokenInvalid.getHttpStatus());
+        response.setStatus(accessTokenInvalid.getHttpStatusCode());
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(responseBody);
     }

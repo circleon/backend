@@ -74,17 +74,25 @@ public class AuthController {
         return ResponseEntity.ok(SuccessResponse.builder().message("로그아웃 성공").build());
     }
 
+    /**
+     * 클라이언트에서 액세스토 토큰 테스트
+     */
+    @GetMapping("/test")
+    public ResponseEntity<SuccessResponse> test() {
+        return ResponseEntity.ok(SuccessResponse.builder().message("test").build());
+    }
+
     @ExceptionHandler(UserException.class)
     public ResponseEntity<ErrorResponse> handleUserException(UserException e) {
 
         UserResponseStatus status = e.getStatus();
 
-        log.warn("UserException: {} {} {}", status.getHttpStatus(), status.getCode(), status.getMessage());
+        log.warn("UserException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorCode(status.getCode())
                 .errorMessage(status.getMessage())
                 .build();
-        return ResponseEntity.status(status.getHttpStatus()).body(errorResponse);
+        return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
     }
 }

@@ -1,21 +1,28 @@
 package com.circleon.domain.user.entity;
 
-public enum UnivCode {
-    AJOU(1, "ajou.ac.kr");
+import com.circleon.common.converter.AbstractCommonEnumAttributeConverter;
+import com.circleon.common.converter.CommonEnum;
+import jakarta.persistence.Converter;
+import lombok.Getter;
 
-    private final int code;
+@Getter
+public enum UnivCode implements CommonEnum {
+
+    AJOU("아주대학교","ajou.ac.kr");
+
+    private final String description;
     private final String email;
 
-    UnivCode(int code, String email){
-        this.code = code;
+    UnivCode(String description, String email) {
+        this.description = description;
         this.email = email;
     }
 
-    public String getEmail() {
-        return email;
+    @jakarta.persistence.Converter(autoApply = true)
+    public static class Converter extends AbstractCommonEnumAttributeConverter<UnivCode>{
+        public Converter() {
+            super(UnivCode.class);
+        }
     }
 
-    public int getCode(){
-        return code;
-    }
 }

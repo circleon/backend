@@ -23,17 +23,24 @@ public class UserDataLoader implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         if(userRepository.count() == 0) {
-            for(int i = 0 ; i < 10; i++){
+            for(int i = 0 ; i < 50; i++){
                 String email = "user" + i + "@ajou.ac.kr";
                 String password = "user" + i;
                 String username = "user" + i;
+
+                UserStatus status = null;
+                if(i % 10 == 0){
+                    status = UserStatus.DEACTIVATED;
+                }else{
+                    status = UserStatus.ACTIVE;
+                }
 
                 User user = User.builder()
                         .email(email)
                         .password(passwordEncoder.encode(password))
                         .username(username)
                         .univCode(UnivCode.AJOU)
-                        .status(UserStatus.ACTIVE)
+                        .status(status)
                         .role(Role.ROLE_USER)
                         .build();
 

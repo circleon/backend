@@ -38,7 +38,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         String responseBody = objectMapper.writeValueAsString(errorResponse);
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setStatus(forbiddenAccess.getHttpStatus());
+        response.setStatus(forbiddenAccess.getHttpStatusCode());
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(responseBody);
     }

@@ -8,7 +8,9 @@ public interface FileStore {
 
     String storeFile(MultipartFile file);
 
-    boolean deleteFile(Path path);
+    boolean deleteFile(String filePath);
 
     String storeThumbnail(MultipartFile file);
+
+    boolean isValidFile(MultipartFile file);
 }

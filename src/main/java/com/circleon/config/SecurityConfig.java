@@ -41,7 +41,7 @@ public class SecurityConfig {
                                 "/api/auth/verification", "/api/auth/verification-code",
                                 "/api/auth/refresh", "api/auth/logout").permitAll()
 
-                        .requestMatchers(("/api/auth/test")).hasRole("USER")
+                        .requestMatchers(("/api/circles/**")).hasRole("USER")
 
                         .anyRequest().authenticated()
                 )

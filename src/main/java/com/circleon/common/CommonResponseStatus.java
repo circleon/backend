@@ -18,14 +18,18 @@ public enum CommonResponseStatus {
     FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN.value(), "004", "권한이 없습니다."),
     LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED.value(), "005", "로그인이 필요합니다."),
 
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "006", "존재하지 않은 유저입니다."),
+
+    FILE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST.value(), "007", "파일 용량 초과"),
+
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(), "5", "서버 에러");
 
-    private final int httpStatus;
+    private final int httpStatusCode;
     private final String code;
     private final String message;
 
-    CommonResponseStatus(int httpStatus, String code, String message) {
-        this.httpStatus = httpStatus;
+    CommonResponseStatus(int httpStatusCode, String code, String message) {
+        this.httpStatusCode = httpStatusCode;
         this.code = code;
         this.message = message;
     }

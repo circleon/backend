@@ -6,22 +6,22 @@ import com.circleon.common.converter.CommonEnum;
 import lombok.Getter;
 
 @Getter
-public enum CircleStatus implements CommonEnum {
-
-    ACTIVE("활성화"),
-    INACTIVE("비활성화"),
-    PENDING("대기");
+public enum MembershipStatus implements CommonEnum {
+    PENDING("대기"),
+    APPROVED("가입"),
+    REJECTED("거절"),
+    INACTIVE("탈퇴");
 
     private final String description;
 
-    CircleStatus(String description) {
+    MembershipStatus(String description) {
         this.description = description;
     }
 
     @jakarta.persistence.Converter(autoApply = true)
-    public static class Converter extends AbstractCommonEnumAttributeConverter<CircleStatus> {
+    public static class Converter extends AbstractCommonEnumAttributeConverter<MembershipStatus> {
         public Converter() {
-            super(CircleStatus.class);
+            super(MembershipStatus.class);
         }
     }
 }

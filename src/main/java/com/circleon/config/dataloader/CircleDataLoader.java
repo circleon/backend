@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 @Component
 @RequiredArgsConstructor
@@ -37,18 +38,19 @@ public class CircleDataLoader implements CommandLineRunner {
 
             List<User> users = userRepository.findAllByStatus(UserStatus.ACTIVE);
 
-            List<User> filteredUsers = users.stream()
-                    .filter(user -> user.getId() % 5 == 0)
-                    .toList();
 
-            for(int i = 0 ; i < 10; i++){
+            for(int i = 1 ; i <= 100; i++){
                 String name = "Circle_" + i;
-                String profileImgUrl = CommonConstants.DEFAULT_IMG_URL;
-                String ThumbImgUrl = CommonConstants.DEFAULT_THUMB_IMG_URL;
+                String profileImgUrl = null;
+                String ThumbImgUrl = null;
                 CircleStatus circleStatus = CircleStatus.ACTIVE;
-                CategoryType categoryType = CategoryType.values()[i % CategoryType.values().length];
+                CategoryType categoryType = CategoryType.values()[(i-1) % CategoryType.values().length];
                 String introduction = "안녕하세요. " + "Circle_" + i + " 동아리 입니다.";
-                User applicant = filteredUsers.get(i % filteredUsers.size());
+                User applicant = users.get((i-1) % users.size());
+
+                if(i >= 90){
+                    circleStatus = CircleStatus.INACTIVE;
+                }
 
                 Circle circle = Circle.builder()
                         .name(name)
@@ -72,43 +74,71 @@ public class CircleDataLoader implements CommandLineRunner {
                 myCircleRepository.save(myCircle);
             }
 
-            List<Circle> Circles = circleRepository.findAllByCircleStatus(CircleStatus.ACTIVE);
+            List<Circle> circles = circleRepository.findAllByCircleStatus(CircleStatus.ACTIVE);
 
+            Random random = new Random();
+
+            //동아리 가입
             for(int i = 0 ; i < users.size(); i++){
 
+                int randomIndex = random.nextInt(circles.size());
 
-                Circle circle = Circles.get(i % Circles.size());
-                User user = users.get(i);
+                for(int j = 0 ; j < 30; j++){
+                    Circle circle = circles.get((j+randomIndex) % circles.size());
+                    User user = users.get(i);
 
-                Long applicantId = circle.getApplicant().getId();
-                Long userId = user.getId();
+                    Long applicantId = circle.getApplicant().getId();
+                    Long userId = user.getId();
 
-                if(applicantId.equals(userId)){
-                    continue;
+                    if(applicantId.equals(userId)){
+                        continue;
+                    }
+
+
+                    MyCircle myCircle = MyCircle.builder()
+                            .circleRole(CircleRole.MEMBER)
+                            .circle(circle)
+                            .user(user)
+                            .membershipStatus(MembershipStatus.APPROVED)
+                            .build();
+
+                    myCircleRepository.save(myCircle);
                 }
 
-                CircleRole circleRole;
-                if(i % 7 == 0){
-                    circleRole = CircleRole.EXECUTIVE;
-                }else{
-                    circleRole = CircleRole.MEMBER;
-                }
-                MembershipStatus membershipStatus;
-                if(i % 13 == 0){
-                    membershipStatus = MembershipStatus.INACTIVE;
-                }else{
-                    membershipStatus = MembershipStatus.APPROVED;
-                }
+            }
 
-                MyCircle myCircle = MyCircle.builder()
-                        .circleRole(circleRole)
-                        .circle(circle)
-                        .user(user)
-                        .membershipStatus(membershipStatus)
-                        .build();
+            //동아리 직책 변경
+            for(int i = 0; i < circles.size(); i++){
 
-                myCircleRepository.save(myCircle);
+                Circle circle = circles.get(i);
 
+                List<MyCircle> myCircles = myCircleRepository.findAllByCircleAndMembershipStatus(circle, MembershipStatus.APPROVED);
+
+                MyCircle member = myCircles.stream()
+                        .filter(myCircle -> myCircle.getCircleRole().equals(CircleRole.MEMBER))
+                        .findFirst()
+                        .orElse(null);
+
+                if(member == null) continue;
+                member.setCircleRole(CircleRole.EXECUTIVE);
+                myCircleRepository.save(member);
+            }
+
+            //동아리 탈퇴자 만들기
+            for(int i = 0; i < circles.size(); i++){
+
+                Circle circle = circles.get(i);
+
+                List<MyCircle> myCircles = myCircleRepository.findAllByCircleAndMembershipStatus(circle, MembershipStatus.APPROVED);
+
+                MyCircle member = myCircles.stream()
+                        .filter(myCircle -> myCircle.getCircleRole().equals(CircleRole.MEMBER))
+                        .findFirst()
+                        .orElse(null);
+
+                if(member == null) continue;
+                member.setMembershipStatus(MembershipStatus.INACTIVE);
+                myCircleRepository.save(member);
             }
 
         }

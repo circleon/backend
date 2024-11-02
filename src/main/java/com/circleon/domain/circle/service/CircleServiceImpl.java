@@ -1,6 +1,5 @@
 package com.circleon.domain.circle.service;
 
-import com.circleon.common.CommonConstants;
 import com.circleon.common.CommonResponseStatus;
 import com.circleon.common.exception.CommonException;
 import com.circleon.common.file.FileStore;
@@ -39,8 +38,6 @@ public class CircleServiceImpl implements CircleService {
 
     @Override
     public void createCircle(Long applicantId, CircleCreateRequest circleCreateRequest) {
-
-        //TODO 동아리 이름 유니크 해야 하나??
 
         //존재하는 유저인지 검증
         User foundUser = userService.findByIdAndStatus(applicantId, UserStatus.ACTIVE);
@@ -112,7 +109,7 @@ public class CircleServiceImpl implements CircleService {
 
         User foundUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE);
 
-        // 요청 유저가 해당 써클의 회장이나 임원인지? TODO 권한 뭐로 할지 회의
+        // 요청 유저가 해당 써클의 회장이나 임원인지? TODO 권한 뭐로 할지 회의 -> 회장만
         MyCircle foundMyCircle = myCircleRepository.findByUserAndCircleAndMembershipStatus(foundUser, foundCircle, MembershipStatus.APPROVED)
                 .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBERSHIP_NOT_FOUND));
 

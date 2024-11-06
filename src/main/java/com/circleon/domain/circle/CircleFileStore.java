@@ -1,10 +1,14 @@
 package com.circleon.domain.circle;
 
+import com.circleon.common.CommonResponseStatus;
+import com.circleon.common.exception.CommonException;
 import com.circleon.common.file.AbstractFileStore;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,6 +16,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,7 +31,7 @@ public class CircleFileStore extends AbstractFileStore {
     private String circleFileDirectory;
 
     @Override
-    protected String getFileDirectory() {
+    public String getFileDirectory() {
         return circleFileDirectory;
     }
 
@@ -107,4 +112,23 @@ public class CircleFileStore extends AbstractFileStore {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public Resource loadFileAsResource(String filePath){
+
+        try {
+            Path path = Paths.get(getFileDirectory()).resolve(filePath);
+
+            Resource resource = new UrlResource(path.toUri());
+
+            if (!resource.exists()) {
+                throw new CommonException(CommonResponseStatus.FILE_NOT_FOUND);
+            }
+
+            return resource;
+        }catch (MalformedURLException e){
+            throw new RuntimeException("파일 경로가 잘 못 되었습니다.", e);
+        }
+    }
+
 }

@@ -1,10 +1,12 @@
 package com.circleon.common.file;
 
+import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Path;
 
 public interface FileStore {
+
+    String getFileDirectory();
 
     String storeFile(MultipartFile file);
 
@@ -13,4 +15,6 @@ public interface FileStore {
     String storeThumbnail(MultipartFile file);
 
     boolean isValidFile(MultipartFile file);
+
+    Resource loadFileAsResource(String filePath);
 }

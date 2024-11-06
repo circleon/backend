@@ -22,6 +22,8 @@ public enum CommonResponseStatus {
 
     FILE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST.value(), "007", "파일 용량 초과"),
 
+    FILE_NOT_FOUND(HttpStatus.BAD_REQUEST.value(), "008", "존재하지 않는 파일"),
+
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(), "5", "서버 에러");
 
     private final int httpStatusCode;

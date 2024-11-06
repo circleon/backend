@@ -38,10 +38,12 @@ public class GlobalExceptionHandler {
 
         CommonResponseStatus status =  e.getStatus();
 
-        log.warn("CommonException: {} {} {}", status.getHttpStatusCode(), status.getMessage(), status.getCode());
+        log.warn("CommonException: {} {}", status.getHttpStatusCode(), status.getCode());
+
+        log.warn("CommonException: {}", e.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorMessage(status.getMessage())
+                .errorMessage(e.getMessage())
                 .errorCode(status.getCode())
                 .build();
 
@@ -91,6 +93,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException e) {
 
+        log.error("RuntimeException message: {}", e.getMessage());
         log.error("RuntimeException", e);
 
         CommonResponseStatus internalServerError = CommonResponseStatus.INTERNAL_SERVER_ERROR;

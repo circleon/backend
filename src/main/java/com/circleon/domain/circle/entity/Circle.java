@@ -32,16 +32,25 @@ public class Circle {
     @Column
     private String thumbnailUrl;
 
+    @Column
+    private String introImgUrl;
+
     @Column(nullable = false)
     private CircleStatus circleStatus;
 
     @Column
     private CategoryType categoryType;
 
-    //TODO 꼭 필요한가?
     @Lob
     @Column(columnDefinition = "TEXT")
     private String introduction;
+
+    @Column
+    private LocalDateTime recruitmentStartDate;
+
+    @Column
+    private LocalDateTime recruitmentEndDate;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "applicant_id")

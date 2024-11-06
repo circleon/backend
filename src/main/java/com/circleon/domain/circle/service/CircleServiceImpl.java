@@ -5,10 +5,7 @@ import com.circleon.common.exception.CommonException;
 import com.circleon.common.file.FileStore;
 
 import com.circleon.domain.circle.*;
-import com.circleon.domain.circle.dto.CircleCreateRequest;
-import com.circleon.domain.circle.dto.CircleResponse;
-import com.circleon.domain.circle.dto.CircleUpdateRequest;
-import com.circleon.domain.circle.dto.CircleUpdateResponse;
+import com.circleon.domain.circle.dto.*;
 import com.circleon.domain.circle.entity.Circle;
 import com.circleon.domain.circle.entity.MyCircle;
 import com.circleon.domain.circle.exception.CircleException;
@@ -20,9 +17,14 @@ import com.circleon.domain.user.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -42,21 +44,21 @@ public class CircleServiceImpl implements CircleService {
         //존재하는 유저인지 검증
         User foundUser = userService.findByIdAndStatus(applicantId, UserStatus.ACTIVE);
 
-        String imgPath = null;
-        String thumbnailPath = null;
+        String profileImgUrl = null;
+        String thumbnailUrl = null;
 
         //이미지 유효할때
         if(circleFileStore.isValidFile(circleCreateRequest.getProfileImg())) {
 
             //이미지 원본 저장
-            imgPath = circleFileStore.storeFile(circleCreateRequest.getProfileImg());
-            if (imgPath == null) {
+            profileImgUrl = circleFileStore.storeFile(circleCreateRequest.getProfileImg());
+            if (profileImgUrl == null) {
                 throw new CommonException(CommonResponseStatus.INTERNAL_SERVER_ERROR);
             }
 
             //썸네일 저장
-            thumbnailPath = circleFileStore.storeThumbnail(circleCreateRequest.getProfileImg());
-            if (thumbnailPath == null) {
+            thumbnailUrl = circleFileStore.storeThumbnail(circleCreateRequest.getProfileImg());
+            if (thumbnailUrl == null) {
                 throw new CommonException(CommonResponseStatus.INTERNAL_SERVER_ERROR);
             }
 
@@ -69,8 +71,8 @@ public class CircleServiceImpl implements CircleService {
                 .name(circleCreateRequest.getCircleName())
                 .introduction(circleCreateRequest.getIntroduction())
                 .circleStatus(CircleStatus.PENDING)
-                .profileImgUrl(imgPath)
-                .thumbnailUrl(thumbnailPath)
+                .profileImgUrl(profileImgUrl)
+                .thumbnailUrl(thumbnailUrl)
                 .categoryType(circleCreateRequest.getCategory())
                 .build();
 
@@ -79,11 +81,7 @@ public class CircleServiceImpl implements CircleService {
     }
 
     @Override
-    public Page<CircleResponse> findCircles(Long userId, Pageable pageable, CategoryType categoryType) {
-
-        if(!userService.existsByIdAndStatus(userId, UserStatus.ACTIVE)){
-            throw new CommonException(CommonResponseStatus.LOGIN_REQUIRED);
-        }
+    public Page<CircleResponse> findPagedCircles(Pageable pageable, CategoryType categoryType) {
 
         if(categoryType == null){
             return circleRepository.findAllByCircleStatus(CircleStatus.ACTIVE, pageable)
@@ -101,71 +99,157 @@ public class CircleServiceImpl implements CircleService {
     }
 
     @Override
-    public CircleUpdateResponse updateCircle(Long userId, Long circleId, CircleUpdateRequest circleUpdateRequest) {
+    public CircleInfoUpdateResponse updateCircleInfo(Long userId, Long circleId, CircleInfoUpdateRequest circleInfoUpdateRequest) {
 
-        // 존재하는 써클인지
+        // 수정 권한 체크
+        Circle foundCircle = validatePresidentAccess(userId, circleId);
+
+        //수정
+        foundCircle.setName(circleInfoUpdateRequest.getCircleName());
+        foundCircle.setCategoryType(circleInfoUpdateRequest.getCategoryType());
+        foundCircle.setIntroduction(circleInfoUpdateRequest.getIntroduction());
+        foundCircle.setRecruitmentStartDate(circleInfoUpdateRequest.getRecruitmentStartDate());
+        foundCircle.setRecruitmentEndDate(circleInfoUpdateRequest.getRecruitmentEndDate());
+
+        return CircleInfoUpdateResponse.fromCircle(foundCircle);
+    }
+
+    private Circle validatePresidentAccess(Long userId, Long circleId) {
         Circle foundCircle = circleRepository.findByIdAndCircleStatus(circleId, CircleStatus.ACTIVE)
                 .orElseThrow(() -> new CircleException(CircleResponseStatus.CIRCLE_NOT_FOUND));
 
         User foundUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE);
 
-        // 요청 유저가 해당 써클의 회장이나 임원인지? TODO 권한 뭐로 할지 회의 -> 회장만
+        // 요청 유저가 해당 써클의 회장이나 임원인지? 회장만
         MyCircle foundMyCircle = myCircleRepository.findByUserAndCircleAndMembershipStatus(foundUser, foundCircle, MembershipStatus.APPROVED)
                 .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBERSHIP_NOT_FOUND));
 
-        if (foundMyCircle.getCircleRole() == CircleRole.MEMBER) {
+        if (foundMyCircle.getCircleRole() != CircleRole.PRESIDENT) {
             throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS);
         }
-
-        // 이미지 수정 여부 체크
-
-        String imgPath;
-        String thumbnailPath;
-
-        if(circleFileStore.isValidFile(circleUpdateRequest.getProfileImg())) {
-
-            //이미지 삭제
-            boolean isDeletedImg = circleFileStore.deleteFile(foundCircle.getProfileImgUrl());
-
-            if(!isDeletedImg) {
-                log.warn("동아리 프로필 이미지 파일 삭제 오류");
-            }
-
-            //이미지 원본 저장
-            imgPath = circleFileStore.storeFile(circleUpdateRequest.getProfileImg());
-            if (imgPath == null) {
-                throw new CommonException(CommonResponseStatus.INTERNAL_SERVER_ERROR);
-            }
-
-            boolean isDeletedThumbNail = circleFileStore.deleteFile(foundCircle.getThumbnailUrl());
-
-            if(!isDeletedThumbNail) {
-                log.warn("동아리 프로필 이미지 썸네일 파일 삭제 오류");
-            }
-
-            //썸네일 저장
-            thumbnailPath = circleFileStore.storeThumbnail(circleUpdateRequest.getProfileImg());
-            if (thumbnailPath == null) {
-                throw new CommonException(CommonResponseStatus.INTERNAL_SERVER_ERROR);
-            }
-        }else{
-            imgPath = foundCircle.getProfileImgUrl();
-            thumbnailPath = foundCircle.getThumbnailUrl();
-        }
-
-        //수정
-        foundCircle.setName(circleUpdateRequest.getCircleName());
-        foundCircle.setCategoryType(circleUpdateRequest.getCategoryType());
-        foundCircle.setProfileImgUrl(imgPath);
-        foundCircle.setThumbnailUrl(thumbnailPath);
-
-        return CircleUpdateResponse.builder()
-                .circleId(foundCircle.getId())
-                .circleName(foundCircle.getName())
-                .category(foundCircle.getCategoryType())
-                .profileImgUrl(foundCircle.getProfileImgUrl())
-                .thumbnailUrl(foundCircle.getThumbnailUrl())
-                .build();
+        return foundCircle;
     }
 
+    @Override
+    public CircleImagesUpdateResponse updateCircleImages(Long userId, Long circleId, CircleImagesUpdateRequest circleImageUpdateRequest) {
+
+        Circle foundCircle = validatePresidentAccess(userId, circleId);
+
+        // 이미지 저장 null값이면 수정 안함
+
+        //프로필 사진
+        if(circleFileStore.isValidFile(circleImageUpdateRequest.getProfileImg())) {
+
+            //기존 사진들 삭제
+            deleteImg(foundCircle.getProfileImgUrl());
+
+            deleteImg(foundCircle.getThumbnailUrl());
+
+            //저장
+            String profileImgUrl = storeImg(circleImageUpdateRequest.getProfileImg());
+
+            String thumbnailUrl = storeThumbnail(circleImageUpdateRequest.getProfileImg());
+
+            foundCircle.setProfileImgUrl(profileImgUrl);
+            foundCircle.setThumbnailUrl(thumbnailUrl);
+
+        }
+
+        //소개글 사진
+        if(circleFileStore.isValidFile(circleImageUpdateRequest.getIntroImg())){
+
+            deleteImg(foundCircle.getIntroImgUrl());
+
+            String introImgUrl = storeImg(circleImageUpdateRequest.getIntroImg());
+
+            foundCircle.setIntroImgUrl(introImgUrl);
+
+        }
+
+        return CircleImagesUpdateResponse.fromCircle(foundCircle);
+    }
+
+    private String storeImg(MultipartFile file) {
+        String profileImgUrl = circleFileStore.storeFile(file);
+
+        if(profileImgUrl == null){
+            throw new CommonException(CommonResponseStatus.INTERNAL_SERVER_ERROR);
+        }
+        return profileImgUrl;
+    }
+
+    private String storeThumbnail(MultipartFile file) {
+        String thumbnailUrl = circleFileStore.storeThumbnail(file);
+        if(thumbnailUrl == null){
+            throw new CommonException(CommonResponseStatus.INTERNAL_SERVER_ERROR);
+        }
+        return thumbnailUrl;
+    }
+
+    private void deleteImg(String imgUrl) {
+
+        if(imgUrl == null){
+            return ;
+        }
+
+        boolean isDeletedImg = circleFileStore.deleteFile(imgUrl);
+        if(!isDeletedImg){
+            log.warn("동아리 파일 삭제 실패 {}", imgUrl);
+        }
+    }
+
+    @Override
+    public void deleteCircleImages(Long userId, Long circleId, boolean deleteProfileImg, boolean deleteIntroImg) {
+
+        //권한 체크
+        Circle foundCircle = validatePresidentAccess(userId, circleId);
+
+        //이미지 삭제
+        if(deleteProfileImg){
+            deleteImg(foundCircle.getProfileImgUrl());
+            deleteImg(foundCircle.getThumbnailUrl());
+
+            foundCircle.setProfileImgUrl(null);
+            foundCircle.setThumbnailUrl(null);
+        }
+
+        if(deleteIntroImg){
+            deleteImg(foundCircle.getIntroImgUrl());
+
+            foundCircle.setIntroImgUrl(null);
+        }
+    }
+
+    @Override
+    public Resource loadImageAsResource(String filePath) {
+        return circleFileStore.loadFileAsResource(filePath);
+    }
+
+    @Override
+    public CircleDetailResponse findCircleDetail(Long userId, Long circleId) {
+
+        User foundUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE);
+
+        //존재하는 써클인지
+        Circle foundCircle = circleRepository.findByIdAndCircleStatus(circleId, CircleStatus.ACTIVE)
+                .orElseThrow(() -> new CircleException(CircleResponseStatus.CIRCLE_NOT_FOUND));
+
+
+        int memberCount = myCircleRepository.countByCircleAndMembershipStatus(foundCircle, MembershipStatus.APPROVED);
+
+        //현재 써클에 가입유무 후 가입 -> 역할까지
+        Optional<MyCircle> foundMyCircle = myCircleRepository.findByUserAndCircleAndMembershipStatus(foundUser, foundCircle, MembershipStatus.APPROVED);
+
+        return foundMyCircle.map(myCircle -> CircleDetailResponse.fromCircle(foundCircle, memberCount, true, myCircle.getCircleRole()))
+                .orElseGet(()-> CircleDetailResponse.fromCircle(foundCircle, memberCount, false, null));
+
+    }
+
+    @Override
+    public List<CircleSimpleResponse> findAllCirclesSimple() {
+
+        List<Circle> circles = circleRepository.findAllByCircleStatus(CircleStatus.ACTIVE);
+
+        return circles.stream().map(CircleSimpleResponse::fromCircle).toList();
+    }
 }

@@ -13,4 +13,9 @@ public class CommonException extends RuntimeException {
         this.status = status;
     }
 
+    public CommonException(CommonResponseStatus status, String message) {
+        super(message);
+        this.status = status;
+    }
+
 }

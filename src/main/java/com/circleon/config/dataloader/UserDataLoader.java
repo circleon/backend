@@ -11,6 +11,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 @Order(1)
@@ -21,6 +24,8 @@ public class UserDataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+
+        List<User> users = new ArrayList<>();
 
         if(userRepository.count() == 0) {
             for(int i = 1 ; i <= 180; i++){
@@ -38,7 +43,8 @@ public class UserDataLoader implements CommandLineRunner {
                         .role(Role.ROLE_USER)
                         .build();
 
-                userRepository.save(user);
+                users.add(user);
+
             }
 
             for(int i = 181 ; i <= 200; i++){
@@ -55,9 +61,11 @@ public class UserDataLoader implements CommandLineRunner {
                         .status(UserStatus.DEACTIVATED)
                         .role(Role.ROLE_USER)
                         .build();
+                users.add(user);
 
-                userRepository.save(user);
             }
+
+            userRepository.saveAll(users);
         }
     }
 }

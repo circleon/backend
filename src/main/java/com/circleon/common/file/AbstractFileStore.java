@@ -14,8 +14,6 @@ import java.util.UUID;
 
 public abstract class AbstractFileStore implements FileStore{
 
-    protected abstract String getFileDirectory();
-
     @Override
     public boolean deleteFile(String filePath) {
 
@@ -35,14 +33,15 @@ public abstract class AbstractFileStore implements FileStore{
                 && !file.isEmpty() && !file.getOriginalFilename().isEmpty();
     }
 
-    protected String createStoreFileName(String originalFilename) {
+    public String createStoreFileName(String originalFilename) {
         String extension = extractExtension(originalFilename);
         String uuid = UUID.randomUUID().toString();
         return uuid + "." + extension;
     }
 
-    protected String extractExtension(String originalFilename) {
+    public String extractExtension(String originalFilename) {
         int pos = originalFilename.lastIndexOf(".");
         return originalFilename.substring(pos + 1);
     }
+
 }

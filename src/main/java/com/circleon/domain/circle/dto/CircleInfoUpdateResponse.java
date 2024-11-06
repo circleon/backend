@@ -11,31 +11,28 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CircleResponse {
+public class CircleInfoUpdateResponse {
 
     private Long circleId;
 
     private String circleName;
 
-    private String profileImgUrl;
-
-    private String thumbnailUrl;
-
     private CategoryType category;
 
-    private LocalDateTime createdAt;
+    private String introduction;
 
-    private int memberCount;
+    private LocalDateTime recruitmentStartDate;
 
-    public static CircleResponse fromCircle(Circle circle, int memberCount) {
-        return CircleResponse.builder()
+    private LocalDateTime recruitmentEndDate;
+
+    public static CircleInfoUpdateResponse fromCircle(Circle circle) {
+        return CircleInfoUpdateResponse.builder()
                 .circleId(circle.getId())
                 .circleName(circle.getName())
                 .category(circle.getCategoryType())
-                .profileImgUrl(circle.getProfileImgUrl())
-                .thumbnailUrl(circle.getThumbnailUrl())
-                .createdAt(circle.getCreatedAt())
-                .memberCount(memberCount)
+                .introduction(circle.getIntroduction())
+                .recruitmentStartDate(circle.getRecruitmentStartDate())
+                .recruitmentEndDate(circle.getRecruitmentEndDate())
                 .build();
     }
 }

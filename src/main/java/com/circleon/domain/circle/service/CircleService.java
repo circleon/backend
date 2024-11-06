@@ -1,19 +1,30 @@
 package com.circleon.domain.circle.service;
 
 import com.circleon.domain.circle.CategoryType;
-import com.circleon.domain.circle.dto.CircleCreateRequest;
-import com.circleon.domain.circle.dto.CircleResponse;
-import com.circleon.domain.circle.dto.CircleUpdateRequest;
-import com.circleon.domain.circle.dto.CircleUpdateResponse;
+import com.circleon.domain.circle.dto.*;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 public interface CircleService {
 
     void createCircle(Long applicantId, CircleCreateRequest circleCreateRequest);
 
-    Page<CircleResponse> findCircles(Long userId, Pageable pageable, CategoryType categoryType);
+    Page<CircleResponse> findPagedCircles(Pageable pageable, CategoryType categoryType);
 
-    CircleUpdateResponse updateCircle(Long userId, Long circleId, CircleUpdateRequest circleUpdateRequest);
+    CircleInfoUpdateResponse updateCircleInfo(Long userId, Long circleId, CircleInfoUpdateRequest circleInfoUpdateRequest);
 
+    CircleImagesUpdateResponse updateCircleImages(Long userId, Long circleId, CircleImagesUpdateRequest circleImageUpdateRequest);
+
+    void deleteCircleImages(Long userId, Long circleId, boolean deleteProfileImg, boolean deleteIntroImg);
+
+    Resource loadImageAsResource(String filePath);
+
+    CircleDetailResponse findCircleDetail(Long userId, Long circleId);
+
+    List<CircleSimpleResponse> findAllCirclesSimple();
+
+    //TODO 동아리 삭제
 }

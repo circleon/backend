@@ -42,8 +42,7 @@ public class CircleController {
     }
 
     @GetMapping
-    public ResponseEntity<PaginatedResponse<CircleResponse>> findPagedCircles(@LoginUser Long userId,
-                                                                              @RequestParam(required = false) CategoryType categoryType,
+    public ResponseEntity<PaginatedResponse<CircleResponse>> findPagedCircles(@RequestParam(required = false) CategoryType categoryType,
                                                                               Pageable pageable) {
 
         Page<CircleResponse> circlesPage = circleService.findPagedCircles(pageable, categoryType);
@@ -136,3 +135,4 @@ public class CircleController {
         return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
     }
 }
+

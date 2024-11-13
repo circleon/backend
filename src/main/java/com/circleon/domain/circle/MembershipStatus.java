@@ -10,7 +10,8 @@ public enum MembershipStatus implements CommonEnum {
     PENDING("대기"),
     APPROVED("가입"),
     REJECTED("거절"),
-    INACTIVE("탈퇴");
+    INACTIVE("탈퇴"),
+    LEAVE_REQUEST("탈퇴 요청");
 
     private final String description;
 

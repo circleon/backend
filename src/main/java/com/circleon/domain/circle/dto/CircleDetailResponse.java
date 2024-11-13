@@ -38,9 +38,11 @@ public class CircleDetailResponse {
 
     private CircleRole circleRole;
 
+    private Long memberId;
+
     private int memberCount;
 
-    public static CircleDetailResponse fromCircle(Circle circle, int memberCount, boolean isJoined, CircleRole circleRole) {
+    public static CircleDetailResponse fromCircle(Circle circle, boolean isJoined, CircleRole circleRole, Long memberId) {
         return CircleDetailResponse.builder()
                 .circleId(circle.getId())
                 .circleName(circle.getName())
@@ -52,9 +54,10 @@ public class CircleDetailResponse {
                 .recruitmentStartDate(circle.getRecruitmentStartDate())
                 .recruitmentEndDate(circle.getRecruitmentEndDate())
                 .createdAt(circle.getCreatedAt())
-                .memberCount(memberCount)
+                .memberCount(circle.getMemberCount())
                 .isJoined(isJoined)
                 .circleRole(circleRole)
+                .memberId(memberId)
                 .build();
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -46,9 +47,46 @@ public class CircleDataLoader implements CommandLineRunner {
 
             updateMembershipStatusToInactive();
 
+            updateMembershipStatueToPending();
+
+            updateCircleMemberCount();
         }
 
 
+    }
+    private void updateCircleMemberCount(){
+        List<Circle> foundCircles = circleRepository.findAllByCircleStatus(CircleStatus.ACTIVE);
+        List<Circle> updatedCircles = new ArrayList<>();
+        for(int i = 0; i < foundCircles.size(); i++){
+            Circle circle = foundCircles.get(i);
+            int memberCount = myCircleRepository.countByCircleAndMembershipStatus(circle, MembershipStatus.APPROVED);
+            circle.setMemberCount(memberCount);
+            updatedCircles.add(circle);
+        }
+        circleRepository.saveAll(updatedCircles);
+    }
+
+    private void updateMembershipStatueToPending(){
+        List<MyCircle> myCircles = new ArrayList<>();
+        List<Circle> foundCircles = circleRepository.findAllByCircleStatus(CircleStatus.ACTIVE);
+
+        for(int i = 0; i < foundCircles.size(); i++){
+
+            Circle circle = foundCircles.get(i);
+
+            List<MyCircle> foundMyCircles = myCircleRepository.findAllByCircleAndMembershipStatus(circle, MembershipStatus.APPROVED);
+
+            MyCircle member = foundMyCircles.stream()
+                    .filter(myCircle -> myCircle.getCircleRole().equals(CircleRole.MEMBER))
+                    .findFirst()
+                    .orElse(null);
+
+            if(member == null) continue;
+            member.setMembershipStatus(MembershipStatus.PENDING);
+            myCircles.add(member);
+        }
+
+        myCircleRepository.saveAll(myCircles);
     }
 
     private void updateMembershipStatusToInactive() {
@@ -125,7 +163,10 @@ public class CircleDataLoader implements CommandLineRunner {
                         .circle(foundeCircle)
                         .user(user)
                         .membershipStatus(MembershipStatus.APPROVED)
+                        .joinedAt(LocalDateTime.now())
                         .build();
+
+                myCircle.initJoinedAt();
                 myCircles.add(myCircle);
             }
 
@@ -169,6 +210,8 @@ public class CircleDataLoader implements CommandLineRunner {
                     .circleRole(CircleRole.PRESIDENT)
                     .membershipStatus(MembershipStatus.APPROVED)
                     .build();
+
+            myCircle.initJoinedAt();
             myCircles.add(myCircle);
         }
         circleRepository.saveAll(circles);

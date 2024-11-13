@@ -222,6 +222,7 @@ public class AuthServiceImpl implements AuthService{
                 .refreshToken(newRefreshToken)
                 .userId(foundUser.getId())
                 .username(foundUser.getUsername())
+                .univCode(foundUser.getUnivCode())
                 .build();
     }
 

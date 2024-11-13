@@ -85,24 +85,20 @@ public class CircleServiceImpl implements CircleService {
 
         if(categoryType == null){
             return circleRepository.findAllByCircleStatus(CircleStatus.ACTIVE, pageable)
-                        .map(circle -> {
-                            int memberCount = myCircleRepository.countByCircleAndMembershipStatus(circle, MembershipStatus.APPROVED);
-                            return CircleResponse.fromCircle(circle, memberCount);
-                        });
+                        .map(CircleResponse::fromCircle);
         }else{
             return circleRepository.findAllByCategoryTypeAndCircleStatus(categoryType, CircleStatus.ACTIVE, pageable)
-                        .map(circle -> {
-                            int memberCount = myCircleRepository.countByCircleAndMembershipStatus(circle, MembershipStatus.APPROVED);
-                            return CircleResponse.fromCircle(circle, memberCount);
-                        });
+                        .map(CircleResponse::fromCircle);
         }
     }
 
     @Override
     public CircleInfoUpdateResponse updateCircleInfo(Long userId, Long circleId, CircleInfoUpdateRequest circleInfoUpdateRequest) {
 
+        User presidentUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE);
+
         // 수정 권한 체크
-        Circle foundCircle = validatePresidentAccess(userId, circleId);
+        Circle foundCircle = validatePresidentAccess(presidentUser, circleId);
 
         //수정
         foundCircle.setName(circleInfoUpdateRequest.getCircleName());
@@ -114,15 +110,14 @@ public class CircleServiceImpl implements CircleService {
         return CircleInfoUpdateResponse.fromCircle(foundCircle);
     }
 
-    private Circle validatePresidentAccess(Long userId, Long circleId) {
+    private Circle validatePresidentAccess(User user, Long circleId) {
         Circle foundCircle = circleRepository.findByIdAndCircleStatus(circleId, CircleStatus.ACTIVE)
                 .orElseThrow(() -> new CircleException(CircleResponseStatus.CIRCLE_NOT_FOUND));
 
-        User foundUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE);
-
         // 요청 유저가 해당 써클의 회장이나 임원인지? 회장만
-        MyCircle foundMyCircle = myCircleRepository.findByUserAndCircleAndMembershipStatus(foundUser, foundCircle, MembershipStatus.APPROVED)
+        MyCircle foundMyCircle = myCircleRepository.findByUserAndCircleAndMembershipStatus(user, foundCircle, MembershipStatus.APPROVED)
                 .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBERSHIP_NOT_FOUND));
+
 
         if (foundMyCircle.getCircleRole() != CircleRole.PRESIDENT) {
             throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS);
@@ -133,7 +128,9 @@ public class CircleServiceImpl implements CircleService {
     @Override
     public CircleImagesUpdateResponse updateCircleImages(Long userId, Long circleId, CircleImagesUpdateRequest circleImageUpdateRequest) {
 
-        Circle foundCircle = validatePresidentAccess(userId, circleId);
+        User presidentUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE);
+
+        Circle foundCircle = validatePresidentAccess(presidentUser, circleId);
 
         // 이미지 저장 null값이면 수정 안함
 
@@ -201,8 +198,10 @@ public class CircleServiceImpl implements CircleService {
     @Override
     public void deleteCircleImages(Long userId, Long circleId, boolean deleteProfileImg, boolean deleteIntroImg) {
 
+        User presidentUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE);
+
         //권한 체크
-        Circle foundCircle = validatePresidentAccess(userId, circleId);
+        Circle foundCircle = validatePresidentAccess(presidentUser, circleId);
 
         //이미지 삭제
         if(deleteProfileImg){
@@ -237,11 +236,14 @@ public class CircleServiceImpl implements CircleService {
 
         int memberCount = myCircleRepository.countByCircleAndMembershipStatus(foundCircle, MembershipStatus.APPROVED);
 
+        //목록 조회시 카운트
+        foundCircle.setMemberCount(memberCount);
+
         //현재 써클에 가입유무 후 가입 -> 역할까지
         Optional<MyCircle> foundMyCircle = myCircleRepository.findByUserAndCircleAndMembershipStatus(foundUser, foundCircle, MembershipStatus.APPROVED);
 
-        return foundMyCircle.map(myCircle -> CircleDetailResponse.fromCircle(foundCircle, memberCount, true, myCircle.getCircleRole()))
-                .orElseGet(()-> CircleDetailResponse.fromCircle(foundCircle, memberCount, false, null));
+        return foundMyCircle.map(myCircle -> CircleDetailResponse.fromCircle(foundCircle,true, myCircle.getCircleRole(), myCircle.getId()))
+                .orElseGet(()-> CircleDetailResponse.fromCircle(foundCircle,false, null, 0L));
 
     }
 
@@ -251,5 +253,121 @@ public class CircleServiceImpl implements CircleService {
         List<Circle> circles = circleRepository.findAllByCircleStatus(CircleStatus.ACTIVE);
 
         return circles.stream().map(CircleSimpleResponse::fromCircle).toList();
+    }
+
+    @Override
+    public Page<CircleMemberResponse> findPagedCircleMembers(Long userId, Long circleId, Pageable pageable, MembershipStatus membershipStatus) {
+
+        User authorizedUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE);
+
+        //회장, 임원만 가능
+        Circle foundCircle = validateExecutiveAccess(authorizedUser, circleId);
+
+        return myCircleRepository.findAllByCircleAndMembershipStatusWithUser(foundCircle, membershipStatus, pageable)
+                .map(CircleMemberResponse::fromMyCircle);
+    }
+
+    private Circle validateExecutiveAccess(User user, Long circleId) {
+
+        Circle foundCircle = circleRepository.findByIdAndCircleStatus(circleId, CircleStatus.ACTIVE)
+                .orElseThrow(() -> new CircleException(CircleResponseStatus.CIRCLE_NOT_FOUND));
+
+        MyCircle foundMyCircle = myCircleRepository.findByUserAndCircleAndMembershipStatus(user, foundCircle, MembershipStatus.APPROVED)
+                .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBERSHIP_NOT_FOUND));
+
+        if(foundMyCircle.getCircleRole() == CircleRole.MEMBER){
+            throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "동아리 임원이 아닙니다.");
+        }
+
+        return foundCircle;
+    }
+
+    @Override
+    public void updateCircleMemberRole(Long userId, Long circleId, Long memberId, CircleRoleUpdateRequest circleRoleUpdateRequest) {
+
+        User presidentUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE);
+
+        // 회장만 가능
+        Circle targetCircle = validatePresidentAccess(presidentUser, circleId);
+
+        // 이 멤버가 실제 가입하고 있는지 체크
+        MyCircle member = myCircleRepository.findByIdAndCircleAndMembershipStatus(memberId, targetCircle, MembershipStatus.APPROVED)
+                .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBER_NOT_FOUND));
+
+        if(circleRoleUpdateRequest.getCircleRole() == CircleRole.PRESIDENT){
+            // 회장으로
+            member.setCircleRole(circleRoleUpdateRequest.getCircleRole());
+
+            // 본인은 임원으로
+            MyCircle president = myCircleRepository.findByUserAndCircleAndMembershipStatus(presidentUser, targetCircle, MembershipStatus.APPROVED)
+                    .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBERSHIP_NOT_FOUND));
+
+            president.setCircleRole(CircleRole.EXECUTIVE);
+            return ;
+        }
+
+        member.setCircleRole(circleRoleUpdateRequest.getCircleRole());
+    }
+
+    @Override
+    public void updateMembershipStatus(Long userId, Long circleId, Long memberId, Boolean approved) {
+
+        //임원들 가능
+        User authorizedUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE);
+
+        Circle circle = validateExecutiveAccess(authorizedUser, circleId);
+
+        //실제 가입 신청을 했는지 확인
+        MyCircle applicantMember = myCircleRepository.findByIdAndCircleAndMembershipStatus(memberId, circle, MembershipStatus.PENDING)
+                .orElseThrow(() -> new CircleException(CircleResponseStatus.APPLICANT_NOT_FOUND));
+
+        MembershipStatus membershipStatus = determineMembershipStatus(approved);
+
+        applicantMember.setMembershipStatus(membershipStatus);
+
+        // 가입시 카운트
+        if(applicantMember.getMembershipStatus() == MembershipStatus.APPROVED){
+            registerMember(circle, applicantMember);
+        }
+
+    }
+
+    private static void registerMember(Circle circle, MyCircle applicantMember) {
+        circle.incrementMemberCount();
+        applicantMember.initJoinedAt();
+    }
+
+    private MembershipStatus determineMembershipStatus(Boolean approved) {
+        MembershipStatus membershipStatus = MembershipStatus.REJECTED;
+
+        if(approved){
+            membershipStatus = MembershipStatus.APPROVED;
+        }
+        return membershipStatus;
+    }
+
+    @Override
+    public void expelMember(Long userId, Long circleId, Long memberId) {
+
+        //임원들 가능
+        User authorizedUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE);
+
+        Circle circle = validateExecutiveAccess(authorizedUser, circleId);
+
+        //실제 가입되어 있는 유저인지
+        MyCircle member = myCircleRepository.findByIdAndCircleAndMembershipStatus(memberId, circle, MembershipStatus.APPROVED)
+                .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBER_NOT_FOUND));
+
+        if(member.getCircleRole() == CircleRole.PRESIDENT){
+            throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "회장은 추방 불가능");
+        }
+
+        if(member.getUser().getId().equals(userId)){
+            throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "본인은 추방 불가능");
+        }
+
+        //추방 + 카운트
+        member.setMembershipStatus(MembershipStatus.INACTIVE);
+        circle.decrementMemberCount();
     }
 }

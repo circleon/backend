@@ -1,6 +1,7 @@
 package com.circleon.common.dto;
 
 import lombok.*;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -25,6 +26,15 @@ public class PaginatedResponse<T> {
                 .currentPageNumber(currentPageNumber)
                 .totalElementCount(totalElementCount)
                 .totalPageCount(totalPageCount)
+                .build();
+    }
+
+    public static <T> PaginatedResponse<T> fromPage(Page<T> page){
+        return PaginatedResponse.<T>builder()
+                .content(page.getContent())
+                .currentPageNumber(page.getNumber())
+                .totalElementCount(page.getTotalElements())
+                .totalPageCount(page.getTotalPages())
                 .build();
     }
 }

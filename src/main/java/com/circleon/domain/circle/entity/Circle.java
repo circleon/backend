@@ -1,5 +1,6 @@
 package com.circleon.domain.circle.entity;
 
+import com.circleon.common.BaseEntity;
 import com.circleon.domain.circle.CategoryType;
 import com.circleon.domain.circle.CircleStatus;
 import com.circleon.domain.user.entity.User;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Circle {
+public class Circle extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,9 +23,6 @@ public class Circle {
 
     @Column(nullable = false)
     private String name;
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
 
     @Column
     private String profileImgUrl;
@@ -51,13 +49,21 @@ public class Circle {
     @Column
     private LocalDateTime recruitmentEndDate;
 
+    @Column(nullable = false)
+    private int memberCount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "applicant_id")
     private User applicant;
 
-    @PrePersist
-    public void prePersist() {
-        this.createdAt = this.createdAt == null ? LocalDateTime.now() : this.createdAt;
+    public void incrementMemberCount() {
+        this.memberCount++;
+    }
+
+    public void decrementMemberCount() {
+        if (this.memberCount > 0) {
+            this.memberCount--;
+        }
+
     }
 }

@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
         log.warn("CommonException: {}", e.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorMessage(e.getMessage())
+                .errorMessage(status.getMessage())
                 .errorCode(status.getCode())
                 .build();
 

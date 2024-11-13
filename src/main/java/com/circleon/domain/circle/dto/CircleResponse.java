@@ -27,7 +27,7 @@ public class CircleResponse {
 
     private int memberCount;
 
-    public static CircleResponse fromCircle(Circle circle, int memberCount) {
+    public static CircleResponse fromCircle(Circle circle) {
         return CircleResponse.builder()
                 .circleId(circle.getId())
                 .circleName(circle.getName())
@@ -35,7 +35,7 @@ public class CircleResponse {
                 .profileImgUrl(circle.getProfileImgUrl())
                 .thumbnailUrl(circle.getThumbnailUrl())
                 .createdAt(circle.getCreatedAt())
-                .memberCount(memberCount)
+                .memberCount(circle.getMemberCount())
                 .build();
     }
 }

@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 @Entity
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
 
     @Id
@@ -38,17 +40,6 @@ public class User {
 
     @Column
     private String profileImgUrl;
-
-    @Builder
-    public User(Long id, String username, String email, String password, UnivCode univCode, UserStatus status, Role role) {
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.password = password;
-        this.univCode = univCode;
-        this.status = status;
-        this.role = role;
-    }
 
     @PrePersist
     public void prePersist(){

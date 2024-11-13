@@ -8,6 +8,7 @@ import com.circleon.common.dto.SuccessResponse;
 import com.circleon.common.exception.CommonException;
 import com.circleon.domain.circle.CategoryType;
 import com.circleon.domain.circle.CircleResponseStatus;
+import com.circleon.domain.circle.MembershipStatus;
 import com.circleon.domain.circle.dto.*;
 import com.circleon.domain.circle.exception.CircleException;
 import com.circleon.domain.circle.service.CircleService;
@@ -23,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @Slf4j
@@ -64,11 +66,11 @@ public class CircleController {
     }
 
     @GetMapping("/summary")
-    public ResponseEntity<List<CircleSimpleResponse>> findAllCirclesSimple() {
+    public ResponseEntity<CircleListResponse<CircleSimpleResponse>> findAllCirclesSimple() {
 
         List<CircleSimpleResponse> circlesSimple = circleService.findAllCirclesSimple();
 
-        return ResponseEntity.ok(circlesSimple);
+        return ResponseEntity.ok(CircleListResponse.fromList(circlesSimple));
     }
 
     @PutMapping("/{circleId}")
@@ -118,6 +120,59 @@ public class CircleController {
         return ResponseEntity.ok()
                 .contentType(mediaType)
                 .body(resource);
+    }
+
+    @GetMapping("/{circleId}/members")
+    public ResponseEntity<PaginatedResponse<CircleMemberResponse>> findPagedCircleMembers(@LoginUser Long userId,
+                                                                                   @PathVariable Long circleId,
+                                                                                   @RequestParam(defaultValue = "APPROVED") MembershipStatus membershipStatus,
+                                                                                   Pageable pageable) {
+        if(!isAccessMembershipStatus(membershipStatus)){
+            throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "[findPagedCircleMembers] 동아리원 명단 조회에서 권한이 없는 접근");
+        }
+
+        Page<CircleMemberResponse> pagedCircleMembers = circleService.findPagedCircleMembers(userId, circleId, pageable, membershipStatus);
+
+        return ResponseEntity.ok(PaginatedResponse.fromPage(pagedCircleMembers));
+    }
+
+    private boolean isAccessMembershipStatus(MembershipStatus membershipStatus) {
+        return membershipStatus == MembershipStatus.APPROVED || membershipStatus == MembershipStatus.PENDING;
+    }
+
+    @PutMapping("/{circleId}/members/{memberId}/role")
+    public ResponseEntity<SuccessResponse> updateCircleMemberRole(@LoginUser Long userId,
+                                                            @PathVariable Long circleId,
+                                                            @PathVariable Long memberId,
+                                                            @RequestBody CircleRoleUpdateRequest circleRoleUpdateRequest){
+        circleService.updateCircleMemberRole(userId, circleId, memberId, circleRoleUpdateRequest);
+
+        return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
+    }
+
+    @PutMapping("/{circleId}/members/{memberId}/status")
+    public ResponseEntity<SuccessResponse> updateMembershipStatus(@LoginUser Long userId,
+                                                                  @PathVariable Long circleId,
+                                                                  @PathVariable Long memberId,
+                                                                  @RequestBody MembershipStatusUpdateRequest membershipStatusUpdateRequest){
+
+        if(Objects.isNull(membershipStatusUpdateRequest.getApproved())){
+            membershipStatusUpdateRequest.setApproved(false);
+        }
+
+        circleService.updateMembershipStatus(userId, circleId, memberId, membershipStatusUpdateRequest.getApproved());
+
+        return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
+    }
+
+    @DeleteMapping("/{circleId}/members/{memberId}")
+    public ResponseEntity<SuccessResponse> expelMember(@LoginUser Long userId,
+                                                       @PathVariable Long circleId,
+                                                       @PathVariable Long memberId){
+
+        circleService.expelMember(userId, circleId, memberId);
+
+        return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
     }
 
     @ExceptionHandler(CircleException.class)

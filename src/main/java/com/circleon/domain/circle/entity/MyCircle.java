@@ -24,6 +24,9 @@ public class MyCircle {
     private LocalDateTime joinedAt;
 
     @Column
+    private LocalDateTime updatedAt;
+
+    @Column
     private CircleRole circleRole;
 
     @Column(nullable = false)
@@ -37,8 +40,13 @@ public class MyCircle {
     @JoinColumn(name = "circle_id")
     private Circle circle;
 
-    @PrePersist
-    public void prePersist() {
-        this.joinedAt = this.joinedAt == null ? LocalDateTime.now() : this.joinedAt;
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
+
+    public void initJoinedAt() {
+        this.joinedAt = LocalDateTime.now();
+    }
+
 }

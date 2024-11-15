@@ -353,9 +353,9 @@ class AuthServiceImplTest {
         //when
         LoginResponse loginResponse = authServiceImpl.login(loginRequest);
 
-        assertEquals("access_token", loginResponse.getAccessToken());
-        assertEquals("refresh_token", loginResponse.getRefreshToken());
-        assertEquals(foundUser.getId(), loginResponse.getUserId());
+        assertEquals("access_token", loginResponse.getToken().getAccessToken());
+        assertEquals("refresh_token", loginResponse.getToken().getRefreshToken());
+        assertEquals(foundUser.getId(), loginResponse.getUser().getUserId());
         verify(refreshTokenRepository, times(1)).save(any(RefreshToken.class));
 
     }

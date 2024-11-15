@@ -44,6 +44,9 @@ public class Circle extends BaseEntity {
     private String introduction;
 
     @Column
+    private String summary;
+
+    @Column
     private LocalDateTime recruitmentStartDate;
 
     @Column

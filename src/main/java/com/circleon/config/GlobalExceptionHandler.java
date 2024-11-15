@@ -38,9 +38,9 @@ public class GlobalExceptionHandler {
 
         CommonResponseStatus status =  e.getStatus();
 
-        log.warn("CommonException: {} {}", status.getHttpStatusCode(), status.getCode());
-
         log.warn("CommonException: {}", e.getMessage());
+
+        log.warn("CommonException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorMessage(status.getMessage())

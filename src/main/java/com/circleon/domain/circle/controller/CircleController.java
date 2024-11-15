@@ -137,7 +137,7 @@ public class CircleController {
     }
 
     private boolean isAccessMembershipStatus(MembershipStatus membershipStatus) {
-        return membershipStatus == MembershipStatus.APPROVED || membershipStatus == MembershipStatus.PENDING;
+        return membershipStatus == MembershipStatus.APPROVED || membershipStatus == MembershipStatus.PENDING || membershipStatus == MembershipStatus.LEAVE_REQUEST;
     }
 
     @PutMapping("/{circleId}/members/{memberId}/role")
@@ -156,11 +156,9 @@ public class CircleController {
                                                                   @PathVariable Long memberId,
                                                                   @RequestBody MembershipStatusUpdateRequest membershipStatusUpdateRequest){
 
-        if(Objects.isNull(membershipStatusUpdateRequest.getApproved())){
-            membershipStatusUpdateRequest.setApproved(false);
-        }
 
-        circleService.updateMembershipStatus(userId, circleId, memberId, membershipStatusUpdateRequest.getApproved());
+
+        circleService.updateMembershipStatus(userId, circleId, memberId, membershipStatusUpdateRequest);
 
         return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
     }
@@ -180,7 +178,10 @@ public class CircleController {
 
         CircleResponseStatus status = e.getStatus();
 
-        log.warn("CircleResponseStatus: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
+        log.warn("CircleException: {}", e.getMessage());
+
+        log.warn("CircleException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
+
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorCode(status.getCode())

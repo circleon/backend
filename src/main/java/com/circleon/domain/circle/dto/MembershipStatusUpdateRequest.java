@@ -1,5 +1,6 @@
 package com.circleon.domain.circle.dto;
 
+import com.circleon.domain.circle.MembershipStatus;
 import lombok.*;
 
 @Getter
@@ -9,6 +10,5 @@ import lombok.*;
 @Builder
 public class MembershipStatusUpdateRequest {
 
-    private Boolean approved;
-
+    private MembershipStatus membershipStatus;
 }

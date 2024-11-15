@@ -25,6 +25,8 @@ public class CircleResponse {
 
     private LocalDateTime createdAt;
 
+    private String summary;
+
     private int memberCount;
 
     public static CircleResponse fromCircle(Circle circle) {
@@ -36,6 +38,7 @@ public class CircleResponse {
                 .thumbnailUrl(circle.getThumbnailUrl())
                 .createdAt(circle.getCreatedAt())
                 .memberCount(circle.getMemberCount())
+                .summary(circle.getSummary())
                 .build();
     }
 }

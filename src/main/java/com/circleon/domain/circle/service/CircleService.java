@@ -33,7 +33,7 @@ public interface CircleService {
     void updateCircleMemberRole(Long userId, Long circleId, Long memberId, CircleRoleUpdateRequest circleRoleUpdateRequest);
 
     //동아리 멥머 가입 승인 거절 동시에
-    void updateMembershipStatus(Long userId, Long circleId, Long memberId, Boolean approved);
+    void updateMembershipStatus(Long userId, Long circleId, Long memberId, MembershipStatusUpdateRequest membershipStatusUpdateRequest);
 
     //동아리원 추방
     void expelMember(Long userId, Long circleId, Long memberId);

@@ -21,6 +21,8 @@ public class CircleInfoUpdateResponse {
 
     private String introduction;
 
+    private String summary;
+
     private LocalDateTime recruitmentStartDate;
 
     private LocalDateTime recruitmentEndDate;
@@ -33,6 +35,7 @@ public class CircleInfoUpdateResponse {
                 .introduction(circle.getIntroduction())
                 .recruitmentStartDate(circle.getRecruitmentStartDate())
                 .recruitmentEndDate(circle.getRecruitmentEndDate())
+                .summary(circle.getSummary())
                 .build();
     }
 }

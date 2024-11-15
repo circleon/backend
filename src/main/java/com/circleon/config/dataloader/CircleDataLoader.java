@@ -186,6 +186,7 @@ public class CircleDataLoader implements CommandLineRunner {
             CircleStatus circleStatus = CircleStatus.ACTIVE;
             CategoryType categoryType = CategoryType.values()[(i-1) % CategoryType.values().length];
             String introduction = "안녕하세요. " + "Circle_" + i + " 동아리 입니다.";
+            String summary = "안녕하세요. " + "Circle_" + i + " 동아리 입니다. 한 줄 소개입니다.";
             User applicant = users.get((i-1) % users.size());
 
             if(i >= 90){
@@ -200,6 +201,7 @@ public class CircleDataLoader implements CommandLineRunner {
                     .applicant(applicant)
                     .thumbnailUrl(ThumbImgUrl)
                     .circleStatus(circleStatus)
+                    .summary(summary)
                     .build();
 
             circles.add(circle);

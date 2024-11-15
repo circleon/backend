@@ -22,11 +22,11 @@ public class JwtUtil {
 
     private Key key;
 
-    //TODO 잠시 1분으로
-    private final long jwtAccessExpirationMs = 1000L * 60 * 1;
+    //TODO 잠시 1시간으로
+    private final long jwtAccessExpirationMs = 1000L * 60 * 60;
 
-    //TODO 잠시 3분으로
-    private final long jwtRefreshExpirationMs = 1000L * 60 * 3;
+    //TODO 잠시 1시간분으로
+    private final long jwtRefreshExpirationMs = 1000L * 60 * 60;
 
     @PostConstruct
     protected void init() {

@@ -10,13 +10,14 @@ import lombok.*;
 @Builder
 public class LoginResponse {
 
-    private Long userId;
+    private UserDto user;
 
-    private String username;
+    private TokenDto token;
 
-    private UnivCode univCode;
-
-    private String accessToken;
-
-    private String refreshToken;
+    public static LoginResponse of(UserDto user, TokenDto token) {
+        return LoginResponse.builder()
+                .user(user)
+                .token(token)
+                .build();
+    }
 }

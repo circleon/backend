@@ -22,4 +22,6 @@ public interface MyCircleRepository extends JpaRepository<MyCircle, Long>, MyCir
     List<MyCircle> findAllByCircleAndMembershipStatus(Circle circle, MembershipStatus membershipStatus);
 
     Optional<MyCircle> findByIdAndCircleAndMembershipStatus(Long id, Circle circle, MembershipStatus membershipStatus);
+
+    Optional<MyCircle> findByIdAndCircle(Long id, Circle circle);
 }

@@ -34,7 +34,7 @@ public class CircleDetailResponse {
 
     private LocalDateTime recruitmentEndDate;
 
-    private boolean isJoined;
+    private String summary;
 
     private CircleRole circleRole;
 
@@ -42,7 +42,7 @@ public class CircleDetailResponse {
 
     private int memberCount;
 
-    public static CircleDetailResponse fromCircle(Circle circle, boolean isJoined, CircleRole circleRole, Long memberId) {
+    public static CircleDetailResponse fromCircle(Circle circle, CircleRole circleRole, Long memberId) {
         return CircleDetailResponse.builder()
                 .circleId(circle.getId())
                 .circleName(circle.getName())
@@ -51,11 +51,11 @@ public class CircleDetailResponse {
                 .thumbnailUrl(circle.getThumbnailUrl())
                 .introImgUrl(circle.getIntroImgUrl())
                 .introduction(circle.getIntroduction())
+                .summary(circle.getSummary())
                 .recruitmentStartDate(circle.getRecruitmentStartDate())
                 .recruitmentEndDate(circle.getRecruitmentEndDate())
                 .createdAt(circle.getCreatedAt())
                 .memberCount(circle.getMemberCount())
-                .isJoined(isJoined)
                 .circleRole(circleRole)
                 .memberId(memberId)
                 .build();

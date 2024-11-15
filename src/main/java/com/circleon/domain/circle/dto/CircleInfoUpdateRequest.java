@@ -19,6 +19,8 @@ public class CircleInfoUpdateRequest {
 
     private String introduction;
 
+    private String summary;
+
     private LocalDateTime recruitmentStartDate;
 
     private LocalDateTime recruitmentEndDate;

@@ -12,4 +12,9 @@ public class CircleException extends RuntimeException {
         super(status.getMessage());
         this.status = status;
     }
+
+    public CircleException(CircleResponseStatus status, String message) {
+        super(message);
+        this.status = status;
+    }
 }

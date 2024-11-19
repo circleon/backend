@@ -1,13 +1,16 @@
 package com.circleon.domain.circle.service;
 
 import com.circleon.domain.circle.CategoryType;
+import com.circleon.domain.circle.CircleStatus;
 import com.circleon.domain.circle.MembershipStatus;
 import com.circleon.domain.circle.dto.*;
+import com.circleon.domain.circle.entity.Circle;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CircleService {
 
@@ -39,4 +42,6 @@ public interface CircleService {
     void expelMember(Long userId, Long circleId, Long memberId);
 
     //TODO 동아리 삭제
+
+    Optional<Circle> findByIdAndCircleStatus(Long circleId, CircleStatus circleStatus);
 }

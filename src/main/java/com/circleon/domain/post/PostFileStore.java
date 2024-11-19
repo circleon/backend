@@ -1,9 +1,8 @@
-package com.circleon.domain.circle;
+package com.circleon.domain.post;
 
 import com.circleon.common.CommonResponseStatus;
 import com.circleon.common.exception.CommonException;
 import com.circleon.common.file.AbstractFileStore;
-import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,15 +22,14 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Component
-@Slf4j
-public class CircleFileStore extends AbstractFileStore {
+public class PostFileStore extends AbstractFileStore {
 
     @Value("${circle.image.dir}")
-    private String circleFileDirectory;
+    private String postFileDirectory;
 
     @Override
     public String getFileDirectory() {
-        return circleFileDirectory;
+        return postFileDirectory;
     }
 
     @Override
@@ -132,5 +129,4 @@ public class CircleFileStore extends AbstractFileStore {
             throw new RuntimeException("파일 경로가 잘 못 되었습니다.", e);
         }
     }
-
 }

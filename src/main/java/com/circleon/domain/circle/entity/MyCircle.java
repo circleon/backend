@@ -32,6 +32,9 @@ public class MyCircle {
     @Column(nullable = false)
     private MembershipStatus membershipStatus;
 
+    @Column
+    private String joinMessage;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;

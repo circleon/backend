@@ -11,6 +11,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 
 @Service
 @Transactional
@@ -26,13 +28,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByIdAndStatus(Long id, UserStatus status) {
-        return userRepository.findByIdAndStatus(id, status)
-                .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
+    public Optional<User> findByIdAndStatus(Long id, UserStatus status) {
+        return userRepository.findByIdAndStatus(id, status);
     }
 
     @Override
     public boolean existsByIdAndStatus(Long id, UserStatus status) {
         return userRepository.existsByIdAndStatus(id, status);
+    }
+
+    @Override
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
     }
 }

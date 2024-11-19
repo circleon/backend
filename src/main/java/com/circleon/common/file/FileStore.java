@@ -8,11 +8,11 @@ public interface FileStore {
 
     String getFileDirectory();
 
-    String storeFile(MultipartFile file);
+    String storeFile(MultipartFile file, Long id);
 
     boolean deleteFile(String filePath);
 
-    String storeThumbnail(MultipartFile file);
+    String storeThumbnail(MultipartFile file, Long id);
 
     boolean isValidFile(MultipartFile file);
 

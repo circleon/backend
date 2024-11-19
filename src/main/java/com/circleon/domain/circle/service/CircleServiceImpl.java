@@ -42,28 +42,12 @@ public class CircleServiceImpl implements CircleService {
     public void createCircle(Long applicantId, CircleCreateRequest circleCreateRequest) {
 
         //존재하는 유저인지 검증
-        User foundUser = userService.findByIdAndStatus(applicantId, UserStatus.ACTIVE);
+        User foundUser = userService.findByIdAndStatus(applicantId, UserStatus.ACTIVE)
+                .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
+
 
         String profileImgUrl = null;
         String thumbnailUrl = null;
-
-        //이미지 유효할때
-        if(circleFileStore.isValidFile(circleCreateRequest.getProfileImg())) {
-
-            //이미지 원본 저장
-            profileImgUrl = circleFileStore.storeFile(circleCreateRequest.getProfileImg());
-            if (profileImgUrl == null) {
-                throw new CommonException(CommonResponseStatus.INTERNAL_SERVER_ERROR);
-            }
-
-            //썸네일 저장
-            thumbnailUrl = circleFileStore.storeThumbnail(circleCreateRequest.getProfileImg());
-            if (thumbnailUrl == null) {
-                throw new CommonException(CommonResponseStatus.INTERNAL_SERVER_ERROR);
-            }
-
-        }
-
 
         //동아리 엔티티
         Circle circle = Circle.builder()
@@ -71,12 +55,32 @@ public class CircleServiceImpl implements CircleService {
                 .name(circleCreateRequest.getCircleName())
                 .introduction(circleCreateRequest.getIntroduction())
                 .circleStatus(CircleStatus.PENDING)
+                .categoryType(circleCreateRequest.getCategory())
                 .profileImgUrl(profileImgUrl)
                 .thumbnailUrl(thumbnailUrl)
-                .categoryType(circleCreateRequest.getCategory())
                 .build();
 
-        circleRepository.save(circle);
+        Circle savedCircle = circleRepository.save(circle);
+
+        //이미지 유효할때
+        if(circleFileStore.isValidFile(circleCreateRequest.getProfileImg())) {
+
+            //이미지 원본 저장
+            profileImgUrl = circleFileStore.storeFile(circleCreateRequest.getProfileImg(), savedCircle.getId());
+            if (profileImgUrl == null) {
+                throw new CommonException(CommonResponseStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            //썸네일 저장
+            thumbnailUrl = circleFileStore.storeThumbnail(circleCreateRequest.getProfileImg(), savedCircle.getId());
+            if (thumbnailUrl == null) {
+                throw new CommonException(CommonResponseStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            savedCircle.setProfileImgUrl(profileImgUrl);
+            savedCircle.setThumbnailUrl(thumbnailUrl);
+
+        }
 
     }
 
@@ -95,7 +99,8 @@ public class CircleServiceImpl implements CircleService {
     @Override
     public CircleInfoUpdateResponse updateCircleInfo(Long userId, Long circleId, CircleInfoUpdateRequest circleInfoUpdateRequest) {
 
-        User presidentUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE);
+        User presidentUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE)
+                .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
         // 수정 권한 체크
         Circle foundCircle = validatePresidentAccess(presidentUser, circleId);
@@ -129,7 +134,8 @@ public class CircleServiceImpl implements CircleService {
     @Override
     public CircleImagesUpdateResponse updateCircleImages(Long userId, Long circleId, CircleImagesUpdateRequest circleImageUpdateRequest) {
 
-        User presidentUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE);
+        User presidentUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE)
+                .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
         Circle foundCircle = validatePresidentAccess(presidentUser, circleId);
 
@@ -144,9 +150,9 @@ public class CircleServiceImpl implements CircleService {
             deleteImg(foundCircle.getThumbnailUrl());
 
             //저장
-            String profileImgUrl = storeImg(circleImageUpdateRequest.getProfileImg());
+            String profileImgUrl = storeImg(circleImageUpdateRequest.getProfileImg(), foundCircle.getId());
 
-            String thumbnailUrl = storeThumbnail(circleImageUpdateRequest.getProfileImg());
+            String thumbnailUrl = storeThumbnail(circleImageUpdateRequest.getProfileImg(), foundCircle.getId());
 
             foundCircle.setProfileImgUrl(profileImgUrl);
             foundCircle.setThumbnailUrl(thumbnailUrl);
@@ -158,7 +164,7 @@ public class CircleServiceImpl implements CircleService {
 
             deleteImg(foundCircle.getIntroImgUrl());
 
-            String introImgUrl = storeImg(circleImageUpdateRequest.getIntroImg());
+            String introImgUrl = storeImg(circleImageUpdateRequest.getIntroImg(), foundCircle.getId());
 
             foundCircle.setIntroImgUrl(introImgUrl);
 
@@ -167,8 +173,8 @@ public class CircleServiceImpl implements CircleService {
         return CircleImagesUpdateResponse.fromCircle(foundCircle);
     }
 
-    private String storeImg(MultipartFile file) {
-        String profileImgUrl = circleFileStore.storeFile(file);
+    private String storeImg(MultipartFile file, Long circleId) {
+        String profileImgUrl = circleFileStore.storeFile(file, circleId);
 
         if(profileImgUrl == null){
             throw new CommonException(CommonResponseStatus.INTERNAL_SERVER_ERROR);
@@ -176,8 +182,8 @@ public class CircleServiceImpl implements CircleService {
         return profileImgUrl;
     }
 
-    private String storeThumbnail(MultipartFile file) {
-        String thumbnailUrl = circleFileStore.storeThumbnail(file);
+    private String storeThumbnail(MultipartFile file, Long circleId) {
+        String thumbnailUrl = circleFileStore.storeThumbnail(file, circleId);
         if(thumbnailUrl == null){
             throw new CommonException(CommonResponseStatus.INTERNAL_SERVER_ERROR);
         }
@@ -199,7 +205,8 @@ public class CircleServiceImpl implements CircleService {
     @Override
     public void deleteCircleImages(Long userId, Long circleId, boolean deleteProfileImg, boolean deleteIntroImg) {
 
-        User presidentUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE);
+        User presidentUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE)
+                .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
         //권한 체크
         Circle foundCircle = validatePresidentAccess(presidentUser, circleId);
@@ -228,7 +235,8 @@ public class CircleServiceImpl implements CircleService {
     @Override
     public CircleDetailResponse findCircleDetail(Long userId, Long circleId) {
 
-        User foundUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE);
+        User foundUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE)
+                .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
         //존재하는 써클인지
         Circle foundCircle = circleRepository.findByIdAndCircleStatus(circleId, CircleStatus.ACTIVE)
@@ -259,7 +267,8 @@ public class CircleServiceImpl implements CircleService {
     @Override
     public Page<CircleMemberResponse> findPagedCircleMembers(Long userId, Long circleId, Pageable pageable, MembershipStatus membershipStatus) {
 
-        User user = userService.findByIdAndStatus(userId, UserStatus.ACTIVE);
+        User user = userService.findByIdAndStatus(userId, UserStatus.ACTIVE)
+                .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
         //회원이면 가능하도록
         MyCircle member = validateMemberAccess(user, circleId);
@@ -301,7 +310,8 @@ public class CircleServiceImpl implements CircleService {
     @Override
     public void updateCircleMemberRole(Long userId, Long circleId, Long memberId, CircleRoleUpdateRequest circleRoleUpdateRequest) {
 
-        User presidentUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE);
+        User presidentUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE)
+                .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
         // 회장만 가능
         Circle targetCircle = validatePresidentAccess(presidentUser, circleId);
@@ -329,7 +339,8 @@ public class CircleServiceImpl implements CircleService {
     public void updateMembershipStatus(Long userId, Long circleId, Long memberId, MembershipStatusUpdateRequest membershipStatusUpdateRequest) {
 
         //임원들 가능
-        User authorizedUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE);
+        User authorizedUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE)
+                .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
         Circle circle = validateExecutiveAccess(authorizedUser, circleId);
 
@@ -386,7 +397,8 @@ public class CircleServiceImpl implements CircleService {
     public void expelMember(Long userId, Long circleId, Long memberId) {
 
         //임원들 가능
-        User authorizedUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE);
+        User authorizedUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE)
+                .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
         Circle circle = validateExecutiveAccess(authorizedUser, circleId);
 
@@ -405,5 +417,10 @@ public class CircleServiceImpl implements CircleService {
         //추방 + 카운트
         member.setMembershipStatus(MembershipStatus.INACTIVE);
         circle.decrementMemberCount();
+    }
+
+    @Override
+    public Optional<Circle> findByIdAndCircleStatus(Long circleId, CircleStatus circleStatus) {
+        return circleRepository.findByIdAndCircleStatus(circleId, CircleStatus.ACTIVE);
     }
 }

@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -103,8 +104,9 @@ public class CircleController {
         return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
     }
 
-    @GetMapping("/images/{directory}/{filename}")
-    public ResponseEntity<Resource> findImage(@PathVariable String directory,
+    @GetMapping("/images/{circleId}/{directory}/{filename}")
+    public ResponseEntity<Resource> findImage(@PathVariable Long circleId,
+                                              @PathVariable String directory,
                                               @PathVariable String filename,
                                               @RequestHeader("Content-Type") String contentTypeHeader) {
         MediaType mediaType;
@@ -113,7 +115,7 @@ public class CircleController {
         }catch (InvalidMediaTypeException e){
             throw new CommonException(CommonResponseStatus.BAD_REQUEST, e.getMessage());
         }
-        String filePath = directory + "/" + filename + "." + mediaType.getSubtype();
+        String filePath = circleId + "/" + directory + "/" + filename + "." + mediaType.getSubtype();
 
         Resource resource = circleService.loadImageAsResource(filePath);
 

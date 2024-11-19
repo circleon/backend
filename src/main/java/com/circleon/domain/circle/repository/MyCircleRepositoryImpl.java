@@ -5,6 +5,7 @@ import com.circleon.domain.circle.entity.Circle;
 import com.circleon.domain.circle.entity.MyCircle;
 import com.circleon.domain.circle.entity.QMyCircle;
 import com.circleon.domain.user.entity.QUser;
+import com.circleon.domain.user.entity.User;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.PathBuilder;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -101,4 +103,16 @@ public class MyCircleRepositoryImpl implements MyCircleRepositoryCustom{
         }
     }
 
+    @Override
+    public Optional<MyCircle> findAllByUserAndCircleInMembershipStatuses(User user, Circle circle, List<MembershipStatus> membershipStatuses) {
+
+        QMyCircle myCircle = QMyCircle.myCircle;
+
+        return Optional.ofNullable(jpaQueryFactory
+                .selectFrom(myCircle)
+                .where(myCircle.circle.eq(circle)
+                        .and(myCircle.user.eq(user))
+                        .and(myCircle.membershipStatus.in(membershipStatuses)))
+                .fetchFirst());
+    }
 }

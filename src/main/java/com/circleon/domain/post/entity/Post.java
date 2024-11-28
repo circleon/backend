@@ -31,9 +31,11 @@ public class Post extends BaseEntity {
     private CommonStatus status;
 
     @Column
+    @Builder.Default
     private Integer commentCount = 0;
 
     @Column
+    @Builder.Default
     private Boolean isPinned = false;
 
     @ManyToOne(fetch = FetchType.LAZY)

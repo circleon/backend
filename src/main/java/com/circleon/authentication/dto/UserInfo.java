@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserDto {
+public class UserInfo {
 
     private Long userId;
 
@@ -17,8 +17,8 @@ public class UserDto {
 
     private UnivCode univCode;
 
-    public static UserDto from(User user) {
-        return UserDto.builder()
+    public static UserInfo from(User user) {
+        return UserInfo.builder()
                 .userId(user.getId())
                 .username(user.getUsername())
                 .univCode(user.getUnivCode())

@@ -217,7 +217,7 @@ public class AuthServiceImpl implements AuthService{
 
         refreshTokenRepository.save(refreshToken);
 
-        return LoginResponse.of(UserDto.from(foundUser), TokenDto.of(newAccessToken, newRefreshToken));
+        return LoginResponse.of(UserInfo.from(foundUser), TokenDto.of(newAccessToken, newRefreshToken));
     }
 
     private LocalDateTime getLocalDateTime(Date date) {

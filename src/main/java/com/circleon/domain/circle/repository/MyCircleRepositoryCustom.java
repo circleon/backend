@@ -1,6 +1,7 @@
 package com.circleon.domain.circle.repository;
 
 import com.circleon.domain.circle.MembershipStatus;
+import com.circleon.domain.circle.dto.MyCircleSearchCondition;
 import com.circleon.domain.circle.entity.Circle;
 import com.circleon.domain.circle.entity.MyCircle;
 import com.circleon.domain.user.entity.User;
@@ -15,4 +16,9 @@ public interface MyCircleRepositoryCustom {
     Page<MyCircle> findAllByCircleAndMembershipStatusWithUser(Circle circle, MembershipStatus membershipStatus, Pageable pageable);
 
     Optional<MyCircle> findAllByUserAndCircleInMembershipStatuses(User user, Circle circle, List<MembershipStatus> membershipStatuses);
+
+    Optional<MyCircle> findByMyCircleSearchCondition(MyCircleSearchCondition condition);
+
+    Optional<MyCircle> fineJoinedMember(Long userId, Long circleId);
+
 }

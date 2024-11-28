@@ -5,8 +5,6 @@ import com.circleon.common.CommonStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Getter
 @Setter
@@ -19,10 +17,10 @@ public class PostImage extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private String postImgUrl;
 
-    @Column
+    @Column(nullable = false)
     private CommonStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -1,6 +1,5 @@
 package com.circleon.authentication.dto;
 
-import com.circleon.domain.user.entity.UnivCode;
 import lombok.*;
 
 @Getter
@@ -10,11 +9,11 @@ import lombok.*;
 @Builder
 public class LoginResponse {
 
-    private UserDto user;
+    private UserInfo user;
 
     private TokenDto token;
 
-    public static LoginResponse of(UserDto user, TokenDto token) {
+    public static LoginResponse of(UserInfo user, TokenDto token) {
         return LoginResponse.builder()
                 .user(user)
                 .token(token)

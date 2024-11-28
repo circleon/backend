@@ -1,5 +1,6 @@
 package com.circleon.domain.user.entity;
 
+import com.circleon.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,9 +31,6 @@ public class User {
     private UnivCode univCode;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt;
-
-    @Column(nullable = false)
     private UserStatus status;
 
     @Column(nullable = false)
@@ -40,10 +38,5 @@ public class User {
 
     @Column
     private String profileImgUrl;
-
-    @PrePersist
-    public void prePersist(){
-        this.createdAt = this.createdAt == null ? LocalDateTime.now() : this.createdAt;
-    }
 
 }

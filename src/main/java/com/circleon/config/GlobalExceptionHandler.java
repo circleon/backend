@@ -42,6 +42,8 @@ public class GlobalExceptionHandler {
 
         log.warn("CommonException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
 
+        log.warn("CommonException", e);
+
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorMessage(status.getMessage())
                 .errorCode(status.getCode())
@@ -54,6 +56,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
 
         log.warn("MethodArgumentNotValidException: {}", ex.getMessage());
+
+        log.warn("MethodArgumentNotValidException", ex);
 
         String errorMessage = ex.getBindingResult()
                                 .getFieldErrors()

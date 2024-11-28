@@ -6,8 +6,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum PostResponseStatus {
 
-    //임시
-    EXAMPLE(HttpStatus.NOT_FOUND.value(), "000", "일단예시");
+    POST_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "061", "게시글이 존재하지 않습니다."),
+    INVALID_POST_TYPE(HttpStatus.BAD_REQUEST.value(), "062", "공지사항이 아닙니다.");
 
     private final int httpStatusCode;
     private final String code;

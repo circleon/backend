@@ -8,6 +8,7 @@ import com.circleon.domain.circle.CircleStatus;
 import com.circleon.domain.circle.MembershipStatus;
 import com.circleon.domain.circle.dto.MyCircleCreateRequest;
 import com.circleon.domain.circle.dto.MyCircleCreateResponse;
+import com.circleon.domain.circle.dto.MyCircleSearchCondition;
 import com.circleon.domain.circle.entity.Circle;
 import com.circleon.domain.circle.entity.MyCircle;
 import com.circleon.domain.circle.exception.CircleException;
@@ -80,5 +81,15 @@ public class MyCircleServiceImpl implements MyCircleService {
     @Override
     public Optional<MyCircle> findByUserAndCircleAndMembershipStatus(User user, Circle circle, MembershipStatus membershipStatus) {
         return myCircleRepository.findByUserAndCircleAndMembershipStatus(user, circle, membershipStatus);
+    }
+
+    @Override
+    public Optional<MyCircle> findByMyCircleSearchCondition(MyCircleSearchCondition myCircleSearchCondition) {
+        return myCircleRepository.findByMyCircleSearchCondition(myCircleSearchCondition);
+    }
+
+    @Override
+    public Optional<MyCircle> fineJoinedMember(Long userId, Long circleId) {
+        return myCircleRepository.fineJoinedMember(userId, circleId);
     }
 }

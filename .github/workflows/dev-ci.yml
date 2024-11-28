@@ -30,6 +30,9 @@ jobs:
       - name: Set up SSH Tunnel for RDS
         run: ssh -i /tmp/ssh_key.pem -f -N -L 13306:${{ secrets.RDS_DEV_HOST }} ${{ secrets.EC2_DEV_USER }}@${{ secrets.EC2_DEV_HOST }}
 
+      - name: Set up SSH Tunnel for Redis
+        run: ssh -i /tmp/ssh_key.pem -f -N -L ${{ secrets.REDIS_PORT_DEV }}:${{ secrets.REDIS_HOST_DEV }}:${{ secrets.REDIS_PORT_DEV }} ${{ secrets.EC2_DEV_USER }}@${{ secrets.EC2_DEV_HOST }}
+
       - name: Build with Gradle
         run: ./gradlew clean build
         env:
@@ -39,6 +42,8 @@ jobs:
           AWS_SES_ACCESS_KEY: ${{ secrets.AWS_SES_ACCESS_KEY }}
           AWS_SES_SECRET_ACCESS_KEY: ${{ secrets.AWS_SES_SECRET_ACCESS_KEY }}
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST_DEV }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT_DEV }}
 
       - name: Remove SSH KEY
         run: rm /tmp/ssh_key.pem
@@ -69,5 +74,7 @@ jobs:
             export AWS_SES_SECRET_ACCESS_KEY=${{ secrets.AWS_SES_SECRET_ACCESS_KEY }}
             export JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
             export IMAGE_STORAGE_PATH=${{ secrets.IMAGE_STORAGE_PATH }}
+            export REDIS_HOST=${{ secrets.REDIS_HOST_DEV }}
+            export REDIS_PORT${{ secrets.REDIS_PORT_DEV }}
             docker compose down
             docker compose up --build -d

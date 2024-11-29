@@ -75,6 +75,6 @@ jobs:
             export JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
             export IMAGE_STORAGE_PATH=${{ secrets.IMAGE_STORAGE_PATH }}
             export REDIS_HOST=${{ secrets.REDIS_HOST_DEV }}
-            export REDIS_PORT${{ secrets.REDIS_PORT_DEV }}
+            export REDIS_PORT=${{ secrets.REDIS_PORT_DEV }}
             docker compose down
             docker compose up --build -d

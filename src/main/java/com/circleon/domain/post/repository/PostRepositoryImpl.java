@@ -23,14 +23,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
-import java.lang.reflect.Field;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import static com.circleon.domain.circle.entity.QCircle.*;
-import static com.circleon.domain.post.entity.QComment.comment;
 import static com.circleon.domain.user.entity.QUser.*;
 import static com.circleon.domain.post.entity.QPost.*;
 import static com.circleon.domain.post.entity.QPostImage.*;

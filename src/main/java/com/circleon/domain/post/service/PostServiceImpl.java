@@ -145,10 +145,23 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(()->new PostException(PostResponseStatus.POST_NOT_FOUND, "[updatePost] 게시글이 존재하지 않습니다."));
 
         if(post.getPostType() == PostType.POST){
-            throw new PostException(PostResponseStatus.INVALID_POST_TYPE, "[updatePin] 공지사항이 아닙니다.");
+            throw new PostException(PostResponseStatus.NOT_NOTICE, "[updatePin] 공지사항이 아닙니다.");
         }
 
         //핀 수정
         post.setIsPinned(postPinUpdateRequest.getIsPinned());
+    }
+
+    //TODO 나중에 포스트 이미지랑 댓글은 스큐쥴러로 삭제
+    @Override
+    public void deletePost(Long userId, Long circleId, Long postId) {
+
+        //회원
+        MyCircle member = validateMembership(userId, circleId);
+
+        Post post = postRepository.findByIdAndAuthorAndCircleAndStatus(postId, member.getUser(), member.getCircle(), CommonStatus.ACTIVE)
+                .orElseThrow(() -> new PostException(PostResponseStatus.POST_NOT_FOUND, "[deletePost] 게시글이 존재하지 않습니다."));
+
+        post.setStatus(CommonStatus.INACTIVE);
     }
 }

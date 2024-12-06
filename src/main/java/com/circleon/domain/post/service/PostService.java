@@ -18,4 +18,6 @@ public interface PostService {
     PostUpdateResponse updatePost(Long userId, Long circleId, Long postId, PostUpdateRequest postUpdateRequest);
 
     void updatePin(Long userId, Long circleId, Long postId, PostPinUpdateRequest postPinUpdateRequest);
+
+    void deletePost(Long userId, Long circleId, Long postId);
 }

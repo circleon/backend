@@ -8,6 +8,9 @@ import com.circleon.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -46,4 +49,11 @@ public class Post extends BaseEntity {
     @JoinColumn(name = "circle_id")
     private Circle circle;
 
+    public void increaseCommentCount() {
+        commentCount++;
+    }
+
+    public void decreaseCommentCount() {
+        commentCount--;
+    }
 }

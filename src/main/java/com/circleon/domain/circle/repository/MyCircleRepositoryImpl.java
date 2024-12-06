@@ -73,7 +73,7 @@ public class MyCircleRepositoryImpl implements MyCircleRepositoryCustom{
                         return new OrderSpecifier<>(order.isAscending() ? Order.ASC : Order.DESC, user.username);
                     }
 
-                    Class<?> fieldType = getFieldType(MyCircle.class, order.getProperty());
+                    Class<?> fieldType = getFieldType(order.getProperty());
                     PathBuilder<MyCircle> pathBuilder = new PathBuilder<>(myCircle.getType(), myCircle.getMetadata());
 
                     if(fieldType == LocalDateTime.class){
@@ -98,14 +98,21 @@ public class MyCircleRepositoryImpl implements MyCircleRepositoryCustom{
                 .toArray(OrderSpecifier[]::new);
     }
 
-    private Class<?> getFieldType(Class<?> clazz, String fieldName) {
-        try{
-            Field field = clazz.getDeclaredField(fieldName);
-            return field.getType();
-        }catch (NoSuchFieldException e){
-            log.warn("정렬을 위한 필드 체크 에러. 존재하는 필드가 없습니다. {}", e.getMessage());
-            return null;
+    private Class<?> getFieldType(String fieldName) {
+
+        Class<?> currentClass = MyCircle.class;
+
+        while (currentClass != null) {
+            try {
+                Field field = currentClass.getDeclaredField(fieldName);
+                return field.getType();
+            }catch (NoSuchFieldException e){
+                currentClass = currentClass.getSuperclass();
+            }
         }
+
+        log.warn("정렬을 위한 필드 체크 에러. 존재하는 필드가 없습니다. {}", fieldName);
+        return null;
     }
 
     @Override

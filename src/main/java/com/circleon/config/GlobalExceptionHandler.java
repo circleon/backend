@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GlobalExceptionHandler {
 
+
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
 
@@ -41,8 +42,6 @@ public class GlobalExceptionHandler {
         log.warn("CommonException: {}", e.getMessage());
 
         log.warn("CommonException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
-
-        log.warn("CommonException", e);
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorMessage(status.getMessage())

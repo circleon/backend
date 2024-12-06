@@ -78,6 +78,15 @@ public class PostController {
         return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
     }
 
+    @DeleteMapping("/circles/{circleId}/posts/{postId}")
+    public ResponseEntity<SuccessResponse> deletePost(@LoginUser Long userId,
+                                                      @PathVariable Long circleId,
+                                                      @PathVariable Long postId){
+        postService.deletePost(userId, circleId, postId);
+
+        return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
+    }
+
     @GetMapping("/posts/images/{circleId}/{directory}/{filename}")
     public ResponseEntity<Resource> findImage(@PathVariable Long circleId,
                                               @PathVariable String directory,

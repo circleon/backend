@@ -15,4 +15,6 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
     Optional<Post> findByIdAndAuthorAndCircleAndStatus(Long id, User author, Circle circle, CommonStatus status);
 
     Optional<Post> findByIdAndCircleAndStatus(Long id, Circle circle, CommonStatus status);
+
+    Optional<Post> findByIdAndStatus(Long id, CommonStatus status);
 }

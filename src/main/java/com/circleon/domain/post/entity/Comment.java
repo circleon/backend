@@ -1,6 +1,7 @@
 package com.circleon.domain.post.entity;
 
 import com.circleon.common.BaseEntity;
+import com.circleon.common.CommonStatus;
 import com.circleon.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,6 +21,9 @@ public class Comment extends BaseEntity {
     @Lob
     @Column(columnDefinition = "TEXT")
     private String content;
+
+    @Column
+    private CommonStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="post_id")

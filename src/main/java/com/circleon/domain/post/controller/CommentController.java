@@ -10,6 +10,7 @@ import com.circleon.domain.post.PostResponseStatus;
 import com.circleon.domain.post.dto.*;
 import com.circleon.domain.post.exception.PostException;
 import com.circleon.domain.post.service.CommentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -30,7 +31,7 @@ public class CommentController {
     public ResponseEntity<CommentCreateResponse> createComment(@LoginUser Long userId,
                                                                @PathVariable Long circleId,
                                                                @PathVariable Long postId,
-                                                               @RequestBody CommentCreateRequest commentCreateRequest){
+                                                               @Valid @RequestBody CommentCreateRequest commentCreateRequest){
         CommentCreateResponse commentCreateResponse = commentService.createComment(RequestIdentifiers.of(userId, circleId, postId), commentCreateRequest);
         return ResponseEntity.ok(commentCreateResponse);
     }
@@ -56,7 +57,7 @@ public class CommentController {
                                                                @PathVariable Long circleId,
                                                                @PathVariable Long postId,
                                                                @PathVariable Long commentId,
-                                                               @RequestBody CommentUpdateRequest commentUpdateRequest){
+                                                               @Valid @RequestBody CommentUpdateRequest commentUpdateRequest){
         CommentUpdateResponse commentUpdateResponse = commentService
                 .updateComment(
                         RequestIdentifiers.of(userId, circleId, postId),

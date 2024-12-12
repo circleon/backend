@@ -2,7 +2,10 @@ package com.circleon.domain.circle.repository;
 
 import com.circleon.domain.circle.CircleStatus;
 import com.circleon.domain.circle.MembershipStatus;
+import com.circleon.domain.circle.dto.CircleInfo;
 import com.circleon.domain.circle.dto.MyCircleSearchCondition;
+import com.circleon.domain.circle.dto.MyCircleSearchRequest;
+import com.circleon.domain.circle.dto.MyCircleSearchResponse;
 import com.circleon.domain.circle.entity.Circle;
 import com.circleon.domain.circle.entity.MyCircle;
 
@@ -10,6 +13,7 @@ import com.circleon.domain.user.entity.User;
 import com.circleon.domain.user.entity.UserStatus;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -126,7 +130,6 @@ public class MyCircleRepositoryImpl implements MyCircleRepositoryCustom{
                 .fetchFirst());
     }
 
-    @Override
     public Optional<MyCircle> findByMyCircleSearchCondition(MyCircleSearchCondition condition) {
 
         return Optional.ofNullable(
@@ -174,5 +177,45 @@ public class MyCircleRepositoryImpl implements MyCircleRepositoryCustom{
                         .membershipStatus(MembershipStatus.APPROVED)
                         .build()
         );
+    }
+
+    @Override
+    public Page<MyCircleSearchResponse> findAllByMyCircleSearchRequest(MyCircleSearchRequest myCircleSearchRequest) {
+
+        List<MyCircleSearchResponse> myCircleSearchResponses = jpaQueryFactory
+                .select(Projections.constructor(MyCircleSearchResponse.class,
+                        myCircle.id,
+                        myCircle.joinedAt,
+                        myCircle.membershipStatus,
+                        myCircle.circleRole,
+                        Projections.constructor(CircleInfo.class,
+                                myCircle.circle.id,
+                                myCircle.circle.name,
+                                myCircle.circle.thumbnailUrl
+                        )))
+                .from(myCircle)
+                .join(myCircle.circle, circle)
+                .where(
+                        userIdEq(myCircleSearchRequest.getUserId()),
+                        membershipStatusEq(myCircleSearchRequest.getMembershipStatus()),
+                        circleStatusEq(CircleStatus.ACTIVE)
+                )
+                .orderBy(getOrderSpecifiers(myCircleSearchRequest.getPageable().getSort()))
+                .offset(myCircleSearchRequest.getPageable().getOffset())
+                .limit(myCircleSearchRequest.getPageable().getPageSize())
+                .fetch();
+
+        Long total = Optional.ofNullable(
+                jpaQueryFactory
+                .select(myCircle.count())
+                .from(myCircle)
+                .where(
+                        userIdEq(myCircleSearchRequest.getUserId()),
+                        membershipStatusEq(myCircleSearchRequest.getMembershipStatus()),
+                        circleStatusEq(CircleStatus.ACTIVE)
+                ).fetchOne())
+                .orElse(0L);
+
+        return new PageImpl<>(myCircleSearchResponses, myCircleSearchRequest.getPageable(), total);
     }
 }

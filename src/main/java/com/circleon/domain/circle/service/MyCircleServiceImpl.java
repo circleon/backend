@@ -1,14 +1,13 @@
 package com.circleon.domain.circle.service;
 
 import com.circleon.common.CommonResponseStatus;
+import com.circleon.common.dto.PaginatedResponse;
 import com.circleon.common.exception.CommonException;
 import com.circleon.domain.circle.CircleResponseStatus;
 import com.circleon.domain.circle.CircleRole;
 import com.circleon.domain.circle.CircleStatus;
 import com.circleon.domain.circle.MembershipStatus;
-import com.circleon.domain.circle.dto.MyCircleCreateRequest;
-import com.circleon.domain.circle.dto.MyCircleCreateResponse;
-import com.circleon.domain.circle.dto.MyCircleSearchCondition;
+import com.circleon.domain.circle.dto.*;
 import com.circleon.domain.circle.entity.Circle;
 import com.circleon.domain.circle.entity.MyCircle;
 import com.circleon.domain.circle.exception.CircleException;
@@ -20,6 +19,7 @@ import com.circleon.domain.user.exception.UserException;
 import com.circleon.domain.user.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -79,13 +79,13 @@ public class MyCircleServiceImpl implements MyCircleService {
     }
 
     @Override
-    public Optional<MyCircle> findByUserAndCircleAndMembershipStatus(User user, Circle circle, MembershipStatus membershipStatus) {
-        return myCircleRepository.findByUserAndCircleAndMembershipStatus(user, circle, membershipStatus);
-    }
+    public PaginatedResponse<MyCircleSearchResponse> findPagedMyCircles(MyCircleSearchRequest myCircleSearchRequest) {
 
-    @Override
-    public Optional<MyCircle> findByMyCircleSearchCondition(MyCircleSearchCondition myCircleSearchCondition) {
-        return myCircleRepository.findByMyCircleSearchCondition(myCircleSearchCondition);
+        // 가입 명단 조회
+        Page<MyCircleSearchResponse> pagedMyCircles = myCircleRepository
+                .findAllByMyCircleSearchRequest(myCircleSearchRequest);
+
+        return PaginatedResponse.fromPage(pagedMyCircles);
     }
 
     @Override

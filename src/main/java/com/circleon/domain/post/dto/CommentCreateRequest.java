@@ -1,5 +1,6 @@
 package com.circleon.domain.post.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @AllArgsConstructor
@@ -9,6 +10,7 @@ import lombok.*;
 @Builder
 public class CommentCreateRequest {
 
+    @NotBlank
     private String content;
 
 }

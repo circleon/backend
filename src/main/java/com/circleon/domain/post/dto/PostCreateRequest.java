@@ -12,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Builder
 public class PostCreateRequest {
 
-    @NotNull
     private String content;
 
     @NotNull

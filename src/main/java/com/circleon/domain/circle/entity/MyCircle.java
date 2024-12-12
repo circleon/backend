@@ -1,5 +1,6 @@
 package com.circleon.domain.circle.entity;
 
+import com.circleon.common.BaseEntity;
 import com.circleon.domain.circle.CircleRole;
 import com.circleon.domain.circle.MembershipStatus;
 import com.circleon.domain.user.entity.User;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MyCircle {
+public class MyCircle extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,9 +23,6 @@ public class MyCircle {
 
     @Column
     private LocalDateTime joinedAt;
-
-    @Column
-    private LocalDateTime updatedAt;
 
     @Column
     private CircleRole circleRole;
@@ -36,17 +34,12 @@ public class MyCircle {
     private String joinMessage;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "circle_id")
+    @JoinColumn(name = "circle_id", nullable = false)
     private Circle circle;
-
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
 
     public void initJoinedAt() {
         this.joinedAt = LocalDateTime.now();

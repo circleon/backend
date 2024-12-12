@@ -159,9 +159,19 @@ public class PostServiceImpl implements PostService {
         //회원
         MyCircle member = validateMembership(userId, circleId);
 
-        Post post = postRepository.findByIdAndAuthorAndCircleAndStatus(postId, member.getUser(), member.getCircle(), CommonStatus.ACTIVE)
+        Post post = postRepository.findByIdAndCircleAndStatus(postId, member.getCircle(), CommonStatus.ACTIVE)
                 .orElseThrow(() -> new PostException(PostResponseStatus.POST_NOT_FOUND, "[deletePost] 게시글이 존재하지 않습니다."));
 
+        if(member.getCircleRole() == CircleRole.MEMBER) {
+            validatePostAuthor(post, userId, "[deletePost] 본인이 작성하지 않은 게시글을 삭제하려는 시도");
+        }
+
         post.setStatus(CommonStatus.INACTIVE);
+    }
+
+    private void validatePostAuthor(Post post, Long userId, String message) {
+        if(!post.getAuthor().getId().equals(userId)){
+            throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, message);
+        }
     }
 }

@@ -11,7 +11,6 @@ import lombok.*;
 @Builder
 public class PostUpdateRequest {
 
-    @NotNull
     private String content;
 
     @NotNull

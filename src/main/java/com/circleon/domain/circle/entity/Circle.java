@@ -56,7 +56,7 @@ public class Circle extends BaseEntity {
     private int memberCount;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "applicant_id")
+    @JoinColumn(name = "applicant_id", nullable = false)
     private User applicant;
 
     public void incrementMemberCount() {

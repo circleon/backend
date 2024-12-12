@@ -27,10 +27,10 @@ public class Post extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @Column
+    @Column(nullable = false)
     private PostType postType;
 
-    @Column
+    @Column(nullable = false)
     private CommonStatus status;
 
     @Column
@@ -42,11 +42,11 @@ public class Post extends BaseEntity {
     private Boolean isPinned = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id")
+    @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "circle_id")
+    @JoinColumn(name = "circle_id", nullable = false)
     private Circle circle;
 
     public void increaseCommentCount() {

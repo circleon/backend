@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,7 +22,15 @@ public class CircleCreateRequest {
     private CategoryType category;
 
     @NotBlank
-    private String introduction;
+    private String summary;
 
     private MultipartFile profileImg;
+
+    private LocalDateTime recruitmentStartDate;
+
+    private LocalDateTime recruitmentEndDate;
+
+    private String introduction;
+
+    private MultipartFile introductionImg;
 }

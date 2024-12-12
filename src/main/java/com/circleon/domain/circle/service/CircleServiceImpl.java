@@ -46,40 +46,38 @@ public class CircleServiceImpl implements CircleService {
                 .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
 
-        String profileImgUrl = null;
-        String thumbnailUrl = null;
-
         //동아리 엔티티
         Circle circle = Circle.builder()
                 .applicant(foundUser)
                 .name(circleCreateRequest.getCircleName())
-                .introduction(circleCreateRequest.getIntroduction())
                 .circleStatus(CircleStatus.PENDING)
                 .categoryType(circleCreateRequest.getCategory())
-                .profileImgUrl(profileImgUrl)
-                .thumbnailUrl(thumbnailUrl)
+                .introduction(circleCreateRequest.getIntroduction())
+                .summary(circleCreateRequest.getSummary())
+                .recruitmentStartDate(circleCreateRequest.getRecruitmentStartDate())
+                .recruitmentEndDate(circleCreateRequest.getRecruitmentEndDate())
                 .build();
 
         Circle savedCircle = circleRepository.save(circle);
 
-        //이미지 유효할때
+        //프로필 이미지 유효할때
         if(circleFileStore.isValidFile(circleCreateRequest.getProfileImg())) {
 
             //이미지 원본 저장
-            profileImgUrl = circleFileStore.storeFile(circleCreateRequest.getProfileImg(), savedCircle.getId());
-            if (profileImgUrl == null) {
-                throw new CommonException(CommonResponseStatus.INTERNAL_SERVER_ERROR);
-            }
-
+            String profileImgUrl = storeImg(circleCreateRequest.getProfileImg(), savedCircle.getId());
             //썸네일 저장
-            thumbnailUrl = circleFileStore.storeThumbnail(circleCreateRequest.getProfileImg(), savedCircle.getId());
-            if (thumbnailUrl == null) {
-                throw new CommonException(CommonResponseStatus.INTERNAL_SERVER_ERROR);
-            }
+            String thumbnailUrl = storeThumbnail(circleCreateRequest.getProfileImg(), savedCircle.getId());
 
             savedCircle.setProfileImgUrl(profileImgUrl);
             savedCircle.setThumbnailUrl(thumbnailUrl);
 
+        }
+
+        //소개글 이미지 유효할때
+        if(circleFileStore.isValidFile(circleCreateRequest.getIntroductionImg())){
+
+            String introImgUrl = storeImg(circleCreateRequest.getIntroductionImg(), savedCircle.getId());
+            savedCircle.setIntroImgUrl(introImgUrl);
         }
 
     }
@@ -174,12 +172,12 @@ public class CircleServiceImpl implements CircleService {
     }
 
     private String storeImg(MultipartFile file, Long circleId) {
-        String profileImgUrl = circleFileStore.storeFile(file, circleId);
+        String imgUrl = circleFileStore.storeFile(file, circleId);
 
-        if(profileImgUrl == null){
+        if(imgUrl == null){
             throw new CommonException(CommonResponseStatus.INTERNAL_SERVER_ERROR);
         }
-        return profileImgUrl;
+        return imgUrl;
     }
 
     private String storeThumbnail(MultipartFile file, Long circleId) {

@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final AuthenticationManager authenticationManager;
@@ -31,9 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = jwtUtil.resolveToken(authorizationHeader);
 
-            JwtAuthenticationToken jwtAuthenticationToken = JwtAuthenticationToken.builder()
-                    .token(token)
-                    .build();
+            JwtAuthenticationToken jwtAuthenticationToken = new JwtAuthenticationToken(token);
 
             Authentication authentication = authenticationManager.authenticate(jwtAuthenticationToken);
 

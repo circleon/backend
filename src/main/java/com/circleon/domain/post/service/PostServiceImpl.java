@@ -40,9 +40,7 @@ import java.util.List;
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
-    private final UserService userService;
     private final MyCircleService myCircleService;
-    private final CircleService circleService;
     private final FileStore postFileStore;
     private final PostImageRepository postImageRepository;
 

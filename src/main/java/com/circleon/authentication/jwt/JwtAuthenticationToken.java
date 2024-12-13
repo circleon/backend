@@ -12,7 +12,7 @@ public class JwtAuthenticationToken  extends AbstractAuthenticationToken {
 
     private final Long userId;
 
-    @Builder
+
     public JwtAuthenticationToken(String token) {
         super(null);
         this.token = token;
@@ -20,7 +20,7 @@ public class JwtAuthenticationToken  extends AbstractAuthenticationToken {
         setAuthenticated(false);
     }
 
-    @Builder
+
     public JwtAuthenticationToken(Long userId, Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         this.userId = userId;

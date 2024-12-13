@@ -46,7 +46,7 @@ public class PostDataLoader implements CommandLineRunner {
             return;
         }
 
-        List<MyCircle> members = myCircleRepository.findAllByIdLessThanEqual(3L);
+        List<MyCircle> members = myCircleRepository.findAllByIdLessThanEqual(5L);
 
         createPostTestData(members);
         createNoticeTestData(members);
@@ -60,7 +60,7 @@ public class PostDataLoader implements CommandLineRunner {
 
             if(mc.getMembershipStatus() != MembershipStatus.APPROVED) continue;
 
-            Pageable pageable = PageRequest.of(0, 5);
+            Pageable pageable = PageRequest.of(0, 20);
 
             List<PostResponse> posts = postRepository.findPosts(mc.getCircle().getId(), PostType.POST, pageable);
 
@@ -100,15 +100,10 @@ public class PostDataLoader implements CommandLineRunner {
 
             if(mc.getMembershipStatus() != MembershipStatus.APPROVED) continue;
 
-            for(int i = 0 ; i < 100; i++){
+            for(int i = 0 ; i < 500; i++){
 
                 String content = i + "번 게시글입니다. 안뇽하세염";
 
-                Boolean isPinned = false;
-
-                if(i % 20 == 0){
-                    isPinned = true;
-                }
 
                 Post post = Post.builder()
                         .content(content)
@@ -116,7 +111,7 @@ public class PostDataLoader implements CommandLineRunner {
                         .status(CommonStatus.ACTIVE)
                         .author(mc.getUser())
                         .circle(mc.getCircle())
-                        .isPinned(isPinned)
+                        .isPinned(false)
                         .build();
 
                 posts.add(post);

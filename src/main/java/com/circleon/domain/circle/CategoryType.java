@@ -8,6 +8,7 @@ import lombok.Getter;
 @Getter
 public enum CategoryType implements CommonEnum {
 
+    ALL("전체"), // 조회 전용
     IT_COMPUTER("IT/컴퓨터"),
     SPORTS("스포츠"),
     CULTURE("문화"),

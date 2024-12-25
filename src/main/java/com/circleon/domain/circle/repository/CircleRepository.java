@@ -3,6 +3,7 @@ package com.circleon.domain.circle.repository;
 import com.circleon.domain.circle.CategoryType;
 import com.circleon.domain.circle.CircleStatus;
 import com.circleon.domain.circle.entity.Circle;
+import com.circleon.domain.circle.entity.MyCircle;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,4 +24,6 @@ public interface CircleRepository extends JpaRepository<Circle, Long> {
 
     Page<Circle> findAllByCategoryTypeAndCircleStatus(CategoryType categoryType, CircleStatus circleStatus, Pageable pageable);
 
+    //데이터로더 용
+    List<Circle> findAllByIdLessThanEqual(Long id);
 }

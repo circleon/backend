@@ -29,31 +29,35 @@ public class CircleScheduleDataLoader implements CommandLineRunner {
             return;
         }
 
-        Circle circle = circleRepository.findById(1L).orElse(null);
+        List<Circle> circles = circleRepository.findAllByIdLessThanEqual(10L);
 
-        //일정 20개 생성
-        createCircleScheduleTestData(circle);
+        //일정 동아리당 20개 생성
+        createCircleScheduleTestData(circles);
     }
 
-    private void createCircleScheduleTestData(Circle circle){
+    private void createCircleScheduleTestData(List<Circle> circles){
         List<CircleSchedule> circleSchedules = new ArrayList<>();
 
-        for(int i = 1; i <= 20; i++){
-            String title = i + "번 일정입니다.";
-            String content = i + "번 일정 내용입니다.";
-            LocalDateTime startAt = LocalDateTime.now();
-            LocalDateTime endAt = startAt.plusHours(1);
+        for(Circle circle : circles){
 
-            CircleSchedule circleSchedule = CircleSchedule.builder()
-                    .title(title)
-                    .content(content)
-                    .startAt(startAt)
-                    .endAt(endAt)
-                    .status(CommonStatus.ACTIVE)
-                    .circle(circle)
-                    .build();
+            for(int i = 1; i <= 20; i++){
+                String title = i + "번 일정입니다.";
+                String content = i + "번 일정 내용입니다.";
+                LocalDateTime startAt = LocalDateTime.now().plusMonths(1).plusDays(i);
+                LocalDateTime endAt = startAt.plusHours(5);
 
-            circleSchedules.add(circleSchedule);
+                CircleSchedule circleSchedule = CircleSchedule.builder()
+                        .title(title)
+                        .content(content)
+                        .startAt(startAt)
+                        .endAt(endAt)
+                        .status(CommonStatus.ACTIVE)
+                        .circle(circle)
+                        .build();
+
+                circleSchedules.add(circleSchedule);
+            }
+
         }
 
         circleScheduleRepository.saveAll(circleSchedules);

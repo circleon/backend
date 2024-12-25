@@ -1,5 +1,6 @@
 package com.circleon.domain.schedule.circle.dto;
 
+import com.circleon.domain.schedule.circle.entity.CircleSchedule;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,4 +22,14 @@ public class CircleScheduleDetail {
     private LocalDateTime startAt;
 
     private LocalDateTime endAt;
+
+    public static CircleScheduleDetail fromCircleSchedule(CircleSchedule circleSchedule) {
+        return CircleScheduleDetail.builder()
+                .circleScheduleId(circleSchedule.getId())
+                .title(circleSchedule.getTitle())
+                .content(circleSchedule.getContent())
+                .startAt(circleSchedule.getStartAt())
+                .endAt(circleSchedule.getEndAt())
+                .build();
+    }
 }

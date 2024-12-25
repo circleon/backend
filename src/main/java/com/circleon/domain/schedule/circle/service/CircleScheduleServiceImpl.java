@@ -131,4 +131,21 @@ public class CircleScheduleServiceImpl implements CircleScheduleService {
 
         circleSchedule.setStatus(CommonStatus.INACTIVE);
     }
+
+    @Override
+    public CircleScheduleDetail findNextSchedule(CircleMemberIdentifier circleMemberIdentifier) {
+
+        //동아리원 체크
+        MyCircle member = validateMembership(circleMemberIdentifier.getUserId(),
+                circleMemberIdentifier.getCircleId(),
+                "[findUpcomingSchedule] 가입하지 않은 동아리입니다.");
+
+        LocalDateTime now = LocalDateTime.now();
+
+        //1년 이내중에
+        CircleSchedule circleSchedule = circleScheduleRepository.findFirstByCircleAndStartAtBetweenOrderByStartAt(member.getCircle(), now, now.plusYears(1))
+                .orElseThrow(() -> new ScheduleException(ScheduleResponseStatus.SCHEDULE_NOT_FOUND, "[findUpcomingSchedule] 일정이 존재하지 않습니다."));
+
+        return CircleScheduleDetail.fromCircleSchedule(circleSchedule);
+    }
 }

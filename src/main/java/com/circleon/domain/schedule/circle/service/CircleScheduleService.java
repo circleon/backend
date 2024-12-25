@@ -11,4 +11,6 @@ public interface CircleScheduleService {
     CircleScheduleUpdateResponse updateCircleSchedule(CircleMemberIdentifier circleMemberIdentifier, Long circleScheduleId, CircleScheduleUpdateRequest updateRequest);
 
     void deleteCircleSchedule(CircleMemberIdentifier circleMemberIdentifier, Long circleScheduleId);
+
+    CircleScheduleDetail findNextSchedule(CircleMemberIdentifier circleMemberIdentifier);
 }

@@ -1,7 +1,7 @@
 package com.circleon.domain.circle.repository;
 
 import com.circleon.domain.circle.MembershipStatus;
-import com.circleon.domain.circle.dto.MyCircleSearchCondition;
+
 import com.circleon.domain.circle.dto.MyCircleSearchRequest;
 import com.circleon.domain.circle.dto.MyCircleSearchResponse;
 import com.circleon.domain.circle.entity.Circle;
@@ -23,4 +23,5 @@ public interface MyCircleRepositoryCustom {
 
     Page<MyCircleSearchResponse> findAllByMyCircleSearchRequest(MyCircleSearchRequest myCircleSearchRequest);
 
+    Optional<MyCircle> findByIdWithUserAndCircle(Long myCircleId);
 }

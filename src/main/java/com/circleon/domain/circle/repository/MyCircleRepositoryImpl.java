@@ -3,7 +3,7 @@ package com.circleon.domain.circle.repository;
 import com.circleon.domain.circle.CircleStatus;
 import com.circleon.domain.circle.MembershipStatus;
 import com.circleon.domain.circle.dto.CircleInfo;
-import com.circleon.domain.circle.dto.MyCircleSearchCondition;
+
 import com.circleon.domain.circle.dto.MyCircleSearchRequest;
 import com.circleon.domain.circle.dto.MyCircleSearchResponse;
 import com.circleon.domain.circle.entity.Circle;
@@ -130,21 +130,23 @@ public class MyCircleRepositoryImpl implements MyCircleRepositoryCustom{
                 .fetchFirst());
     }
 
-    public Optional<MyCircle> findByMyCircleSearchCondition(MyCircleSearchCondition condition) {
-
-        return Optional.ofNullable(
-                jpaQueryFactory
-                        .selectFrom(myCircle)
-                        .join(myCircle.circle, circle).fetchJoin()
-                        .join(myCircle.user, user).fetchJoin()
-                        .where(userIdEq(condition.getUserId()),
-                                userStatusEq(condition.getUserStatus()),
-                                circleIdEq(condition.getCircleId()),
-                                circleStatusEq(condition.getCircleStatus()),
-                                membershipStatusEq(condition.getMembershipStatus())
-                        ).fetchOne()
-        );
-    }
+    //TODO 삭제
+//    public Optional<MyCircle> findByMyCircleSearchCondition(MyCircleSearchCondition condition) {
+//
+//        return Optional.ofNullable(
+//                jpaQueryFactory
+//                        .selectFrom(myCircle)
+//                        .join(myCircle.circle, circle).fetchJoin()
+//                        .join(myCircle.user, user).fetchJoin()
+//                        .where(userIdEq(condition.getUserId()),
+//                                userStatusEq(condition.getUserStatus()),
+//                                circleIdEq(condition.getCircleId()),
+//                                circleStatusEq(condition.getCircleStatus()),
+//                                membershipStatusEq(condition.getMembershipStatus())
+//                                        .or(membershipStatusEq(MembershipStatus.LEAVE_REQUEST))
+//                        ).fetchOne()
+//        );
+//    }
 
     private BooleanExpression userIdEq(Long userId) {
         return userId != null ? user.id.eq(userId) : null;
@@ -168,14 +170,19 @@ public class MyCircleRepositoryImpl implements MyCircleRepositoryCustom{
 
     @Override
     public Optional<MyCircle> fineJoinedMember(Long userId, Long circleId) {
-        return findByMyCircleSearchCondition(
-                MyCircleSearchCondition.builder()
-                        .userId(userId)
-                        .circleId(circleId)
-                        .userStatus(UserStatus.ACTIVE)
-                        .circleStatus(CircleStatus.ACTIVE)
-                        .membershipStatus(MembershipStatus.APPROVED)
-                        .build()
+
+        return Optional.ofNullable(
+                jpaQueryFactory
+                        .selectFrom(myCircle)
+                        .join(myCircle.circle, circle).fetchJoin()
+                        .join(myCircle.user, user).fetchJoin()
+                        .where(userIdEq(userId),
+                                userStatusEq(UserStatus.ACTIVE),
+                                circleIdEq(circleId),
+                                circleStatusEq(CircleStatus.ACTIVE),
+                                membershipStatusEq(MembershipStatus.APPROVED)
+                                        .or(membershipStatusEq(MembershipStatus.LEAVE_REQUEST))
+                        ).fetchOne()
         );
     }
 
@@ -217,5 +224,19 @@ public class MyCircleRepositoryImpl implements MyCircleRepositoryCustom{
                 .orElse(0L);
 
         return new PageImpl<>(myCircleSearchResponses, myCircleSearchRequest.getPageable(), total);
+    }
+
+    @Override
+    public Optional<MyCircle> findByIdWithUserAndCircle(Long myCircleId) {
+        return Optional.ofNullable(
+                jpaQueryFactory
+                        .select(myCircle)
+                        .from(myCircle)
+                        .join(myCircle.user, user).fetchJoin()
+                        .join(myCircle.circle, circle).fetchJoin()
+                        .where(
+                                myCircle.id.eq(myCircleId)
+                        ).fetchOne()
+        );
     }
 }

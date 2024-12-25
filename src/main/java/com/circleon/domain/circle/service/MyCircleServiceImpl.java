@@ -12,10 +12,8 @@ import com.circleon.domain.circle.entity.Circle;
 import com.circleon.domain.circle.entity.MyCircle;
 import com.circleon.domain.circle.exception.CircleException;
 import com.circleon.domain.circle.repository.MyCircleRepository;
-import com.circleon.domain.user.UserResponseStatus;
 import com.circleon.domain.user.entity.User;
 
-import com.circleon.domain.user.exception.UserException;
 import com.circleon.domain.user.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -91,5 +89,33 @@ public class MyCircleServiceImpl implements MyCircleService {
     @Override
     public Optional<MyCircle> fineJoinedMember(Long userId, Long circleId) {
         return myCircleRepository.fineJoinedMember(userId, circleId);
+    }
+
+
+    @Override
+    public void deleteApplication(Long userId, Long memberId) {
+
+        //존재하는지 확인
+        MyCircle member = myCircleRepository.findByIdWithUserAndCircle(memberId)
+                .orElseThrow(() -> new CircleException(CircleResponseStatus.APPLICATION_NOT_FOUND,
+                        "[deleteApplication] 가입 신청이 존재하지 않음."));
+
+        //해당 유저가 맞는지 체크
+        validateOwnership(userId, member, "[deleteApplication] 다른 유저의 동아리 가입 신청 삭제 시도");
+
+        //pending 즉 가입 요청 상태인지 체크;
+        if(member.getMembershipStatus() != MembershipStatus.PENDING){
+            throw new CircleException(CircleResponseStatus.APPLICATION_NOT_FOUND,
+                    "[deleteApplication] 가입 신청이 존재하지 않음.");
+        }
+
+        member.setMembershipStatus(MembershipStatus.INACTIVE);
+
+    }
+
+    private void validateOwnership(Long userId, MyCircle member, String message) {
+        if(!member.getUser().getId().equals(userId)){
+            throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, message);
+        }
     }
 }

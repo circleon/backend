@@ -66,6 +66,15 @@ public class CircleScheduleController {
         return ResponseEntity.ok(SuccessResponse.builder().message("success").build());
     }
 
+    @GetMapping("/circles/{circleId}/schedules/next")
+    public ResponseEntity<CircleScheduleDetail> findNextSchedule(@LoginUser Long userId,
+                                                                 @PathVariable Long circleId){
+
+        CircleScheduleDetail nextSchedule = circleScheduleService.findNextSchedule(CircleMemberIdentifier.of(userId, circleId));
+
+        return ResponseEntity.ok(nextSchedule);
+    }
+
 
     @ExceptionHandler(CircleException.class)
     public ResponseEntity<ErrorResponse> handleCircleException(CircleException e) {

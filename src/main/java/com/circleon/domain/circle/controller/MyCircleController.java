@@ -4,6 +4,7 @@ import com.circleon.common.CommonResponseStatus;
 import com.circleon.common.annotation.LoginUser;
 import com.circleon.common.dto.ErrorResponse;
 import com.circleon.common.dto.PaginatedResponse;
+import com.circleon.common.dto.SuccessResponse;
 import com.circleon.common.exception.CommonException;
 import com.circleon.domain.circle.CircleResponseStatus;
 import com.circleon.domain.circle.MembershipStatus;
@@ -70,6 +71,13 @@ public class MyCircleController {
         return MembershipStatus.APPROVED == membershipStatus || MembershipStatus.PENDING == membershipStatus;
     }
 
+    @DeleteMapping("/{memberId}/application")
+    public ResponseEntity<SuccessResponse> deleteApplication(@LoginUser Long userId,
+                                                             @PathVariable Long memberId){
+        myCircleService.deleteApplication(userId, memberId);
+
+        return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
+    }
 
     @ExceptionHandler(CircleException.class)
     public ResponseEntity<ErrorResponse> handleCircleException(CircleException e) {

@@ -118,4 +118,26 @@ public class MyCircleServiceImpl implements MyCircleService {
             throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, message);
         }
     }
+
+    @Override
+    public void processLeaveRequest(Long userId, Long memberId, CircleLeaveRequest circleLeaveRequest) {
+
+        //존재하는지 확인
+        MyCircle member = myCircleRepository.findByIdWithUserAndCircle(memberId)
+                .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBER_NOT_FOUND,
+                        "[processLeaveRequest] 존재하지 않은 동아리 회원"));
+
+        //해당 유저가 맞는지 체크
+        validateOwnership(userId, member, "[processLeaveRequest] 다른 유저의 동아리 탈퇴 신청 시도");
+
+        //가입상태인지 체크
+        if(member.getMembershipStatus() != MembershipStatus.APPROVED){
+            throw new CircleException(CircleResponseStatus.MEMBERSHIP_NOT_FOUND,
+                    "[processLeaveRequest] 가입하지 않은 동아리");
+        }
+
+        //상태 변경 및 탈퇴 요청 메시지 저장
+        member.setMembershipStatus(MembershipStatus.LEAVE_REQUEST);
+        member.setLeaveMessage(circleLeaveRequest.getLeaveMessage());
+    }
 }

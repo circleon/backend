@@ -16,4 +16,5 @@ public interface MyCircleService {
 
     void deleteApplication(Long userId, Long memberId);
 
+    void processLeaveRequest(Long userId, Long memberId, CircleLeaveRequest circleLeaveRequest);
 }

@@ -8,10 +8,7 @@ import com.circleon.common.dto.SuccessResponse;
 import com.circleon.common.exception.CommonException;
 import com.circleon.domain.circle.CircleResponseStatus;
 import com.circleon.domain.circle.MembershipStatus;
-import com.circleon.domain.circle.dto.MyCircleCreateRequest;
-import com.circleon.domain.circle.dto.MyCircleCreateResponse;
-import com.circleon.domain.circle.dto.MyCircleSearchRequest;
-import com.circleon.domain.circle.dto.MyCircleSearchResponse;
+import com.circleon.domain.circle.dto.*;
 import com.circleon.domain.circle.exception.CircleException;
 import com.circleon.domain.circle.service.MyCircleService;
 import lombok.RequiredArgsConstructor;
@@ -75,6 +72,16 @@ public class MyCircleController {
     public ResponseEntity<SuccessResponse> deleteApplication(@LoginUser Long userId,
                                                              @PathVariable Long memberId){
         myCircleService.deleteApplication(userId, memberId);
+
+        return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
+    }
+
+    @PostMapping("/{memberId}/leave-request")
+    public ResponseEntity<SuccessResponse> requestLeave(@LoginUser Long userId,
+                                                        @PathVariable Long memberId,
+                                                        @RequestBody CircleLeaveRequest circleLeaveRequest){
+
+        myCircleService.processLeaveRequest(userId, memberId, circleLeaveRequest);
 
         return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
     }

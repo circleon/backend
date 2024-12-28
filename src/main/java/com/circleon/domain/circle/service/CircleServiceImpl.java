@@ -332,7 +332,9 @@ public class CircleServiceImpl implements CircleService {
             return ;
         }
 
-        member.setCircleRole(circleRoleUpdateRequest.getCircleRole());
+        if(circleRoleUpdateRequest.getCircleRole() != null){
+            member.setCircleRole(circleRoleUpdateRequest.getCircleRole());
+        }
     }
 
     @Override

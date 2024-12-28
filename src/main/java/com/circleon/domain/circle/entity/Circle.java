@@ -39,8 +39,8 @@ public class Circle extends BaseEntity {
     @Column
     private CategoryType categoryType;
 
-    @Lob
-    @Column(columnDefinition = "TEXT")
+
+    @Column(length = 1000)
     private String introduction;
 
     @Column

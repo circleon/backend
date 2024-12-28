@@ -23,8 +23,7 @@ public class Post extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Lob
-    @Column(columnDefinition = "TEXT")
+    @Column(length = 1000)
     private String content;
 
     @Column(nullable = false)

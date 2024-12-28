@@ -9,6 +9,7 @@ import com.circleon.domain.schedule.ScheduleResponseStatus;
 import com.circleon.domain.schedule.circle.dto.*;
 import com.circleon.domain.schedule.circle.service.CircleScheduleService;
 import com.circleon.domain.schedule.exception.ScheduleException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class CircleScheduleController {
     @PostMapping("/circles/{circleId}/schedules")
     public ResponseEntity<CircleScheduleCreateResponse> createSchedule(@LoginUser Long userId,
                                                                        @PathVariable Long circleId,
-                                                                       @RequestBody CircleScheduleCreateRequest circleScheduleCreateRequest){
+                                                                       @Valid @RequestBody CircleScheduleCreateRequest circleScheduleCreateRequest){
 
         CircleScheduleCreateResponse circleScheduleCreateResponse = circleScheduleService
                 .createCircleSchedule(CircleMemberIdentifier.of(userId, circleId), circleScheduleCreateRequest);
@@ -49,7 +50,7 @@ public class CircleScheduleController {
     public ResponseEntity<CircleScheduleUpdateResponse> updateCircleSchedule(@LoginUser Long userId,
                                                                              @PathVariable Long circleId,
                                                                              @PathVariable Long circleScheduleId,
-                                                                             @RequestBody CircleScheduleUpdateRequest circleScheduleUpdateRequest){
+                                                                             @Valid @RequestBody CircleScheduleUpdateRequest circleScheduleUpdateRequest){
         CircleScheduleUpdateResponse circleScheduleUpdateResponse = circleScheduleService
                 .updateCircleSchedule(CircleMemberIdentifier.of(userId, circleId), circleScheduleId, circleScheduleUpdateRequest);
 

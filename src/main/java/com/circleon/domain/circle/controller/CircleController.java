@@ -146,7 +146,7 @@ public class CircleController {
     public ResponseEntity<SuccessResponse> updateCircleMemberRole(@LoginUser Long userId,
                                                             @PathVariable Long circleId,
                                                             @PathVariable Long memberId,
-                                                            @RequestBody CircleRoleUpdateRequest circleRoleUpdateRequest){
+                                                            @Valid @RequestBody CircleRoleUpdateRequest circleRoleUpdateRequest){
         circleService.updateCircleMemberRole(userId, circleId, memberId, circleRoleUpdateRequest);
 
         return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
@@ -156,7 +156,7 @@ public class CircleController {
     public ResponseEntity<SuccessResponse> updateMembershipStatus(@LoginUser Long userId,
                                                                   @PathVariable Long circleId,
                                                                   @PathVariable Long memberId,
-                                                                  @RequestBody MembershipStatusUpdateRequest membershipStatusUpdateRequest){
+                                                                  @Valid @RequestBody MembershipStatusUpdateRequest membershipStatusUpdateRequest){
 
 
 

@@ -23,8 +23,7 @@ public class CircleSchedule extends BaseEntity {
     @Column
     private String title;
 
-    @Lob
-    @Column(columnDefinition = "TEXT")
+    @Column(length = 1000)
     private String content;
 
     @Column

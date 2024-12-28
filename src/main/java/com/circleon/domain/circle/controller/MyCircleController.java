@@ -11,6 +11,7 @@ import com.circleon.domain.circle.MembershipStatus;
 import com.circleon.domain.circle.dto.*;
 import com.circleon.domain.circle.exception.CircleException;
 import com.circleon.domain.circle.service.MyCircleService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -78,7 +79,7 @@ public class MyCircleController {
     @PostMapping("/{memberId}/leave-request")
     public ResponseEntity<SuccessResponse> requestLeave(@LoginUser Long userId,
                                                         @PathVariable Long memberId,
-                                                        @RequestBody CircleLeaveRequest circleLeaveRequest){
+                                                        @RequestBody @Valid CircleLeaveRequest circleLeaveRequest){
 
         myCircleService.processLeaveRequest(userId, memberId, circleLeaveRequest);
 

@@ -152,7 +152,6 @@ public class CircleDataLoader implements CommandLineRunner {
 
                 Long applicantId = foundeCircle.getApplicant().getId();
                 Long userId = user.getId();
-                String joinMessage = user.getUsername() + " 입니다. 가입 신청 희망합니다.";
                 if(applicantId.equals(userId)){
                     continue;
                 }
@@ -164,7 +163,6 @@ public class CircleDataLoader implements CommandLineRunner {
                         .user(user)
                         .membershipStatus(MembershipStatus.APPROVED)
                         .joinedAt(LocalDateTime.now())
-                        .joinMessage(joinMessage)
                         .build();
 
                 myCircle.initJoinedAt();

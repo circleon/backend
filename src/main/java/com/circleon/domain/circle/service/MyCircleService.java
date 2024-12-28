@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface MyCircleService {
 
-    MyCircleCreateResponse applyForMembership(Long userId, Long circleId, MyCircleCreateRequest myCircleCreateRequest);
+    MyCircleCreateResponse applyForMembership(Long userId, Long circleId);
 
     Optional<MyCircle> fineJoinedMember(Long userId, Long circleId);
 

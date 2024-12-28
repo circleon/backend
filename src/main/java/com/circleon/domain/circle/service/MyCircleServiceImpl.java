@@ -34,7 +34,7 @@ public class MyCircleServiceImpl implements MyCircleService {
     private final UserService userService;
 
     @Override
-    public MyCircleCreateResponse applyForMembership(Long userId, Long circleId, MyCircleCreateRequest myCircleCreateRequest) {
+    public MyCircleCreateResponse applyForMembership(Long userId, Long circleId) {
 
         //이미 가입되어 있는지 확인
         User user = userService.findById(userId)
@@ -44,8 +44,10 @@ public class MyCircleServiceImpl implements MyCircleService {
                 .orElseThrow(()->new CircleException(CircleResponseStatus.CIRCLE_NOT_FOUND));
 
         List<MembershipStatus> membershipStatuses = new ArrayList<>();
+
         membershipStatuses.add(MembershipStatus.APPROVED);
         membershipStatuses.add(MembershipStatus.PENDING);
+        membershipStatuses.add(MembershipStatus.LEAVE_REQUEST);
 
         myCircleRepository.findAllByUserAndCircleInMembershipStatuses(user, circle, membershipStatuses)
                 .ifPresent(myCircle -> validateMembershipStatusAndThrowException(myCircle.getMembershipStatus()));
@@ -54,7 +56,6 @@ public class MyCircleServiceImpl implements MyCircleService {
         MyCircle applicant = MyCircle.builder()
                 .user(user)
                 .circle(circle)
-                .joinMessage(myCircleCreateRequest.getJoinMessage())
                 .circleRole(CircleRole.MEMBER)
                 .membershipStatus(MembershipStatus.PENDING)
                 .build();
@@ -66,11 +67,11 @@ public class MyCircleServiceImpl implements MyCircleService {
 
     private void validateMembershipStatusAndThrowException(MembershipStatus membershipStatus) {
 
-        if (membershipStatus.equals(MembershipStatus.APPROVED)) {
+        if (membershipStatus.equals(MembershipStatus.APPROVED)|| membershipStatus.equals(MembershipStatus.LEAVE_REQUEST)) {
             throw new CircleException(CircleResponseStatus.ALREADY_MEMBER, "[applyForMembership] 이미 가입된 동아리");
         }
 
-        if(membershipStatus.equals(MembershipStatus.PENDING)){
+        if(membershipStatus.equals(MembershipStatus.PENDING)) {
             throw new CircleException(CircleResponseStatus.ALREADY_APPLIED, "[applyForMembership] 이미 가입 신청한 상태");
         }
 

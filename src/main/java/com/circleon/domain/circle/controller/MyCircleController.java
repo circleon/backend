@@ -29,10 +29,9 @@ public class MyCircleController {
 
     @PostMapping("/{circleId}")
     public ResponseEntity<MyCircleCreateResponse> applyForMembership(@LoginUser Long userId,
-                                                                     @PathVariable Long circleId,
-                                                                     @RequestBody MyCircleCreateRequest myCircleCreateRequest){
+                                                                     @PathVariable Long circleId){
 
-        MyCircleCreateResponse myCircleCreateResponse = myCircleService.applyForMembership(userId, circleId, myCircleCreateRequest);
+        MyCircleCreateResponse myCircleCreateResponse = myCircleService.applyForMembership(userId, circleId);
 
         return ResponseEntity.ok(myCircleCreateResponse);
     }

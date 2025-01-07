@@ -25,6 +25,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -96,7 +97,7 @@ public class CommentServiceImpl implements CommentService {
         validateCommentAuthor(comment, identifiers.getUserId(), "[updateComment] 본인이 작성하지 않은 댓글을 삭제하려는 시도");
 
         comment.setContent(commentUpdateRequest.getContent());
-
+        comment.setUpdatedAt(LocalDateTime.now());
         return CommentUpdateResponse.fromComment(comment);
     }
 

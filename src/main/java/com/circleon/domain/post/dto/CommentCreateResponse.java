@@ -18,6 +18,8 @@ public class CommentCreateResponse {
 
     private LocalDateTime createdAt;
 
+    private LocalDateTime updatedAt;
+
     private Author author;
 
     public static CommentCreateResponse fromComment(Comment comment) {
@@ -25,6 +27,7 @@ public class CommentCreateResponse {
                 .commentId(comment.getId())
                 .content(comment.getContent())
                 .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
                 .author(Author.builder()
                         .authorId(comment.getAuthor().getId())
                         .authorName(comment.getAuthor().getUsername())

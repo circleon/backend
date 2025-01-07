@@ -24,6 +24,7 @@ import java.util.Map;
 public class CacheConfig {
 
     public static final String POST_COUNT = "postCount";
+    public static final String CIRCLES = "circles";
     public static final long CACHE_DEFAULT_TIME = 1L;
     public static final long POST_COUNT_TIME = 60L * 5;
 

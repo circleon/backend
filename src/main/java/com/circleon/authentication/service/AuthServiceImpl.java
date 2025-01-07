@@ -5,6 +5,7 @@ import com.circleon.authentication.dto.*;
 import com.circleon.authentication.email.dto.AwsSesEmailRequest;
 import com.circleon.authentication.email.dto.EmailVerificationRequest;
 import com.circleon.authentication.email.dto.VerificationCodeRequest;
+import com.circleon.authentication.email.service.AsyncService;
 import com.circleon.authentication.email.service.EmailService;
 import com.circleon.authentication.entity.EmailVerification;
 import com.circleon.authentication.entity.RefreshToken;
@@ -30,13 +31,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
 public class AuthServiceImpl implements AuthService{
-
 
     private final UserRepository userRepository;
     private final EmailVerificationRepository emailVerificationRepository;
@@ -45,6 +46,8 @@ public class AuthServiceImpl implements AuthService{
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final JwtUtil jwtUtil;
+
+    private final AsyncService asyncService;
 
     @Override
     public void registerUser(SignUpRequest signUpRequest) {
@@ -96,34 +99,51 @@ public class AuthServiceImpl implements AuthService{
     }
 
     //TODO 비동기 처리로 바꿔야함 성능때문에
+//    @Override
+//    public void sendVerificationEmail(EmailVerificationRequest emailVerificationRequest) {
+//
+//        // 먼저 이메일 중복 여부 체크
+//        if(userRepository.existsByEmailAndStatus(emailVerificationRequest.getEmail(), UserStatus.ACTIVE)) {
+//
+//            throw new UserException(UserResponseStatus.EMAIL_DUPLICATE);
+//        }
+//
+//        // 이메일 인증 테이블에서 이메일 존재 여부 확인
+//        EmailVerification existingVerification = emailVerificationRepository
+//                .findByEmail(emailVerificationRequest.getEmail())
+//                .orElse(null);
+//
+//        //코드 생성
+//        String verificationCode = emailService.generateVerificationCode();
+//        String encryptedCode = passwordEncoder.encode(verificationCode);
+//
+//        if(existingVerification != null) { //존재
+//
+//            handleExistingVerification(existingVerification, encryptedCode);
+//        }else{
+//            //인증 코드 저장
+//            createNewVerification(emailVerificationRequest, encryptedCode);
+//        }
+//
+//
+//        //TODO 인증 메시지 포멧 다시 정하기 + 보내고 나서 저장하는개 맞을듯?
+//        AwsSesEmailRequest awsSesEmailRequest = AwsSesEmailRequest.builder()
+//                .sender(AuthConstants.SOURCE_MAIL)
+//                .subject("[Circle On] 인증 코드")
+//                .content(verificationCode)
+//                .recipient(emailVerificationRequest.getEmail())
+//                .build();
+//
+//        emailService.sendEmail(awsSesEmailRequest);
+//    }
+
     @Override
     public void sendVerificationEmail(EmailVerificationRequest emailVerificationRequest) {
 
-        // 먼저 이메일 중복 여부 체크
-        if(userRepository.existsByEmailAndStatus(emailVerificationRequest.getEmail(), UserStatus.ACTIVE)) {
-
-            throw new UserException(UserResponseStatus.EMAIL_DUPLICATE);
-        }
-
-        // 이메일 인증 테이블에서 이메일 존재 여부 확인
-        EmailVerification existingVerification = emailVerificationRepository
-                .findByEmail(emailVerificationRequest.getEmail())
-                .orElse(null);
-
         //코드 생성
         String verificationCode = emailService.generateVerificationCode();
-        String encryptedCode = passwordEncoder.encode(verificationCode);
 
-        if(existingVerification != null) { //존재
-
-            handleExistingVerification(existingVerification, encryptedCode);
-        }else{
-            //인증 코드 저장
-            createNewVerification(emailVerificationRequest, encryptedCode);
-        }
-
-
-        //TODO 인증 메시지 포멧 다시 정하기
+        //TODO 인증 메시지 포멧 다시 정하기 + 보내고 나서 저장하는개 맞을듯?
         AwsSesEmailRequest awsSesEmailRequest = AwsSesEmailRequest.builder()
                 .sender(AuthConstants.SOURCE_MAIL)
                 .subject("[Circle On] 인증 코드")
@@ -132,6 +152,22 @@ public class AuthServiceImpl implements AuthService{
                 .build();
 
         emailService.sendEmail(awsSesEmailRequest);
+    }
+
+    @Override
+    public CompletableFuture<Void> sendAsyncVerificationEmail(String email) {
+
+        log.info("메일 비동기 테스트 메일 보내기전 : {}", Thread.currentThread().getName());
+        String verificationCode = emailService.generateVerificationCode();
+
+        AwsSesEmailRequest awsSesEmailRequest = AwsSesEmailRequest.builder()
+                .sender(AuthConstants.SOURCE_MAIL)
+                .subject("[Circle On] 인증 코드")
+                .content(verificationCode)
+                .recipient(email)
+                .build();
+
+        return emailService.sendAsyncEmail(awsSesEmailRequest);
     }
 
     @Override
@@ -231,17 +267,37 @@ public class AuthServiceImpl implements AuthService{
 
         String refreshToken = refreshTokenRequest.getRefreshToken();
 
+        //리프레쉬토큰이 검증됐는지도 봐야함
+        if(!jwtUtil.validateToken(refreshTokenRequest.getRefreshToken())){
+            return null;
+        }
+
         //리프레쉬 존재 여부 (로그아웃 됐는지)
         RefreshToken foundRefreshToken = refreshTokenRepository.findByRefreshToken(refreshToken)
                 .orElseThrow(() -> new CommonException(CommonResponseStatus.REFRESH_TOKEN_INVALID));
 
-        //리프레쉬 토큰 검증 and 리프레쉬 토큰에 해당하는 액세스 토큰 만료 여부 확인 -> 만료 아니면 로그아웃 처리
-        if(isInvalidRefreshOrStillValidAccessToken(foundRefreshToken)){
+        //액세스가 아직 유효한데 리프레쉬 요청이 들어오는 경우
+        String foundAccessToken = foundRefreshToken.getAccessToken();
+        if(jwtUtil.validateToken(foundAccessToken)){
+
+            Date now = new Date();
+            Date threshold = new Date(now.getTime() - AuthConstants.REFRESH_TOKEN_COMPROMISE_THRESHOLD);
+            
+            if(jwtUtil.getIssuedAt(foundAccessToken).after(threshold)){
+                return RefreshTokenResponse.builder().accessToken(foundAccessToken).build();
+            }
+            
+            //리프레쉬 탈취로 간주
             refreshTokenRepository.delete(foundRefreshToken);
             return null;
         }
 
         //새로운 액세스 토큰
+        return reissueAccessToken(foundRefreshToken);
+
+    }
+
+    private RefreshTokenResponse reissueAccessToken(RefreshToken foundRefreshToken) {
         try{
             Long userId = jwtUtil.getUserId(foundRefreshToken.getRefreshToken());
             String role = jwtUtil.getRole(foundRefreshToken.getRefreshToken());
@@ -257,13 +313,8 @@ public class AuthServiceImpl implements AuthService{
             refreshTokenRepository.delete(foundRefreshToken);
             return null;
         }
-
     }
 
-    private boolean isInvalidRefreshOrStillValidAccessToken(RefreshToken foundRefreshToken) {
-        return !jwtUtil.validateToken(foundRefreshToken.getRefreshToken())
-                || jwtUtil.validateToken(foundRefreshToken.getAccessToken());
-    }
 
     //TODO 좀 더 고민
     @Override

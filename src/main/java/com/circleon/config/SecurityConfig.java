@@ -39,7 +39,7 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/auth/login", "/api/auth/signup",
                                 "/api/auth/verification", "/api/auth/verification-code",
-                                "/api/auth/refresh").permitAll()
+                                "/api/auth/refresh", "/api/auth/test").permitAll()
 
                         .requestMatchers(("/api/circles/**")).hasRole("USER")
 

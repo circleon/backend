@@ -4,6 +4,7 @@ package com.circleon.authentication.controller;
 import com.circleon.authentication.dto.*;
 import com.circleon.authentication.email.dto.EmailVerificationRequest;
 import com.circleon.authentication.email.dto.VerificationCodeRequest;
+import com.circleon.authentication.email.service.AsyncService;
 import com.circleon.authentication.service.AuthService;
 import com.circleon.common.CommonResponseStatus;
 import com.circleon.common.dto.ErrorResponse;
@@ -18,6 +19,9 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -25,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final AsyncService asyncService;
 
     @PostMapping("/signup")
     public ResponseEntity<SuccessResponse> signup(@Valid @RequestBody SignUpRequest signUpRequest) {
@@ -34,7 +39,9 @@ public class AuthController {
 
     @PostMapping("/verification")
     public ResponseEntity<SuccessResponse> sendVerificationEmail(@Valid @RequestBody EmailVerificationRequest emailVerificationRequest) {
+        log.info("1");
         authService.sendVerificationEmail(emailVerificationRequest);
+        log.info("1");
         return ResponseEntity.ok(SuccessResponse.builder().message("Verification email sent").build());
     }
 
@@ -74,13 +81,6 @@ public class AuthController {
         return ResponseEntity.ok(SuccessResponse.builder().message("로그아웃 성공").build());
     }
 
-    /**
-     * 클라이언트에서 액세스토 토큰 테스트
-     */
-    @GetMapping("/test")
-    public ResponseEntity<SuccessResponse> test() {
-        return ResponseEntity.ok(SuccessResponse.builder().message("test").build());
-    }
 
     @ExceptionHandler(UserException.class)
     public ResponseEntity<ErrorResponse> handleUserException(UserException e) {
@@ -94,5 +94,15 @@ public class AuthController {
                 .errorMessage(status.getMessage())
                 .build();
         return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
+    }
+
+    @PostMapping("/test")
+    public CompletableFuture<ResponseEntity<SuccessResponse>> test(@RequestBody Map<String, String> emailMap) {
+
+        log.info("톰켓 스레드 시작 : {}", Thread.currentThread().getName());
+        CompletableFuture<Void> future = authService.sendAsyncVerificationEmail(emailMap.get("email"));
+        log.info("톰켓 스레드 종료 : {}", Thread.currentThread().getName());
+
+        return future.thenApply(e->ResponseEntity.ok(SuccessResponse.builder().message("Success").build()));
     }
 }

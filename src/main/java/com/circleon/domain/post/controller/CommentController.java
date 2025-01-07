@@ -1,5 +1,6 @@
 package com.circleon.domain.post.controller;
 
+import com.circleon.common.PageableValidator;
 import com.circleon.common.annotation.LoginUser;
 import com.circleon.common.dto.ErrorResponse;
 import com.circleon.common.dto.PaginatedResponse;
@@ -18,6 +19,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -46,6 +49,8 @@ public class CommentController {
         Sort sort = Sort.by(Sort.Order.asc("createdAt"));
 
         Pageable pageable = PageRequest.of(page, size, sort);
+
+        PageableValidator.validatePageable(pageable, List.of("createdAt"), 100);
 
         PaginatedResponse<CommentSearchResponse> pagedComments = commentService.findPagedComments(RequestIdentifiers.of(userId, circleId, postId), pageable);
 

@@ -1,6 +1,7 @@
 package com.circleon.domain.circle.controller;
 
 import com.circleon.common.CommonResponseStatus;
+import com.circleon.common.PageableValidator;
 import com.circleon.common.annotation.LoginUser;
 import com.circleon.common.dto.ErrorResponse;
 import com.circleon.common.dto.PaginatedResponse;
@@ -48,14 +49,16 @@ public class CircleController {
     public ResponseEntity<PaginatedResponse<CircleResponse>> findPagedCircles(@RequestParam(required = false) CategoryType categoryType,
                                                                               Pageable pageable) {
 
-        Page<CircleResponse> circlesPage = circleService.findPagedCircles(pageable, categoryType);
+        PageableValidator.validatePageable(pageable, List.of("createdAt"), 100);
 
-        List<CircleResponse> content = circlesPage.getContent();
-        int currentPageNumber = circlesPage.getNumber();
-        long totalElementCount = circlesPage.getTotalElements();
-        int totalPageCount = circlesPage.getTotalPages();
+//        Page<CircleResponse> circlesPage = circleService.findPagedCircles(pageable, categoryType);
+//
+//        List<CircleResponse> content = circlesPage.getContent();
+//        int currentPageNumber = circlesPage.getNumber();
+//        long totalElementCount = circlesPage.getTotalElements();
+//        int totalPageCount = circlesPage.getTotalPages();
 
-        return ResponseEntity.ok(PaginatedResponse.of(content, currentPageNumber, totalElementCount, totalPageCount));
+        return ResponseEntity.ok(circleService.findPagedCircles(pageable, categoryType));
     }
 
     @GetMapping("/{circleId}")
@@ -117,7 +120,12 @@ public class CircleController {
         }
         String filePath = circleId + "/" + directory + "/" + filename + "." + mediaType.getSubtype();
 
+
         Resource resource = circleService.loadImageAsResource(filePath);
+
+        if(mediaType.getSubtype().equals("jpg")){
+            mediaType = MediaType.parseMediaType("image/jpeg");
+        }
 
         return ResponseEntity.ok()
                 .contentType(mediaType)
@@ -132,6 +140,8 @@ public class CircleController {
         if(!isAccessMembershipStatus(membershipStatus)){
             throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "[findPagedCircleMembers] 동아리원 명단 조회에서 권한이 없는 접근");
         }
+
+        PageableValidator.validatePageable(pageable, List.of("joinedAt", "username"), 100);
 
         Page<CircleMemberResponse> pagedCircleMembers = circleService.findPagedCircleMembers(userId, circleId, pageable, membershipStatus);
 

@@ -1,6 +1,7 @@
 package com.circleon.domain.circle.controller;
 
 import com.circleon.common.CommonResponseStatus;
+import com.circleon.common.PageableValidator;
 import com.circleon.common.annotation.LoginUser;
 import com.circleon.common.dto.ErrorResponse;
 import com.circleon.common.dto.PaginatedResponse;
@@ -19,6 +20,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -50,6 +53,8 @@ public class MyCircleController {
         Sort sort = getSortByMembershipStatus(membershipStatus);
 
         Pageable pageable = PageRequest.of(page, size, sort);
+
+        PageableValidator.validatePageable(pageable, List.of("createdAt", "joinedAt"), 100);
 
         PaginatedResponse<MyCircleSearchResponse> pagedMyCircles = myCircleService
                 .findPagedMyCircles(MyCircleSearchRequest.of(userId, membershipStatus, pageable));

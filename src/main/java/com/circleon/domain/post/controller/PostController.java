@@ -1,6 +1,7 @@
 package com.circleon.domain.post.controller;
 
 import com.circleon.common.CommonResponseStatus;
+import com.circleon.common.PageableValidator;
 import com.circleon.common.annotation.LoginUser;
 import com.circleon.common.dto.ErrorResponse;
 import com.circleon.common.dto.PaginatedResponse;
@@ -26,6 +27,8 @@ import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -53,6 +56,8 @@ public class PostController {
 
         Sort sort = Sort.by(Sort.Order.desc("isPinned"), Sort.Order.desc("createdAt"));
         Pageable pageable = PageRequest.of(page, size, sort);
+
+        PageableValidator.validatePageable(pageable, List.of("isPinned", "createdAt"), 100);
 
         PaginatedResponse<PostResponse> pagedPosts = postService.findPagedPosts(userId, circleId, postType, pageable);
 

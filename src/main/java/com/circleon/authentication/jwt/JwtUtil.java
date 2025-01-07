@@ -23,7 +23,7 @@ public class JwtUtil {
     private Key key;
 
     //TODO 잠시 1시간으로
-    private final long jwtAccessExpirationMs = 1000L * 60 * 60 * 1;
+    private final long jwtAccessExpirationMs = 1000L * 60 * 60;
 
     //TODO 잠시 3시간분으로
     private final long jwtRefreshExpirationMs = 1000L * 60 * 60 * 3;
@@ -90,6 +90,14 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody()
                 .getExpiration();
+    }
+
+    public Date getIssuedAt(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody().getIssuedAt();
     }
 
     public String resolveToken(String bearerToken) {

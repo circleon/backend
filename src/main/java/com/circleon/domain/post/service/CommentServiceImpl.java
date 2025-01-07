@@ -110,10 +110,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentRepository.findByIdAndPostAndStatus(commentId, post, CommonStatus.ACTIVE)
                 .orElseThrow(() -> new PostException(PostResponseStatus.COMMENT_NOT_FOUND, "[deleteComment] 댓글이 존재하지 않습니다."));
 
-        //TODO 이건 회의해봐야 할듯 임원들은 삭제할 수있는지 이러면 멤버 조회도 할 필요가 없어짐 but 멤버 조회는 있어야 하나?
-        if(CircleRole.MEMBER == member.getCircleRole()){
-            validateCommentAuthor(comment, identifiers.getUserId(), "[deleteComment] 본인이 작성하지 않은 댓글을 삭제하려는 시도");
-        }
+        validateCommentAuthor(comment, identifiers.getUserId(), "[deleteComment] 본인이 작성하지 않은 댓글을 삭제하려는 시도");
 
         comment.setStatus(CommonStatus.INACTIVE);
         post.decreaseCommentCount();

@@ -1,6 +1,7 @@
 package com.circleon.domain.circle.service;
 
 import com.circleon.common.CommonResponseStatus;
+import com.circleon.common.dto.PaginatedResponse;
 import com.circleon.common.exception.CommonException;
 import com.circleon.common.file.FileStore;
 
@@ -17,6 +18,7 @@ import com.circleon.domain.user.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -82,15 +84,30 @@ public class CircleServiceImpl implements CircleService {
 
     }
 
+//    @Cacheable(value = "circles", key = "(#categoryType ?: 'ALL') + ':' + #pageable.getPageNumber()")
     @Override
-    public Page<CircleResponse> findPagedCircles(Pageable pageable, CategoryType categoryType) {
+    public PaginatedResponse<CircleResponse> findPagedCircles(Pageable pageable, CategoryType categoryType) {
 
         if(categoryType == null){
-            return circleRepository.findAllByCircleStatus(CircleStatus.ACTIVE, pageable)
-                        .map(CircleResponse::fromCircle);
+            Page<CircleResponse> pagedCircles = circleRepository.findAllByCircleStatus(CircleStatus.ACTIVE, pageable)
+                    .map(CircleResponse::fromCircle);
+
+            List<CircleResponse> content = pagedCircles.getContent();
+            int currentPageNumber = pagedCircles.getNumber();
+            long totalElementCount = pagedCircles.getTotalElements();
+            int totalPageCount = pagedCircles.getTotalPages();
+
+            return PaginatedResponse.of(content, currentPageNumber, totalElementCount, totalPageCount);
         }else{
-            return circleRepository.findAllByCategoryTypeAndCircleStatus(categoryType, CircleStatus.ACTIVE, pageable)
-                        .map(CircleResponse::fromCircle);
+            Page<CircleResponse> pagedCircles = circleRepository.findAllByCategoryTypeAndCircleStatus(categoryType, CircleStatus.ACTIVE, pageable)
+                    .map(CircleResponse::fromCircle);
+
+            List<CircleResponse> content = pagedCircles.getContent();
+            int currentPageNumber = pagedCircles.getNumber();
+            long totalElementCount = pagedCircles.getTotalElements();
+            int totalPageCount = pagedCircles.getTotalPages();
+
+            return PaginatedResponse.of(content, currentPageNumber, totalElementCount, totalPageCount);
         }
     }
 

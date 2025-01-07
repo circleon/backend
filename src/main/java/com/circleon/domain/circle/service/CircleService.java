@@ -1,5 +1,6 @@
 package com.circleon.domain.circle.service;
 
+import com.circleon.common.dto.PaginatedResponse;
 import com.circleon.domain.circle.CategoryType;
 import com.circleon.domain.circle.CircleStatus;
 import com.circleon.domain.circle.MembershipStatus;
@@ -16,7 +17,7 @@ public interface CircleService {
 
     void createCircle(Long applicantId, CircleCreateRequest circleCreateRequest);
 
-    Page<CircleResponse> findPagedCircles(Pageable pageable, CategoryType categoryType);
+    PaginatedResponse<CircleResponse> findPagedCircles(Pageable pageable, CategoryType categoryType);
 
     CircleInfoUpdateResponse updateCircleInfo(Long userId, Long circleId, CircleInfoUpdateRequest circleInfoUpdateRequest);
 

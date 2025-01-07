@@ -22,6 +22,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -54,13 +55,14 @@ public class PostDataLoader implements CommandLineRunner {
     }
 
     private void createCommentData(List<MyCircle> members) {
-        List<Comment> comments = new ArrayList<>();
 
         for (MyCircle mc : members) {
 
             if(mc.getMembershipStatus() != MembershipStatus.APPROVED) continue;
 
-            Pageable pageable = PageRequest.of(0, 20);
+            Sort sort = Sort.by(Sort.Order.desc("createdAt"));
+
+            Pageable pageable = PageRequest.of(0, 10, sort);
 
             List<PostResponse> posts = postRepository.findPosts(mc.getCircle().getId(), PostType.POST, pageable);
 
@@ -82,15 +84,12 @@ public class PostDataLoader implements CommandLineRunner {
                             .build();
                     postEntity.increaseCommentCount();
                     postRepository.save(postEntity);
-
-                    comments.add(comment);
+                    commentRepository.save(comment);
 
                 }
             }
 
         }
-
-        commentRepository.saveAll(comments);
     }
 
     private void createPostTestData(List<MyCircle> members) {

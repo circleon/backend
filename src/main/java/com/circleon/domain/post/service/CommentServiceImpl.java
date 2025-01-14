@@ -18,12 +18,12 @@ import com.circleon.domain.post.entity.Post;
 import com.circleon.domain.post.exception.PostException;
 import com.circleon.domain.post.repository.CommentRepository;
 import com.circleon.domain.post.repository.PostRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;

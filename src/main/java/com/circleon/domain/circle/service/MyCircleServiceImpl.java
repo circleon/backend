@@ -15,10 +15,10 @@ import com.circleon.domain.circle.repository.MyCircleRepository;
 import com.circleon.domain.user.entity.User;
 
 import com.circleon.domain.user.service.UserService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;

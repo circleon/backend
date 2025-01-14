@@ -4,7 +4,7 @@ package com.circleon.authentication.controller;
 import com.circleon.authentication.dto.*;
 import com.circleon.authentication.email.dto.EmailVerificationRequest;
 import com.circleon.authentication.email.dto.VerificationCodeRequest;
-import com.circleon.authentication.email.service.AsyncService;
+
 import com.circleon.authentication.service.AuthService;
 import com.circleon.common.CommonResponseStatus;
 import com.circleon.common.dto.ErrorResponse;
@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,7 +30,6 @@ import java.util.concurrent.CompletableFuture;
 public class AuthController {
 
     private final AuthService authService;
-    private final AsyncService asyncService;
 
     @PostMapping("/signup")
     public ResponseEntity<SuccessResponse> signup(@Valid @RequestBody SignUpRequest signUpRequest) {
@@ -38,11 +38,10 @@ public class AuthController {
     }
 
     @PostMapping("/verification")
-    public ResponseEntity<SuccessResponse> sendVerificationEmail(@Valid @RequestBody EmailVerificationRequest emailVerificationRequest) {
-        log.info("1");
-        authService.sendVerificationEmail(emailVerificationRequest);
-        log.info("1");
-        return ResponseEntity.ok(SuccessResponse.builder().message("Verification email sent").build());
+    public CompletableFuture<ResponseEntity<SuccessResponse>> sendVerificationEmail(@Valid @RequestBody EmailVerificationRequest emailVerificationRequest) {
+
+        return authService.sendAsyncVerificationEmail(emailVerificationRequest)
+                .thenApply(e->ResponseEntity.ok(SuccessResponse.builder().message("Success").build()));
     }
 
     @PostMapping("/verification-code")
@@ -87,7 +86,9 @@ public class AuthController {
 
         UserResponseStatus status = e.getStatus();
 
-        log.warn("UserException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
+        log.warn("UserException: {} {} {}", status.getHttpStatusCode(), status.getCode(), e.getMessage());
+
+        log.warn("UserException: ", e);
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorCode(status.getCode())
@@ -96,13 +97,5 @@ public class AuthController {
         return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
     }
 
-    @PostMapping("/test")
-    public CompletableFuture<ResponseEntity<SuccessResponse>> test(@RequestBody Map<String, String> emailMap) {
 
-        log.info("톰켓 스레드 시작 : {}", Thread.currentThread().getName());
-        CompletableFuture<Void> future = authService.sendAsyncVerificationEmail(emailMap.get("email"));
-        log.info("톰켓 스레드 종료 : {}", Thread.currentThread().getName());
-
-        return future.thenApply(e->ResponseEntity.ok(SuccessResponse.builder().message("Success").build()));
-    }
 }

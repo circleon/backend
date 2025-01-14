@@ -13,4 +13,9 @@ public class UserException extends RuntimeException{
         this.status = status;
     }
 
+    public UserException(UserResponseStatus status, String message) {
+        super(message);
+        this.status = status;
+    }
+
 }

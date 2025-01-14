@@ -11,12 +11,12 @@ import java.time.LocalDateTime;
 
 @MappedSuperclass
 @Getter
-@Setter
 public abstract class BaseEntity {
 
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
+    @Setter
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
@@ -31,5 +31,4 @@ public abstract class BaseEntity {
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
-
 }

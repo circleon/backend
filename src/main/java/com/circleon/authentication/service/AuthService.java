@@ -12,7 +12,7 @@ public interface AuthService {
 
     void sendVerificationEmail(EmailVerificationRequest emailVerificationRequest);
 
-    CompletableFuture<Void> sendAsyncVerificationEmail(String email);
+    CompletableFuture<Void> sendAsyncVerificationEmail(EmailVerificationRequest emailVerificationRequest);
 
     void verifyVerificationCode(VerificationCodeRequest verificationCodeRequest);
 

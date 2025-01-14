@@ -5,7 +5,7 @@ import com.circleon.authentication.dto.*;
 import com.circleon.authentication.email.dto.AwsSesEmailRequest;
 import com.circleon.authentication.email.dto.EmailVerificationRequest;
 import com.circleon.authentication.email.dto.VerificationCodeRequest;
-import com.circleon.authentication.email.service.AsyncService;
+import com.circleon.authentication.email.service.AwsSesEmailService;
 import com.circleon.authentication.email.service.EmailService;
 import com.circleon.authentication.entity.EmailVerification;
 import com.circleon.authentication.entity.RefreshToken;
@@ -21,11 +21,11 @@ import com.circleon.domain.user.entity.User;
 import com.circleon.domain.user.entity.UserStatus;
 import com.circleon.domain.user.exception.UserException;
 import com.circleon.domain.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -46,8 +46,6 @@ public class AuthServiceImpl implements AuthService{
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final JwtUtil jwtUtil;
-
-    private final AsyncService asyncService;
 
     @Override
     public void registerUser(SignUpRequest signUpRequest) {
@@ -137,37 +135,65 @@ public class AuthServiceImpl implements AuthService{
         emailService.sendEmail(awsSesEmailRequest);
     }
 
-//    @Override
-//    public void sendVerificationEmail(EmailVerificationRequest emailVerificationRequest) {
-//
-//        //코드 생성
-//        String verificationCode = emailService.generateVerificationCode();
-//
-//        //TODO 인증 메시지 포멧 다시 정하기 + 보내고 나서 저장하는개 맞을듯?
-//        AwsSesEmailRequest awsSesEmailRequest = AwsSesEmailRequest.builder()
-//                .sender(AuthConstants.SOURCE_MAIL)
-//                .subject("[Circle On] 인증 코드")
-//                .content(verificationCode)
-//                .recipient(emailVerificationRequest.getEmail())
-//                .build();
-//
-//        emailService.sendEmail(awsSesEmailRequest);
-//    }
 
     @Override
-    public CompletableFuture<Void> sendAsyncVerificationEmail(String email) {
+    public CompletableFuture<Void> sendAsyncVerificationEmail(EmailVerificationRequest emailVerificationRequest) {
 
-        log.info("메일 비동기 테스트 메일 보내기전 : {}", Thread.currentThread().getName());
+        // 먼저 이메일 중복 여부 체크
+        if(userRepository.existsByEmailAndStatus(emailVerificationRequest.getEmail(), UserStatus.ACTIVE)) {
+
+            throw new UserException(UserResponseStatus.EMAIL_DUPLICATE);
+        }
+
+        // 이메일 인증 테이블에서 이메일 존재 여부 확인
+        EmailVerification existingVerification = emailVerificationRepository
+                .findByEmail(emailVerificationRequest.getEmail())
+                .orElse(null);
+
+        //코드 생성
         String verificationCode = emailService.generateVerificationCode();
+        String encryptedCode = passwordEncoder.encode(verificationCode);
 
+        if(existingVerification != null) { //존재
+            handleExistingVerification(existingVerification, encryptedCode);
+        }else{
+            //인증 코드 저장
+            createNewVerification(emailVerificationRequest, encryptedCode);
+        }
+
+        //TODO 인증 메시지 포멧 다시 정하기
         AwsSesEmailRequest awsSesEmailRequest = AwsSesEmailRequest.builder()
                 .sender(AuthConstants.SOURCE_MAIL)
                 .subject("[Circle On] 인증 코드")
                 .content(verificationCode)
-                .recipient(email)
+                .recipient(emailVerificationRequest.getEmail())
                 .build();
 
-        return emailService.sendAsyncEmail(awsSesEmailRequest);
+        return emailService.sendAsyncEmail(awsSesEmailRequest)
+                .exceptionally(throwable -> {
+
+                    rollbackResult(emailVerificationRequest.getEmail());
+
+                    throw new UserException(UserResponseStatus.EMAIL_SERVICE_UNAVAILABLE, "[sendAsyncEmail] 이메일 전송 서비스 이용불가");
+                });
+    }
+
+    private void rollbackResult(String email) {
+        EmailVerification emailVerification = emailVerificationRepository.findByEmail(email)
+                .orElse(null);
+
+        if(emailVerification != null) {
+            int updatedAttemptCount = emailVerification.getAttemptCount() - 1;
+
+            if(updatedAttemptCount > 0){
+
+                emailVerification.setAttemptCount(updatedAttemptCount);
+                emailVerification.setExpirationTime(LocalDateTime.now());
+                emailVerificationRepository.save(emailVerification);
+            }else {
+                emailVerificationRepository.delete(emailVerification);
+            }
+        }
     }
 
     @Override

@@ -120,9 +120,9 @@ public class PostController {
 
         PostResponseStatus status = e.getStatus();
 
-        log.warn("PostException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
+        log.error("PostException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
 
-        log.warn("PostException {}", e.getMessage());
+        log.error("PostException {}", e.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorCode(status.getCode())
@@ -137,9 +137,9 @@ public class PostController {
 
         CircleResponseStatus status = e.getStatus();
 
-        log.warn("CircleException: {}", e.getMessage());
+        log.error("CircleException: {}", e.getMessage());
 
-        log.warn("CircleException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
+        log.error("CircleException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorCode(status.getCode())

@@ -16,4 +16,6 @@ public interface PostRepositoryCustom {
 
     PostCount countPosts(Long circleId, PostType postType);
 
+    void deletePostsBy(List<Post> posts);
+
 }

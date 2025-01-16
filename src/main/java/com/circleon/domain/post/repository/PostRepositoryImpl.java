@@ -96,4 +96,12 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
     private BooleanExpression postTypeEq(PostType postType){
         return postType != null ? post.postType.eq(postType) : null;
     }
+
+    @Override
+    public void deletePostsBy(List<Post> posts) {
+        jpaQueryFactory
+                .delete(post)
+                .where(post.in(posts))
+                .execute();
+    }
 }

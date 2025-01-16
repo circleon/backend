@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
 
-        log.warn("Max upload size exceeded", e);
+        log.error("Max upload size exceeded", e);
 
         CommonResponseStatus fileSizeExceeded = CommonResponseStatus.FILE_SIZE_EXCEEDED;
 
@@ -39,9 +39,9 @@ public class GlobalExceptionHandler {
 
         CommonResponseStatus status =  e.getStatus();
 
-        log.warn("CommonException: {}", e.getMessage());
+        log.error("CommonException: {}", e.getMessage());
 
-        log.warn("CommonException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
+        log.error("CommonException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorMessage(status.getMessage())
@@ -54,9 +54,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
 
-        log.warn("MethodArgumentNotValidException: {}", ex.getMessage());
+        log.error("MethodArgumentNotValidException: {}", ex.getMessage());
 
-        log.warn("MethodArgumentNotValidException", ex);
+        log.error("MethodArgumentNotValidException", ex);
 
         String errorMessage = ex.getBindingResult()
                                 .getFieldErrors()

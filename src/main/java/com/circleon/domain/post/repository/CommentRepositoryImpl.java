@@ -6,29 +6,23 @@ import com.circleon.domain.post.dto.Author;
 import com.circleon.domain.post.dto.CommentSearchResponse;
 
 import com.circleon.domain.post.entity.Comment;
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
+import com.circleon.domain.post.entity.Post;
+
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
-import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 
-import java.lang.reflect.Field;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 
 import static com.circleon.domain.post.entity.QComment.comment;
-
 
 import static com.circleon.domain.user.entity.QUser.user;
 
@@ -82,5 +76,13 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom{
                         postIdEq(postId),
                         isCommentActive()
                 ).fetchOne();
+    }
+
+    @Override
+    public void deleteAllByPosts(List<Post> posts) {
+        jpaQueryFactory
+                .delete(comment)
+                .where(comment.post.in(posts))
+                .execute();
     }
 }

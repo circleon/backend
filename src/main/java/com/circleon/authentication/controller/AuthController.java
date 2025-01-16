@@ -18,10 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -86,9 +85,9 @@ public class AuthController {
 
         UserResponseStatus status = e.getStatus();
 
-        log.warn("UserException: {} {} {}", status.getHttpStatusCode(), status.getCode(), e.getMessage());
+        log.error("UserException: {} {} {}", status.getHttpStatusCode(), status.getCode(), e.getMessage());
 
-        log.warn("UserException: ", e);
+        log.error("UserException: ", e);
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorCode(status.getCode())
@@ -96,6 +95,5 @@ public class AuthController {
                 .build();
         return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
     }
-
 
 }

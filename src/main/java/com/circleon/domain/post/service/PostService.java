@@ -20,4 +20,6 @@ public interface PostService {
     void updatePin(Long userId, Long circleId, Long postId, PostPinUpdateRequest postPinUpdateRequest);
 
     void deletePost(Long userId, Long circleId, Long postId);
+
+    void deleteSoftDeletedPosts();
 }

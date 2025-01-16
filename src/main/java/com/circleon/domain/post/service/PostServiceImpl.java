@@ -15,9 +15,11 @@ import com.circleon.domain.circle.service.MyCircleService;
 import com.circleon.domain.post.PostResponseStatus;
 import com.circleon.domain.post.PostType;
 import com.circleon.domain.post.dto.*;
+import com.circleon.domain.post.entity.Comment;
 import com.circleon.domain.post.entity.Post;
 import com.circleon.domain.post.entity.PostImage;
 import com.circleon.domain.post.exception.PostException;
+import com.circleon.domain.post.repository.CommentRepository;
 import com.circleon.domain.post.repository.PostImageRepository;
 import com.circleon.domain.post.repository.PostRepository;
 
@@ -27,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +46,7 @@ public class PostServiceImpl implements PostService {
     private final MyCircleService myCircleService;
     private final FileStore postFileStore;
     private final PostImageRepository postImageRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public PostCreateResponse createPost(Long userId, Long circleId, PostCreateRequest postCreateRequest) {
@@ -169,5 +173,53 @@ public class PostServiceImpl implements PostService {
         if(!post.getAuthor().getId().equals(userId)){
             throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, message);
         }
+    }
+
+    @Override
+    public void deleteSoftDeletedPosts() {
+
+        //소프트 딜리트된 게시판 조회
+        Pageable pageable = PageRequest.of(0, 100);
+
+        while(true){
+
+            List<Post> posts = postRepository.findAllByStatus(CommonStatus.INACTIVE, pageable);
+
+            if(posts.isEmpty()){
+                return;
+            }
+
+            deleteCommentsForPosts(posts);
+
+            deletePostImages(posts);
+
+            hardDeletePosts(posts);
+
+            pageable = pageable.next();
+        }
+    }
+
+    private void deleteCommentsForPosts(List<Post> posts){
+        commentRepository.deleteAllByPosts(posts);
+    }
+
+    private void deletePostImages(List<Post> posts){
+        // 한번에 찾아 오기
+        List<PostImage> postImages = postImageRepository.findAllByPostIn(posts);
+
+        //이미지 삭제
+        postImages.forEach(postImage -> {
+            if(!postFileStore.deleteFile(postImage.getPostImgUrl())){
+                log.error("[deletePostImages] 이미지 삭제 실패 {}" , postImage.getPostImgUrl());
+            }
+        });
+
+        //디비 삭제
+        postImageRepository.deletePostImages(postImages);
+
+    }
+
+    private void hardDeletePosts(List<Post> posts){
+        postRepository.deletePostsBy(posts);
     }
 }

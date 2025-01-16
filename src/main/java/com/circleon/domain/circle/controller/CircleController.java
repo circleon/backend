@@ -190,9 +190,9 @@ public class CircleController {
 
         CircleResponseStatus status = e.getStatus();
 
-        log.warn("CircleException: {}", e.getMessage());
+        log.error("CircleException: {}", e.getMessage());
 
-        log.warn("CircleException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
+        log.error("CircleException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
 
 
         ErrorResponse errorResponse = ErrorResponse.builder()

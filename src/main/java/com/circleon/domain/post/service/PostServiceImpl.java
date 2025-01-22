@@ -65,6 +65,12 @@ public class PostServiceImpl implements PostService {
 
         Post savedPost = postRepository.save(post);
 
+        if(postFileStore.isValidFile(postCreateRequest.getImage())
+                && !postFileStore.isAllowedExtension(postCreateRequest.getImage().getOriginalFilename())){
+
+            throw new CommonException(CommonResponseStatus.FILE_EXTENSION_INVALID, "[createPost] 허용되지 않는 확장자");
+        }
+
         String postImgUrl = postFileStore.storeFile(postCreateRequest.getImage(), member.getCircle().getId());
 
         if(postImgUrl != null) {

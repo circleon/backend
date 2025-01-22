@@ -16,5 +16,9 @@ public interface FileStore {
 
     boolean isValidFile(MultipartFile file);
 
+    boolean isAllowedExtension(String filename);
+
+    String extractExtension(String originalFilename);
+
     Resource loadFileAsResource(String filePath);
 }

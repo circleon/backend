@@ -7,6 +7,7 @@ import com.circleon.common.dto.ErrorResponse;
 import com.circleon.common.dto.PaginatedResponse;
 import com.circleon.common.dto.SuccessResponse;
 import com.circleon.common.exception.CommonException;
+import com.circleon.common.file.FileStore;
 import com.circleon.domain.circle.CircleResponseStatus;
 import com.circleon.domain.circle.exception.CircleException;
 import com.circleon.domain.post.PostResponseStatus;
@@ -36,6 +37,7 @@ import java.util.List;
 public class PostController {
 
     private final PostService postService;
+    private final FileStore postFileStore;
 
     @PostMapping("/circles/{circleId}/posts")
     public ResponseEntity<PostCreateResponse> createPost(@LoginUser Long userId,
@@ -94,20 +96,19 @@ public class PostController {
     @GetMapping("/posts/images/{circleId}/{directory}/{filename}")
     public ResponseEntity<Resource> findImage(@PathVariable Long circleId,
                                               @PathVariable String directory,
-                                              @PathVariable String filename,
-                                              @RequestHeader("Content-Type") String contentTypeHeader){
+                                              @PathVariable String filename){
 
+
+        String filePath = circleId + "/" + directory + "/" + filename;
+        Resource resource = postService.loadImageAsResource(filePath);
+        String extension = postFileStore.extractExtension(filename);
         MediaType mediaType;
 
-        try {
-            mediaType = MediaType.parseMediaType(contentTypeHeader);
-        }catch (InvalidMediaTypeException e){
-            throw new CommonException(CommonResponseStatus.BAD_REQUEST, e.getMessage());
+        if(extension.equals("png")){
+            mediaType = MediaType.IMAGE_PNG;
+        }else{
+            mediaType = MediaType.IMAGE_JPEG;
         }
-        String filePath = circleId + "/" + directory + "/" + filename + "." + mediaType.getSubtype();
-
-        Resource resource = postService.loadImageAsResource(filePath);
-
         return ResponseEntity.ok()
                 .contentType(mediaType)
                 .body(resource);

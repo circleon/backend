@@ -24,6 +24,8 @@ public enum CommonResponseStatus {
 
     FILE_NOT_FOUND(HttpStatus.BAD_REQUEST.value(), "008", "존재하지 않는 파일"),
 
+    FILE_EXTENSION_INVALID(HttpStatus.BAD_REQUEST.value(), "009", "허용되지 않은 확장자 파일입니다."),
+
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(), "5", "서버 에러");
 
     private final int httpStatusCode;

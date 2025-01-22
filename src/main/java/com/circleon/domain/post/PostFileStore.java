@@ -60,7 +60,6 @@ public class PostFileStore extends AbstractFileStore {
                 Thumbnails.of(new ByteArrayInputStream(fileBytes))
                         .size(800, 800)
                         .keepAspectRatio(true)
-                        .outputFormat(extractExtension(originalFilename))
                         .toFile(uploadPath.resolve(storeFileName).toFile());
             }else{
                 Files.write(uploadPath.resolve(storeFileName), fileBytes);
@@ -99,7 +98,6 @@ public class PostFileStore extends AbstractFileStore {
                 Thumbnails.of(new ByteArrayInputStream(fileBytes))
                         .crop(Positions.CENTER)
                         .size(150, 150)
-                        .outputFormat(extractExtension(originalFilename))
                         .toFile(uploadPath.resolve(storeFileName).toFile());
             }else{
                 Files.write(uploadPath.resolve(storeFileName), fileBytes);

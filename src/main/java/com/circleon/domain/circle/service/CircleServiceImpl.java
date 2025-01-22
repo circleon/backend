@@ -74,8 +74,13 @@ public class CircleServiceImpl implements CircleService {
 
         Circle savedCircle = circleRepository.save(circle);
 
+
         //프로필 이미지 유효할때
         if(circleFileStore.isValidFile(circleCreateRequest.getProfileImg())) {
+
+            if(!circleFileStore.isAllowedExtension(circleCreateRequest.getProfileImg().getOriginalFilename())){
+                throw new CommonException(CommonResponseStatus.FILE_EXTENSION_INVALID, "[createCircle] 허용되지 않는 확장자");
+            }
 
             //이미지 원본 저장
             String profileImgUrl = storeImg(circleCreateRequest.getProfileImg(), savedCircle.getId());
@@ -89,6 +94,10 @@ public class CircleServiceImpl implements CircleService {
 
         //소개글 이미지 유효할때
         if(circleFileStore.isValidFile(circleCreateRequest.getIntroductionImg())){
+
+            if(!circleFileStore.isAllowedExtension(circleCreateRequest.getIntroductionImg().getOriginalFilename())){
+                throw new CommonException(CommonResponseStatus.FILE_EXTENSION_INVALID, "[createCircle] 허용되지 않는 확장자");
+            }
 
             String introImgUrl = storeImg(circleCreateRequest.getIntroductionImg(), savedCircle.getId());
             savedCircle.setIntroImgUrl(introImgUrl);

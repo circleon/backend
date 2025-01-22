@@ -7,7 +7,9 @@ import com.circleon.common.dto.ErrorResponse;
 import com.circleon.common.dto.PaginatedResponse;
 import com.circleon.common.dto.SuccessResponse;
 import com.circleon.common.exception.CommonException;
+import com.circleon.common.file.FileStore;
 import com.circleon.domain.circle.CategoryType;
+import com.circleon.domain.circle.CircleFileStore;
 import com.circleon.domain.circle.CircleResponseStatus;
 import com.circleon.domain.circle.MembershipStatus;
 import com.circleon.domain.circle.dto.*;
@@ -25,6 +27,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,6 +39,7 @@ import java.util.Objects;
 public class CircleController {
 
     private final CircleService circleService;
+    private final FileStore circleFileStore;
 
     @PostMapping
     public ResponseEntity<SuccessResponse> createCircle(@Valid @ModelAttribute CircleCreateRequest circleCreateRequest,
@@ -50,13 +55,6 @@ public class CircleController {
                                                                               Pageable pageable) {
 
         PageableValidator.validatePageable(pageable, List.of("createdAt"), 100);
-
-//        Page<CircleResponse> circlesPage = circleService.findPagedCircles(pageable, categoryType);
-//
-//        List<CircleResponse> content = circlesPage.getContent();
-//        int currentPageNumber = circlesPage.getNumber();
-//        long totalElementCount = circlesPage.getTotalElements();
-//        int totalPageCount = circlesPage.getTotalPages();
 
         return ResponseEntity.ok(circleService.findPagedCircles(pageable, categoryType));
     }
@@ -110,21 +108,17 @@ public class CircleController {
     @GetMapping("/images/{circleId}/{directory}/{filename}")
     public ResponseEntity<Resource> findImage(@PathVariable Long circleId,
                                               @PathVariable String directory,
-                                              @PathVariable String filename,
-                                              @RequestHeader("Content-Type") String contentTypeHeader) {
-        MediaType mediaType;
-        try {
-            mediaType = MediaType.parseMediaType(contentTypeHeader);
-        }catch (InvalidMediaTypeException e){
-            throw new CommonException(CommonResponseStatus.BAD_REQUEST, e.getMessage());
-        }
-        String filePath = circleId + "/" + directory + "/" + filename + "." + mediaType.getSubtype();
+                                              @PathVariable String filename){
 
-
+        String filePath = circleId + "/" + directory + "/" + filename;
         Resource resource = circleService.loadImageAsResource(filePath);
+        String extension = circleFileStore.extractExtension(filename);
 
-        if(mediaType.getSubtype().equals("jpg")){
-            mediaType = MediaType.parseMediaType("image/jpeg");
+        MediaType mediaType;
+        if(extension.equals("png")){
+            mediaType = MediaType.IMAGE_PNG;
+        }else{
+            mediaType = MediaType.IMAGE_JPEG;
         }
 
         return ResponseEntity.ok()

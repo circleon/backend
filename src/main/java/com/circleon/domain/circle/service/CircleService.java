@@ -44,5 +44,6 @@ public interface CircleService {
 
     //TODO 동아리 삭제
 
-    Optional<Circle> findByIdAndCircleStatus(Long circleId, CircleStatus circleStatus);
+    void deleteSoftDeletedCircles();
+
 }

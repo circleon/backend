@@ -1,5 +1,6 @@
 package com.circleon.domain.post;
 
+import com.circleon.domain.post.service.CommentService;
 import com.circleon.domain.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,14 +13,25 @@ import org.springframework.stereotype.Component;
 public class PostScheduler {
 
     private final PostService postService;
+    private final CommentService commentService;
 
     @Scheduled(cron = "0 0 3 ? * FRI")
     public void runSoftDeletedPostsCleanup() {
       try{
           log.info("Cleaning up SoftDeleted Posts");
           postService.deleteSoftDeletedPosts();
-      } catch (RuntimeException e) {
-          log.error("soft deleted posts failed", e);
+      } catch (Exception e) {
+          log.error("Cleaning up SoftDeleted Posts fail", e);
       }
+    }
+
+    @Scheduled(cron = "0 0 3 ? * MON")
+    public void runSoftDeletedCommentsCleanup() {
+        try{
+            log.info("Cleaning up SoftDeleted Comments");
+            commentService.deleteSoftDeletedComments();
+        } catch (Exception e) {
+            log.error("Cleaning up SoftDeleted Comments fail", e);
+        }
     }
 }

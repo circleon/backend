@@ -2,6 +2,7 @@ package com.circleon.domain.schedule.circle.repository;
 
 import com.circleon.common.CommonStatus;
 import com.circleon.domain.circle.CircleStatus;
+import com.circleon.domain.circle.entity.Circle;
 import com.circleon.domain.schedule.circle.dto.CircleInfo;
 import com.circleon.domain.schedule.circle.dto.CircleScheduleDetail;
 import com.querydsl.core.types.Projections;
@@ -72,5 +73,13 @@ public class CircleScheduleRepositoryImpl implements CircleScheduleRepositoryCus
                         circle.id.eq(circleId),
                         circle.circleStatus.eq(CircleStatus.ACTIVE)
                 ).fetchOne();
+    }
+
+    @Override
+    public void deleteAllByCircles(List<Circle> circles) {
+        jpaQueryFactory
+                .delete(circleSchedule)
+                .where(circleSchedule.circle.in(circles))
+                .execute();
     }
 }

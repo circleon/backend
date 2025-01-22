@@ -130,24 +130,6 @@ public class MyCircleRepositoryImpl implements MyCircleRepositoryCustom{
                 .fetchFirst());
     }
 
-    //TODO 삭제
-//    public Optional<MyCircle> findByMyCircleSearchCondition(MyCircleSearchCondition condition) {
-//
-//        return Optional.ofNullable(
-//                jpaQueryFactory
-//                        .selectFrom(myCircle)
-//                        .join(myCircle.circle, circle).fetchJoin()
-//                        .join(myCircle.user, user).fetchJoin()
-//                        .where(userIdEq(condition.getUserId()),
-//                                userStatusEq(condition.getUserStatus()),
-//                                circleIdEq(condition.getCircleId()),
-//                                circleStatusEq(condition.getCircleStatus()),
-//                                membershipStatusEq(condition.getMembershipStatus())
-//                                        .or(membershipStatusEq(MembershipStatus.LEAVE_REQUEST))
-//                        ).fetchOne()
-//        );
-//    }
-
     private BooleanExpression userIdEq(Long userId) {
         return userId != null ? user.id.eq(userId) : null;
     }
@@ -238,5 +220,13 @@ public class MyCircleRepositoryImpl implements MyCircleRepositoryCustom{
                                 myCircle.id.eq(myCircleId)
                         ).fetchOne()
         );
+    }
+
+    @Override
+    public void deleteAllByCircles(List<Circle> circles) {
+        jpaQueryFactory
+                .delete(myCircle)
+                .where(myCircle.circle.in(circles))
+                .execute();
     }
 }

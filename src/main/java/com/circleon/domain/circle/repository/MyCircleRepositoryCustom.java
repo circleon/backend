@@ -24,4 +24,6 @@ public interface MyCircleRepositoryCustom {
     Page<MyCircleSearchResponse> findAllByMyCircleSearchRequest(MyCircleSearchRequest myCircleSearchRequest);
 
     Optional<MyCircle> findByIdWithUserAndCircle(Long myCircleId);
+
+    void deleteAllByCircles(List<Circle> circles);
 }

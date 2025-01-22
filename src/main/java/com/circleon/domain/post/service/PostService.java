@@ -1,11 +1,15 @@
 package com.circleon.domain.post.service;
 
 import com.circleon.common.dto.PaginatedResponse;
+import com.circleon.domain.circle.entity.Circle;
 import com.circleon.domain.post.PostType;
 import com.circleon.domain.post.dto.*;
+import com.circleon.domain.post.entity.Post;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 public interface PostService {
 
@@ -19,7 +23,8 @@ public interface PostService {
 
     void updatePin(Long userId, Long circleId, Long postId, PostPinUpdateRequest postPinUpdateRequest);
 
-    void deletePost(Long userId, Long circleId, Long postId);
+    void softDeletePost(Long userId, Long circleId, Long postId);
 
     void deleteSoftDeletedPosts();
+
 }

@@ -10,12 +10,11 @@ import com.circleon.domain.circle.CircleRole;
 
 import com.circleon.domain.circle.entity.MyCircle;
 import com.circleon.domain.circle.exception.CircleException;
-import com.circleon.domain.circle.service.CircleService;
+import com.circleon.domain.circle.service.MyCircleDataService;
 import com.circleon.domain.circle.service.MyCircleService;
 import com.circleon.domain.post.PostResponseStatus;
 import com.circleon.domain.post.PostType;
 import com.circleon.domain.post.dto.*;
-import com.circleon.domain.post.entity.Comment;
 import com.circleon.domain.post.entity.Post;
 import com.circleon.domain.post.entity.PostImage;
 import com.circleon.domain.post.exception.PostException;
@@ -23,7 +22,6 @@ import com.circleon.domain.post.repository.CommentRepository;
 import com.circleon.domain.post.repository.PostImageRepository;
 import com.circleon.domain.post.repository.PostRepository;
 
-import com.circleon.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -43,7 +41,7 @@ import java.util.List;
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
-    private final MyCircleService myCircleService;
+    private final MyCircleDataService myCircleDataService;
     private final FileStore postFileStore;
     private final PostImageRepository postImageRepository;
     private final CommentRepository commentRepository;
@@ -82,7 +80,7 @@ public class PostServiceImpl implements PostService {
     }
 
     private MyCircle validateMembership(Long userId, Long circleId) {
-        return myCircleService.fineJoinedMember(userId, circleId)
+        return myCircleDataService.fineJoinedMember(userId, circleId)
                 .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBERSHIP_NOT_FOUND));
     }
 
@@ -156,7 +154,7 @@ public class PostServiceImpl implements PostService {
 
     //TODO 나중에 포스트 이미지랑 댓글은 스큐쥴러로 삭제
     @Override
-    public void deletePost(Long userId, Long circleId, Long postId) {
+    public void softDeletePost(Long userId, Long circleId, Long postId) {
 
         //회원
         MyCircle member = validateMembership(userId, circleId);
@@ -183,8 +181,8 @@ public class PostServiceImpl implements PostService {
 
         while(true){
 
-            List<Post> posts = postRepository.findAllByStatus(CommonStatus.INACTIVE, pageable);
-
+            Page<Post> pagedPosts = postRepository.findAllByStatus(CommonStatus.INACTIVE, pageable);
+            List<Post> posts = pagedPosts.getContent();
             if(posts.isEmpty()){
                 return;
             }
@@ -193,9 +191,7 @@ public class PostServiceImpl implements PostService {
 
             deletePostImages(posts);
 
-            hardDeletePosts(posts);
-
-            pageable = pageable.next();
+            deletePosts(posts);
         }
     }
 
@@ -216,10 +212,10 @@ public class PostServiceImpl implements PostService {
 
         //디비 삭제
         postImageRepository.deletePostImages(postImages);
-
     }
 
-    private void hardDeletePosts(List<Post> posts){
+    private void deletePosts(List<Post> posts){
         postRepository.deletePostsBy(posts);
     }
+
 }

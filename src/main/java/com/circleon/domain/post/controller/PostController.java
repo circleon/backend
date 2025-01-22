@@ -19,7 +19,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -87,7 +86,7 @@ public class PostController {
     public ResponseEntity<SuccessResponse> deletePost(@LoginUser Long userId,
                                                       @PathVariable Long circleId,
                                                       @PathVariable Long postId){
-        postService.deletePost(userId, circleId, postId);
+        postService.softDeletePost(userId, circleId, postId);
 
         return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
     }

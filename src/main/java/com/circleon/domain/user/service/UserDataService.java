@@ -5,7 +5,7 @@ import com.circleon.domain.user.entity.UserStatus;
 
 import java.util.Optional;
 
-public interface UserService {
+public interface UserDataService {
 
     User findByEmailAndStatus(String email, UserStatus status);
 

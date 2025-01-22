@@ -10,6 +10,7 @@ import com.circleon.domain.circle.entity.Circle;
 import com.circleon.domain.circle.entity.MyCircle;
 import com.circleon.domain.circle.exception.CircleException;
 
+import com.circleon.domain.circle.service.MyCircleDataService;
 import com.circleon.domain.circle.service.MyCircleService;
 import com.circleon.domain.post.PostResponseStatus;
 import com.circleon.domain.post.dto.*;
@@ -21,6 +22,7 @@ import com.circleon.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +36,7 @@ import java.util.List;
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
-    private final MyCircleService myCircleService;
+    private final MyCircleDataService myCircleDataService;
     private final PostRepository postRepository;
 
     @Override
@@ -59,7 +61,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private MyCircle validateMembership(Long userId, Long circleId) {
-        return myCircleService.fineJoinedMember(userId, circleId)
+        return myCircleDataService.fineJoinedMember(userId, circleId)
                 .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBERSHIP_NOT_FOUND));
     }
 
@@ -120,6 +122,25 @@ public class CommentServiceImpl implements CommentService {
     private void validateCommentAuthor(Comment comment, Long userId, String message) {
         if (!comment.getAuthor().getId().equals(userId)) {
             throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, message);
+        }
+    }
+
+    @Override
+    public void deleteSoftDeletedComments() {
+
+        Pageable pageable = PageRequest.of(0, 100);
+
+        while (true){
+
+            Page<Comment> pagedComments = commentRepository.findAllByStatus(CommonStatus.INACTIVE, pageable);
+            List<Comment> comments = pagedComments.getContent();
+
+            if(comments.isEmpty()){
+                return;
+            }
+
+            //삭제
+            commentRepository.deleteAllByComments(comments);
         }
     }
 }

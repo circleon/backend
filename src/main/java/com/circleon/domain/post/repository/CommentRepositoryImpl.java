@@ -85,4 +85,12 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom{
                 .where(comment.post.in(posts))
                 .execute();
     }
+
+    @Override
+    public void deleteAllByComments(List<Comment> comments) {
+        jpaQueryFactory
+                .delete(comment)
+                .where(comment.in(comments))
+                .execute();
+    }
 }

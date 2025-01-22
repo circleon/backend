@@ -12,14 +12,20 @@ import com.circleon.domain.circle.entity.MyCircle;
 import com.circleon.domain.circle.exception.CircleException;
 import com.circleon.domain.circle.repository.CircleRepository;
 import com.circleon.domain.circle.repository.MyCircleRepository;
+import com.circleon.domain.post.entity.Post;
+import com.circleon.domain.post.entity.PostImage;
+import com.circleon.domain.post.service.CommentDataService;
+import com.circleon.domain.post.service.PostDataService;
+import com.circleon.domain.post.service.PostImageDataService;
+import com.circleon.domain.schedule.circle.service.CircleScheduleDataService;
 import com.circleon.domain.user.entity.User;
 import com.circleon.domain.user.entity.UserStatus;
-import com.circleon.domain.user.service.UserService;
+import com.circleon.domain.user.service.UserDataService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,14 +43,20 @@ public class CircleServiceImpl implements CircleService {
 
     private final CircleRepository circleRepository;
     private final MyCircleRepository myCircleRepository;
-    private final UserService userService;
+    private final UserDataService userDataService;
     private final FileStore circleFileStore;
+    private final FileStore postFileStore;
+    private final CircleScheduleDataService circleScheduleDataService;
+    private final PostDataService postDataService;
+    private final CommentDataService commentDataService;
+    private final PostImageDataService postImageDataService;
+
 
     @Override
     public void createCircle(Long applicantId, CircleCreateRequest circleCreateRequest) {
 
         //존재하는 유저인지 검증
-        User foundUser = userService.findByIdAndStatus(applicantId, UserStatus.ACTIVE)
+        User foundUser = userDataService.findByIdAndStatus(applicantId, UserStatus.ACTIVE)
                 .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
 
@@ -114,7 +126,7 @@ public class CircleServiceImpl implements CircleService {
     @Override
     public CircleInfoUpdateResponse updateCircleInfo(Long userId, Long circleId, CircleInfoUpdateRequest circleInfoUpdateRequest) {
 
-        User presidentUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE)
+        User presidentUser = userDataService.findByIdAndStatus(userId, UserStatus.ACTIVE)
                 .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
         // 수정 권한 체크
@@ -149,7 +161,7 @@ public class CircleServiceImpl implements CircleService {
     @Override
     public CircleImagesUpdateResponse updateCircleImages(Long userId, Long circleId, CircleImagesUpdateRequest circleImageUpdateRequest) {
 
-        User presidentUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE)
+        User presidentUser = userDataService.findByIdAndStatus(userId, UserStatus.ACTIVE)
                 .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
         Circle foundCircle = validatePresidentAccess(presidentUser, circleId);
@@ -220,7 +232,7 @@ public class CircleServiceImpl implements CircleService {
     @Override
     public void deleteCircleImages(Long userId, Long circleId, boolean deleteProfileImg, boolean deleteIntroImg) {
 
-        User presidentUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE)
+        User presidentUser = userDataService.findByIdAndStatus(userId, UserStatus.ACTIVE)
                 .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
         //권한 체크
@@ -250,7 +262,7 @@ public class CircleServiceImpl implements CircleService {
     @Override
     public CircleDetailResponse findCircleDetail(Long userId, Long circleId) {
 
-        User foundUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE)
+        User foundUser = userDataService.findByIdAndStatus(userId, UserStatus.ACTIVE)
                 .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
         //존재하는 써클인지
@@ -282,7 +294,7 @@ public class CircleServiceImpl implements CircleService {
     @Override
     public Page<CircleMemberResponse> findPagedCircleMembers(Long userId, Long circleId, Pageable pageable, MembershipStatus membershipStatus) {
 
-        User user = userService.findByIdAndStatus(userId, UserStatus.ACTIVE)
+        User user = userDataService.findByIdAndStatus(userId, UserStatus.ACTIVE)
                 .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
         //회원이면 가능하도록
@@ -327,7 +339,7 @@ public class CircleServiceImpl implements CircleService {
     @Override
     public void updateCircleMemberRole(Long userId, Long circleId, Long memberId, CircleRoleUpdateRequest circleRoleUpdateRequest) {
 
-        User presidentUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE)
+        User presidentUser = userDataService.findByIdAndStatus(userId, UserStatus.ACTIVE)
                 .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
         // 회장만 가능
@@ -358,7 +370,7 @@ public class CircleServiceImpl implements CircleService {
     public void updateMembershipStatus(Long userId, Long circleId, Long memberId, MembershipStatusUpdateRequest membershipStatusUpdateRequest) {
 
         //임원들 가능
-        User authorizedUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE)
+        User authorizedUser = userDataService.findByIdAndStatus(userId, UserStatus.ACTIVE)
                 .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
         Circle circle = validateExecutiveAccess(authorizedUser, circleId);
@@ -416,7 +428,7 @@ public class CircleServiceImpl implements CircleService {
     public void expelMember(Long userId, Long circleId, Long memberId) {
 
         //임원들 가능
-        User authorizedUser = userService.findByIdAndStatus(userId, UserStatus.ACTIVE)
+        User authorizedUser = userDataService.findByIdAndStatus(userId, UserStatus.ACTIVE)
                 .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
         Circle circle = validateExecutiveAccess(authorizedUser, circleId);
@@ -439,7 +451,63 @@ public class CircleServiceImpl implements CircleService {
     }
 
     @Override
-    public Optional<Circle> findByIdAndCircleStatus(Long circleId, CircleStatus circleStatus) {
-        return circleRepository.findByIdAndCircleStatus(circleId, CircleStatus.ACTIVE);
+    public void deleteSoftDeletedCircles() {
+
+        Pageable pageable = PageRequest.of(0, 100);
+
+        while (true){
+
+            //동아리 검색하고
+            List<Circle> circles = circleRepository
+                    .findAllByCircleStatus(CircleStatus.INACTIVE, pageable)
+                    .getContent();
+
+            if(circles.isEmpty()){
+                return;
+            }
+
+            //동아리 일정 삭제
+            circleScheduleDataService.deleteAllByCircles(circles);
+
+            //동아리 게시글들 검색 -> 그 안에서 먼저 게시글 이미지와 댓글 삭제 -> 마지막에 게시글 삭제
+            deletePostByCircles(circles, pageable);
+
+            //멤버 삭제
+            myCircleRepository.deleteAllByCircles(circles);
+
+            //동아리 삭제
+            circleRepository.deleteCircles(circles);
+        }
+
     }
+
+    private void deletePostByCircles(List<Circle> circles, Pageable pageable) {
+        List<Post> posts = postDataService.findAllByCircleIn(circles, pageable).getContent();
+        if(!posts.isEmpty()){
+
+            deleteCommentsByPosts(posts);
+
+            deleteImagesByPosts(posts);
+
+            postDataService.deletePosts(posts);
+        }
+    }
+
+    private void deleteImagesByPosts(List<Post> posts) {
+        List<PostImage> postImages = postImageDataService.findAllByPostIn(posts);
+
+        postImages.forEach(postImage -> {
+            if(!postFileStore.deleteFile(postImage.getPostImgUrl())){
+                log.error("[deletePostImages] 이미지 삭제 실패 {}" , postImage.getPostImgUrl());
+            }
+        });
+
+        postImageDataService.deletePostImages(postImages);
+
+    }
+
+    private void deleteCommentsByPosts(List<Post> posts) {
+        commentDataService.deleteAllByPosts(posts);
+    }
+
 }

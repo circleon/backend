@@ -7,6 +7,7 @@ import com.circleon.domain.circle.CircleResponseStatus;
 import com.circleon.domain.circle.CircleRole;
 import com.circleon.domain.circle.entity.MyCircle;
 import com.circleon.domain.circle.exception.CircleException;
+import com.circleon.domain.circle.service.MyCircleDataService;
 import com.circleon.domain.circle.service.MyCircleService;
 import com.circleon.domain.schedule.ScheduleResponseStatus;
 import com.circleon.domain.schedule.circle.dto.*;
@@ -30,7 +31,7 @@ import java.util.List;
 public class CircleScheduleServiceImpl implements CircleScheduleService {
 
     private final CircleScheduleRepository circleScheduleRepository;
-    private final MyCircleService myCircleService;
+    private final MyCircleDataService myCircleDataService;
 
     @Override
     public CircleScheduleCreateResponse createCircleSchedule(CircleMemberIdentifier circleMemberIdentifier, CircleScheduleCreateRequest circleScheduleCreateRequest) {
@@ -66,7 +67,7 @@ public class CircleScheduleServiceImpl implements CircleScheduleService {
 
 
     private MyCircle validateMembership(Long userId, Long circleId, String message) {
-        return myCircleService.fineJoinedMember(userId, circleId)
+        return myCircleDataService.fineJoinedMember(userId, circleId)
                 .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBERSHIP_NOT_FOUND, message));
     }
 
@@ -148,4 +149,5 @@ public class CircleScheduleServiceImpl implements CircleScheduleService {
 
         return CircleScheduleDetail.fromCircleSchedule(circleSchedule);
     }
+
 }

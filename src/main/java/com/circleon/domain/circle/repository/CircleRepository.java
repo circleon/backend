@@ -14,7 +14,7 @@ import java.util.Optional;
 
 
 @Repository
-public interface CircleRepository extends JpaRepository<Circle, Long> {
+public interface CircleRepository extends JpaRepository<Circle, Long>, CircleRepositoryCustom {
 
     Optional<Circle> findByIdAndCircleStatus(Long id, CircleStatus circleStatus);
 

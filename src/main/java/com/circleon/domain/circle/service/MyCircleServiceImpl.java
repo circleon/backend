@@ -14,7 +14,7 @@ import com.circleon.domain.circle.exception.CircleException;
 import com.circleon.domain.circle.repository.MyCircleRepository;
 import com.circleon.domain.user.entity.User;
 
-import com.circleon.domain.user.service.UserService;
+import com.circleon.domain.user.service.UserDataService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -30,17 +30,18 @@ import java.util.Optional;
 public class MyCircleServiceImpl implements MyCircleService {
 
     private final MyCircleRepository myCircleRepository;
-    private final CircleService circleService;
-    private final UserService userService;
+    private final CircleDataService circleDataService;
+    private final UserDataService userDataService;
+
 
     @Override
     public MyCircleCreateResponse applyForMembership(Long userId, Long circleId) {
 
         //이미 가입되어 있는지 확인
-        User user = userService.findById(userId)
+        User user = userDataService.findById(userId)
                 .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
-        Circle circle = circleService.findByIdAndCircleStatus(circleId, CircleStatus.ACTIVE)
+        Circle circle = circleDataService.findByIdAndCircleStatus(circleId, CircleStatus.ACTIVE)
                 .orElseThrow(()->new CircleException(CircleResponseStatus.CIRCLE_NOT_FOUND));
 
         List<MembershipStatus> membershipStatuses = new ArrayList<>();
@@ -86,12 +87,6 @@ public class MyCircleServiceImpl implements MyCircleService {
 
         return PaginatedResponse.fromPage(pagedMyCircles);
     }
-
-    @Override
-    public Optional<MyCircle> fineJoinedMember(Long userId, Long circleId) {
-        return myCircleRepository.fineJoinedMember(userId, circleId);
-    }
-
 
     @Override
     public void deleteApplication(Long userId, Long memberId) {

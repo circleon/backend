@@ -21,4 +21,6 @@ public interface AuthService {
     RefreshTokenResponse refreshToken(RefreshTokenRequest refreshTokenRequest);
 
     void logout(LogoutRequest logoutRequest);
+
+    void deleteExpiredRefreshTokens();
 }

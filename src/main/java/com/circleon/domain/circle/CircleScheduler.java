@@ -14,7 +14,7 @@ public class CircleScheduler {
     private final CircleService circleService;
 
     @Scheduled(cron = "0 0 3 ? * TUE")
-    public void runSoftDeletedCirclesCleanup(){
+    public void cleanUpSoftDeletedCircles(){
         try{
             log.info("Cleaning up SoftDeleted Circles");
             circleService.deleteSoftDeletedCircles();

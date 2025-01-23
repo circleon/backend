@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @Table(indexes = @Index(columnList = "refresh_token"))
-public class RefreshToken {
+public class UserRefreshToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,7 +37,7 @@ public class RefreshToken {
     private Long version;
 
     @Builder
-    public RefreshToken(String refreshToken, String accessToken, LocalDateTime expiresAt, User user) {
+    public UserRefreshToken(String refreshToken, String accessToken, LocalDateTime expiresAt, User user) {
         this.refreshToken = refreshToken;
         this.accessToken = accessToken;
         this.expiresAt = expiresAt;

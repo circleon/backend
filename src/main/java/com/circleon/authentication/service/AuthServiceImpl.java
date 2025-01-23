@@ -5,13 +5,12 @@ import com.circleon.authentication.dto.*;
 import com.circleon.authentication.email.dto.AwsSesEmailRequest;
 import com.circleon.authentication.email.dto.EmailVerificationRequest;
 import com.circleon.authentication.email.dto.VerificationCodeRequest;
-import com.circleon.authentication.email.service.AwsSesEmailService;
 import com.circleon.authentication.email.service.EmailService;
 import com.circleon.authentication.entity.EmailVerification;
-import com.circleon.authentication.entity.RefreshToken;
+import com.circleon.authentication.entity.UserRefreshToken;
 import com.circleon.authentication.jwt.JwtUtil;
 import com.circleon.authentication.repository.EmailVerificationRepository;
-import com.circleon.authentication.repository.RefreshTokenRepository;
+import com.circleon.authentication.repository.UserRefreshTokenRepository;
 import com.circleon.common.CommonResponseStatus;
 import com.circleon.common.exception.CommonException;
 import com.circleon.domain.user.UserResponseStatus;
@@ -41,7 +40,7 @@ public class AuthServiceImpl implements AuthService{
 
     private final UserRepository userRepository;
     private final EmailVerificationRepository emailVerificationRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final UserRefreshTokenRepository userRefreshTokenRepository;
 
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
@@ -270,14 +269,14 @@ public class AuthServiceImpl implements AuthService{
 
         LocalDateTime expiresAt = getLocalDateTime(expiration);
 
-        RefreshToken refreshToken = RefreshToken.builder()
+        UserRefreshToken userRefreshToken = UserRefreshToken.builder()
                 .refreshToken(newRefreshToken)
                 .accessToken(newAccessToken)
                 .expiresAt(expiresAt)
                 .user(foundUser)
                 .build();
 
-        refreshTokenRepository.save(refreshToken);
+        userRefreshTokenRepository.save(userRefreshToken);
 
         return LoginResponse.of(UserInfo.from(foundUser), TokenDto.of(newAccessToken, newRefreshToken));
     }
@@ -299,11 +298,11 @@ public class AuthServiceImpl implements AuthService{
         }
 
         //리프레쉬 존재 여부 (로그아웃 됐는지)
-        RefreshToken foundRefreshToken = refreshTokenRepository.findByRefreshToken(refreshToken)
+        UserRefreshToken foundUserRefreshToken = userRefreshTokenRepository.findByRefreshToken(refreshToken)
                 .orElseThrow(() -> new CommonException(CommonResponseStatus.REFRESH_TOKEN_INVALID));
 
         //액세스가 아직 유효한데 리프레쉬 요청이 들어오는 경우
-        String foundAccessToken = foundRefreshToken.getAccessToken();
+        String foundAccessToken = foundUserRefreshToken.getAccessToken();
         if(jwtUtil.validateToken(foundAccessToken)){
 
             Date now = new Date();
@@ -314,29 +313,29 @@ public class AuthServiceImpl implements AuthService{
             }
             
             //리프레쉬 탈취로 간주
-            refreshTokenRepository.delete(foundRefreshToken);
+            userRefreshTokenRepository.delete(foundUserRefreshToken);
             return null;
         }
 
         //새로운 액세스 토큰
-        return reissueAccessToken(foundRefreshToken);
+        return reissueAccessToken(foundUserRefreshToken);
 
     }
 
-    private RefreshTokenResponse reissueAccessToken(RefreshToken foundRefreshToken) {
+    private RefreshTokenResponse reissueAccessToken(UserRefreshToken foundUserRefreshToken) {
         try{
-            Long userId = jwtUtil.getUserId(foundRefreshToken.getRefreshToken());
-            String role = jwtUtil.getRole(foundRefreshToken.getRefreshToken());
+            Long userId = jwtUtil.getUserId(foundUserRefreshToken.getRefreshToken());
+            String role = jwtUtil.getRole(foundUserRefreshToken.getRefreshToken());
 
             String accessToken = jwtUtil.createAccessToken(userId, role);
 
-            foundRefreshToken.setAccessToken(accessToken);
+            foundUserRefreshToken.setAccessToken(accessToken);
 
             return RefreshTokenResponse.builder()
                     .accessToken(accessToken)
                     .build();
         }catch (Exception e){
-            refreshTokenRepository.delete(foundRefreshToken);
+            userRefreshTokenRepository.delete(foundUserRefreshToken);
             return null;
         }
     }
@@ -345,6 +344,13 @@ public class AuthServiceImpl implements AuthService{
     //TODO 좀 더 고민
     @Override
     public void logout(LogoutRequest logoutRequest) {
-        refreshTokenRepository.deleteByRefreshToken(logoutRequest.getRefreshToken());
+        userRefreshTokenRepository.deleteByRefreshToken(logoutRequest.getRefreshToken());
+    }
+
+    @Override
+    public void deleteExpiredRefreshTokens() {
+
+        //날짜 만료 리프레쉬 토큰
+        userRefreshTokenRepository.deleteExpiredRefreshTokens();
     }
 }

@@ -7,10 +7,10 @@ import com.circleon.authentication.email.dto.EmailVerificationRequest;
 import com.circleon.authentication.email.dto.VerificationCodeRequest;
 import com.circleon.authentication.email.service.EmailService;
 import com.circleon.authentication.entity.EmailVerification;
-import com.circleon.authentication.entity.RefreshToken;
+import com.circleon.authentication.entity.UserRefreshToken;
 import com.circleon.authentication.jwt.JwtUtil;
 import com.circleon.authentication.repository.EmailVerificationRepository;
-import com.circleon.authentication.repository.RefreshTokenRepository;
+import com.circleon.authentication.repository.UserRefreshTokenRepository;
 import com.circleon.domain.user.UserResponseStatus;
 import com.circleon.domain.user.entity.Role;
 import com.circleon.domain.user.entity.User;
@@ -50,7 +50,7 @@ class AuthServiceImplTest {
     private EmailVerificationRepository emailVerificationRepository;
 
     @Mock
-    private RefreshTokenRepository refreshTokenRepository;
+    private UserRefreshTokenRepository userRefreshTokenRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -341,14 +341,14 @@ class AuthServiceImplTest {
         String newAccessToken = jwtUtil.createAccessToken(foundUser.getId(), foundUser.getRole().name());
         String newRefreshToken = jwtUtil.createRefreshToken(foundUser.getId(), foundUser.getRole().name());
 
-        RefreshToken refreshToken = RefreshToken.builder()
+        UserRefreshToken userRefreshToken = UserRefreshToken.builder()
                 .user(foundUser)
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
                 .expiresAt(LocalDateTime.now().plusMinutes(10))
                 .build();
 
-        when(refreshTokenRepository.save(refreshToken)).thenReturn(refreshToken);
+        when(userRefreshTokenRepository.save(userRefreshToken)).thenReturn(userRefreshToken);
 
         //when
         LoginResponse loginResponse = authServiceImpl.login(loginRequest);
@@ -356,7 +356,7 @@ class AuthServiceImplTest {
         assertEquals("access_token", loginResponse.getToken().getAccessToken());
         assertEquals("refresh_token", loginResponse.getToken().getRefreshToken());
         assertEquals(foundUser.getId(), loginResponse.getUser().getUserId());
-        verify(refreshTokenRepository, times(1)).save(any(RefreshToken.class));
+        verify(userRefreshTokenRepository, times(1)).save(any(UserRefreshToken.class));
 
     }
 

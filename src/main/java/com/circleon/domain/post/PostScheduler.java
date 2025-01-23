@@ -16,7 +16,7 @@ public class PostScheduler {
     private final CommentService commentService;
 
     @Scheduled(cron = "0 0 3 ? * FRI")
-    public void runSoftDeletedPostsCleanup() {
+    public void cleanUpSoftDeletedPosts() {
       try{
           log.info("Cleaning up SoftDeleted Posts");
           postService.deleteSoftDeletedPosts();
@@ -26,7 +26,7 @@ public class PostScheduler {
     }
 
     @Scheduled(cron = "0 0 3 ? * MON")
-    public void runSoftDeletedCommentsCleanup() {
+    public void cleanUpSoftDeletedComments() {
         try{
             log.info("Cleaning up SoftDeleted Comments");
             commentService.deleteSoftDeletedComments();

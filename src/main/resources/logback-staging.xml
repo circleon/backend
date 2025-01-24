@@ -2,7 +2,7 @@
 <configuration>
     <!-- 공통 설정 -->
     <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
-    <property name="LOG_PATH" value="/app/logs"/>
+    <property name="LOG_PATH" value="${LOG_PATH}"/>
     <property name="LOG_FILE_NAME" value="circle-on-staging"/>
 
     <!-- 로그 파일 Appender 정의 -->

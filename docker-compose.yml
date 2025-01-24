@@ -7,7 +7,7 @@ services:
       - "8080:8080"
     volumes:
       - ${IMAGE_STORAGE_PATH}:/app/images
-      - ${LOG_PATH}:/app/logs
+      - ${LOG_STORAGE_PATH}:${LOG_PATH}
     environment:
       - DB_URL=${DB_URL}
       - DB_USERNAME=${DB_USERNAME}
@@ -17,4 +17,5 @@ services:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
+      - LOG_PATH=${LOG_PATH}
       - TZ=Asia/Seoul

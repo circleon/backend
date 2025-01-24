@@ -10,6 +10,8 @@ application-dev.properties
 *.env
 build-local.sh
 logback-local.xml
+*.log
+logs/
 
 ### mac ###
 .DS_Store

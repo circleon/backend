@@ -66,6 +66,7 @@ jobs:
           key: ${{ secrets.EC2_DEV_SSH_KEY }}
           port: 22
           script: |
+            mkdir -p ~/circle-on
             cd ~/circle-on
             export DB_URL=${{ secrets.DB_URL_DEV }}
             export DB_USERNAME=${{ secrets.DB_USERNAME_DEV }}
@@ -76,5 +77,7 @@ jobs:
             export IMAGE_STORAGE_PATH=${{ secrets.IMAGE_STORAGE_PATH }}
             export REDIS_HOST=${{ secrets.REDIS_HOST_DEV }}
             export REDIS_PORT=${{ secrets.REDIS_PORT_DEV }}
+            export LOG_STORAGE_PATH=${{ secrets.LOG_STORAGE_PATH }}
+            export LOG_PATH=${{ secrets.LOG_PATH }}
             docker compose down
             docker compose up --build -d

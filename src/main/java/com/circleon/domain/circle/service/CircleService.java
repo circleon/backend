@@ -34,13 +34,13 @@ public interface CircleService {
     Page<CircleMemberResponse> findPagedCircleMembers(Long userid, Long circleId, Pageable pageable, MembershipStatus membershipStatus);
 
     //동아리 멤버 직책 변경
-    void updateCircleMemberRole(Long userId, Long circleId, Long memberId, CircleRoleUpdateRequest circleRoleUpdateRequest);
-
-    //동아리 멥머 가입 승인 거절 동시에
-    void updateMembershipStatus(Long userId, Long circleId, Long memberId, MembershipStatusUpdateRequest membershipStatusUpdateRequest);
-
-    //동아리원 추방
-    void expelMember(Long userId, Long circleId, Long memberId);
+//    void updateCircleMemberRole(Long userId, Long circleId, Long memberId, CircleRoleUpdateRequest circleRoleUpdateRequest);
+//
+//    //동아리 멥머 가입 승인 거절 동시에
+//    void updateMembershipStatus(Long userId, Long circleId, Long memberId, MembershipStatusUpdateRequest membershipStatusUpdateRequest);
+//
+//    //동아리원 추방
+//    void expelMember(Long userId, Long circleId, Long memberId);
 
     //TODO 동아리 삭제
 

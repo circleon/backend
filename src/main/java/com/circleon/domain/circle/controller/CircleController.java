@@ -9,11 +9,12 @@ import com.circleon.common.dto.SuccessResponse;
 import com.circleon.common.exception.CommonException;
 import com.circleon.common.file.FileStore;
 import com.circleon.domain.circle.CategoryType;
-import com.circleon.domain.circle.CircleFileStore;
+
 import com.circleon.domain.circle.CircleResponseStatus;
 import com.circleon.domain.circle.MembershipStatus;
 import com.circleon.domain.circle.dto.*;
 import com.circleon.domain.circle.exception.CircleException;
+import com.circleon.domain.circle.service.CircleMemberService;
 import com.circleon.domain.circle.service.CircleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,16 +22,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.nio.file.Files;
+
 import java.util.List;
-import java.util.Objects;
+
 
 @RestController
 @Slf4j
@@ -40,6 +38,7 @@ public class CircleController {
 
     private final CircleService circleService;
     private final FileStore circleFileStore;
+    private final CircleMemberService circleMemberService;
 
     @PostMapping
     public ResponseEntity<SuccessResponse> createCircle(@Valid @ModelAttribute CircleCreateRequest circleCreateRequest,
@@ -151,7 +150,7 @@ public class CircleController {
                                                             @PathVariable Long circleId,
                                                             @PathVariable Long memberId,
                                                             @Valid @RequestBody CircleRoleUpdateRequest circleRoleUpdateRequest){
-        circleService.updateCircleMemberRole(userId, circleId, memberId, circleRoleUpdateRequest);
+        circleMemberService.updateCircleMemberRole(userId, circleId, memberId, circleRoleUpdateRequest);
 
         return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
     }
@@ -164,7 +163,7 @@ public class CircleController {
 
 
 
-        circleService.updateMembershipStatus(userId, circleId, memberId, membershipStatusUpdateRequest);
+        circleMemberService.updateMembershipStatus(userId, circleId, memberId, membershipStatusUpdateRequest);
 
         return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
     }
@@ -174,7 +173,7 @@ public class CircleController {
                                                        @PathVariable Long circleId,
                                                        @PathVariable Long memberId){
 
-        circleService.expelMember(userId, circleId, memberId);
+        circleMemberService.expelMember(userId, circleId, memberId);
 
         return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
     }

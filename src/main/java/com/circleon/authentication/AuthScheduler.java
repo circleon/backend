@@ -14,13 +14,13 @@ public class AuthScheduler {
 
     private final AuthService authService;
 
-//    @Scheduled(initialDelay = 5000)
-//    public void cleanUpExpiredRefreshTokens(){
-//        try {
-//            log.info("Cleaning up expired refresh tokens");
-//            authService.deleteExpiredRefreshTokens();
-//        }catch (Exception e){
-//            log.error("Cleaning up expired refresh tokens fail", e);
-//        }
-//    }
+    @Scheduled(cron = "0 0 3 ? * WED")
+    public void cleanUpExpiredRefreshTokens(){
+        try {
+            log.info("Cleaning up expired refresh tokens");
+            authService.deleteExpiredRefreshTokens();
+        }catch (Exception e){
+            log.error("Cleaning up expired refresh tokens fail", e);
+        }
+    }
 }

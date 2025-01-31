@@ -8,7 +8,6 @@ import com.circleon.domain.circle.CircleRole;
 import com.circleon.domain.circle.entity.MyCircle;
 import com.circleon.domain.circle.exception.CircleException;
 import com.circleon.domain.circle.service.MyCircleDataService;
-import com.circleon.domain.circle.service.MyCircleService;
 import com.circleon.domain.schedule.ScheduleResponseStatus;
 import com.circleon.domain.schedule.circle.dto.*;
 import com.circleon.domain.schedule.circle.entity.CircleSchedule;
@@ -67,7 +66,7 @@ public class CircleScheduleServiceImpl implements CircleScheduleService {
 
 
     private MyCircle validateMembership(Long userId, Long circleId, String message) {
-        return myCircleDataService.fineJoinedMember(userId, circleId)
+        return myCircleDataService.findJoinedMember(userId, circleId)
                 .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBERSHIP_NOT_FOUND, message));
     }
 

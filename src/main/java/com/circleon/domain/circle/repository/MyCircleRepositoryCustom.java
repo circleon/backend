@@ -19,11 +19,13 @@ public interface MyCircleRepositoryCustom {
 
     Optional<MyCircle> findAllByUserAndCircleInMembershipStatuses(User user, Circle circle, List<MembershipStatus> membershipStatuses);
 
-    Optional<MyCircle> fineJoinedMember(Long userId, Long circleId);
+    Optional<MyCircle> findJoinedMember(Long userId, Long circleId);
 
     Page<MyCircleSearchResponse> findAllByMyCircleSearchRequest(MyCircleSearchRequest myCircleSearchRequest);
 
     Optional<MyCircle> findByIdWithUserAndCircle(Long myCircleId);
 
     void deleteAllByCircles(List<Circle> circles);
+
+    int countJoinedMember(Long circleId);
 }

@@ -5,13 +5,11 @@ import com.circleon.common.CommonStatus;
 import com.circleon.common.dto.PaginatedResponse;
 import com.circleon.common.exception.CommonException;
 import com.circleon.domain.circle.CircleResponseStatus;
-import com.circleon.domain.circle.CircleRole;
 import com.circleon.domain.circle.entity.Circle;
 import com.circleon.domain.circle.entity.MyCircle;
 import com.circleon.domain.circle.exception.CircleException;
 
 import com.circleon.domain.circle.service.MyCircleDataService;
-import com.circleon.domain.circle.service.MyCircleService;
 import com.circleon.domain.post.PostResponseStatus;
 import com.circleon.domain.post.dto.*;
 import com.circleon.domain.post.entity.Comment;
@@ -61,7 +59,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private MyCircle validateMembership(Long userId, Long circleId) {
-        return myCircleDataService.fineJoinedMember(userId, circleId)
+        return myCircleDataService.findJoinedMember(userId, circleId)
                 .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBERSHIP_NOT_FOUND));
     }
 

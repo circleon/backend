@@ -11,7 +11,6 @@ import com.circleon.domain.circle.CircleRole;
 import com.circleon.domain.circle.entity.MyCircle;
 import com.circleon.domain.circle.exception.CircleException;
 import com.circleon.domain.circle.service.MyCircleDataService;
-import com.circleon.domain.circle.service.MyCircleService;
 import com.circleon.domain.post.PostResponseStatus;
 import com.circleon.domain.post.PostType;
 import com.circleon.domain.post.dto.*;
@@ -86,7 +85,7 @@ public class PostServiceImpl implements PostService {
     }
 
     private MyCircle validateMembership(Long userId, Long circleId) {
-        return myCircleDataService.fineJoinedMember(userId, circleId)
+        return myCircleDataService.findJoinedMember(userId, circleId)
                 .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBERSHIP_NOT_FOUND));
     }
 

@@ -6,5 +6,5 @@ import java.util.Optional;
 
 public interface MyCircleDataService {
 
-    Optional<MyCircle> fineJoinedMember(Long userId, Long circleId);
+    Optional<MyCircle> findJoinedMember(Long userId, Long circleId);
 }

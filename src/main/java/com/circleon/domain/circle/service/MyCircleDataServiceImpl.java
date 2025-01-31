@@ -16,7 +16,7 @@ public class MyCircleDataServiceImpl implements MyCircleDataService {
     private final MyCircleRepository myCircleRepository;
 
     @Override
-    public Optional<MyCircle> fineJoinedMember(Long userId, Long circleId) {
-        return myCircleRepository.fineJoinedMember(userId, circleId);
+    public Optional<MyCircle> findJoinedMember(Long userId, Long circleId) {
+        return myCircleRepository.findJoinedMember(userId, circleId);
     }
 }

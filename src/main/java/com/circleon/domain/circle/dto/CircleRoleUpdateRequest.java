@@ -2,6 +2,7 @@ package com.circleon.domain.circle.dto;
 
 import com.circleon.domain.circle.CircleRole;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Getter
@@ -11,6 +12,6 @@ import lombok.*;
 @Builder
 public class CircleRoleUpdateRequest {
 
-    @NotBlank
+    @NotNull
     private CircleRole circleRole;
 }

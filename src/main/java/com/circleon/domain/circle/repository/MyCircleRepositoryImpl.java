@@ -151,7 +151,7 @@ public class MyCircleRepositoryImpl implements MyCircleRepositoryCustom{
     }
 
     @Override
-    public Optional<MyCircle> fineJoinedMember(Long userId, Long circleId) {
+    public Optional<MyCircle> findJoinedMember(Long userId, Long circleId) {
 
         return Optional.ofNullable(
                 jpaQueryFactory
@@ -228,5 +228,23 @@ public class MyCircleRepositoryImpl implements MyCircleRepositoryCustom{
                 .delete(myCircle)
                 .where(myCircle.circle.in(circles))
                 .execute();
+    }
+
+    @Override
+    public int countJoinedMember(Long circleId) {
+
+        Long result = jpaQueryFactory
+                .select(myCircle.count())
+                .from(myCircle)
+                .join(myCircle.circle, circle)
+                .where(
+                        circleIdEq(circleId),
+                        circleStatusEq(CircleStatus.ACTIVE),
+                        membershipStatusEq(MembershipStatus.APPROVED).or(
+                                membershipStatusEq(MembershipStatus.LEAVE_REQUEST)
+                        )
+                ).fetchOne();
+
+        return result == null ? 0 : result.intValue();
     }
 }

@@ -25,30 +25,23 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class CircleMemberService {
 
-    private final CircleRepository circleRepository;
-    private final UserDataService userDataService;
+
     private final MyCircleRepository myCircleRepository;
 
     public void updateCircleMemberRole(Long userId, Long circleId, Long memberId, CircleRoleUpdateRequest circleRoleUpdateRequest) {
 
-        User presidentUser = userDataService.findByIdAndStatus(userId, UserStatus.ACTIVE)
-                .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
-
         // 회장만 가능
-        Circle targetCircle = validatePresidentAccess(presidentUser, circleId);
+        MyCircle president = validatePresidentAccess(userId, circleId);
 
         // 이 멤버가 실제 가입하고 있는지 체크
-        MyCircle member = myCircleRepository.findByIdAndCircleAndMembershipStatus(memberId, targetCircle, MembershipStatus.APPROVED)
-                .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBER_NOT_FOUND));
+        MyCircle member = myCircleRepository.findByIdAndCircle(memberId, president.getCircle())
+                .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBER_NOT_FOUND, "[updateCircleMemberRole] 멤버가 존재하지 않습니다."));
 
         if(circleRoleUpdateRequest.getCircleRole() == CircleRole.PRESIDENT){
             // 회장으로
             member.setCircleRole(circleRoleUpdateRequest.getCircleRole());
 
             // 본인은 임원으로
-            MyCircle president = myCircleRepository.findByUserAndCircleAndMembershipStatus(presidentUser, targetCircle, MembershipStatus.APPROVED)
-                    .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBERSHIP_NOT_FOUND));
-
             president.setCircleRole(CircleRole.EXECUTIVE);
             return ;
         }
@@ -61,13 +54,11 @@ public class CircleMemberService {
     public void updateMembershipStatus(Long userId, Long circleId, Long memberId, MembershipStatusUpdateRequest membershipStatusUpdateRequest) {
 
         //임원들 가능
-        User authorizedUser = userDataService.findByIdAndStatus(userId, UserStatus.ACTIVE)
-                .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
-        Circle circle = validateExecutiveAccess(authorizedUser, circleId);
+        MyCircle executive = validateExecutiveAccess(userId, circleId);
 
         //상태가 변경될 멤버
-        MyCircle member = myCircleRepository.findByIdAndCircle(memberId, circle)
+        MyCircle member = myCircleRepository.findByIdAndCircle(memberId, executive.getCircle())
                 .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBER_NOT_FOUND));
 
         //거절이나 탈퇴되어 있으면 변경 불가능
@@ -94,13 +85,13 @@ public class CircleMemberService {
 
         // 가입시 카운트
         if(membershipStatus == MembershipStatus.APPROVED){
-            registerMember(circle, member);
+            registerMember(executive.getCircle(), member);
             return;
         }
 
         //탈퇴 승인 시
         if(membershipStatus == MembershipStatus.INACTIVE){
-            leaveCircle(circle);
+            leaveCircle(executive.getCircle());
         }
 
     }
@@ -117,13 +108,11 @@ public class CircleMemberService {
     public void expelMember(Long userId, Long circleId, Long memberId) {
 
         //임원들 가능
-        User authorizedUser = userDataService.findByIdAndStatus(userId, UserStatus.ACTIVE)
-                .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
-        Circle circle = validateExecutiveAccess(authorizedUser, circleId);
+        MyCircle executive = validateExecutiveAccess(userId, circleId);
 
         //실제 가입되어 있는 유저인지
-        MyCircle member = myCircleRepository.findByIdAndCircleAndMembershipStatus(memberId, circle, MembershipStatus.APPROVED)
+        MyCircle member = myCircleRepository.findByIdAndCircleAndMembershipStatus(memberId, executive.getCircle(), MembershipStatus.APPROVED)
                 .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBER_NOT_FOUND));
 
         if(member.getCircleRole() == CircleRole.PRESIDENT){
@@ -136,36 +125,30 @@ public class CircleMemberService {
 
         //추방 + 카운트
         member.setMembershipStatus(MembershipStatus.INACTIVE);
-        circle.decrementMemberCount();
+        executive.getCircle().decrementMemberCount();
     }
 
-    private Circle validateExecutiveAccess(User user, Long circleId) {
+    private MyCircle validateExecutiveAccess(Long userId, Long circleId) {
 
-        Circle foundCircle = circleRepository.findByIdAndCircleStatus(circleId, CircleStatus.ACTIVE)
-                .orElseThrow(() -> new CircleException(CircleResponseStatus.CIRCLE_NOT_FOUND));
 
-        MyCircle foundMyCircle = myCircleRepository.findByUserAndCircleAndMembershipStatus(user, foundCircle, MembershipStatus.APPROVED)
-                .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBERSHIP_NOT_FOUND));
+        MyCircle member = myCircleRepository.findJoinedMember(userId, circleId)
+                .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBER_NOT_FOUND, "[validateExecutiveAccess] 멤버가 아닙니다."));
 
-        if(foundMyCircle.getCircleRole() == CircleRole.MEMBER){
+        if(member.getCircleRole() == CircleRole.MEMBER){
             throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "동아리 임원이 아닙니다.");
         }
 
-        return foundCircle;
+        return member;
     }
 
-    private Circle validatePresidentAccess(User user, Long circleId) {
-        Circle foundCircle = circleRepository.findByIdAndCircleStatus(circleId, CircleStatus.ACTIVE)
-                .orElseThrow(() -> new CircleException(CircleResponseStatus.CIRCLE_NOT_FOUND));
+    private MyCircle validatePresidentAccess(Long userId, Long circleId) {
 
-        // 요청 유저가 해당 써클의 회장이나 임원인지? 회장만
-        MyCircle foundMyCircle = myCircleRepository.findByUserAndCircleAndMembershipStatus(user, foundCircle, MembershipStatus.APPROVED)
-                .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBERSHIP_NOT_FOUND));
+        MyCircle member = myCircleRepository.findJoinedMember(userId, circleId)
+                .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBER_NOT_FOUND, "[validatePresidentAccess] 멤버가 아닙니다."));
 
-
-        if (foundMyCircle.getCircleRole() != CircleRole.PRESIDENT) {
+        if (member.getCircleRole() != CircleRole.PRESIDENT) {
             throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS);
         }
-        return foundCircle;
+        return member;
     }
 }

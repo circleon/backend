@@ -3,6 +3,11 @@ services:
     build: .
     image: circle-on-backend:dev
     container_name: circle-on-app
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "1"
     ports:
       - "8080:8080"
     volumes:

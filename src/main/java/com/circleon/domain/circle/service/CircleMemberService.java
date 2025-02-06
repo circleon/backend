@@ -54,7 +54,6 @@ public class CircleMemberService {
     public void updateMembershipStatus(Long userId, Long circleId, Long memberId, MembershipStatusUpdateRequest membershipStatusUpdateRequest) {
 
         //임원들 가능
-
         MyCircle executive = validateExecutiveAccess(userId, circleId);
 
         //상태가 변경될 멤버

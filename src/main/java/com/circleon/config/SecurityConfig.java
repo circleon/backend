@@ -42,7 +42,8 @@ public class SecurityConfig {
                                 "/api/auth/verification", "/api/auth/verification-code",
                                 "/api/auth/refresh", "/api/auth/test").permitAll()
 
-                        .requestMatchers("/actuator/**").access(new WebExpressionAuthorizationManager("hasIpAddress('127.0.0.1')"))
+                        .requestMatchers("/actuator/**")
+                        .access(new WebExpressionAuthorizationManager("hasIpAddress('127.0.0.1') or hasIpAddress('172.16.0.0/12')"))
 
                         .requestMatchers(("/api/circles/**")).hasRole("USER")
 

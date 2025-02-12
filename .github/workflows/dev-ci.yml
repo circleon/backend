@@ -81,3 +81,4 @@ jobs:
             export LOG_PATH=${{ secrets.LOG_PATH }}
             docker compose down
             docker compose up --build -d
+            

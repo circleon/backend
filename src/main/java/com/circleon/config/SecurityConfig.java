@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -40,6 +41,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login", "/api/auth/signup",
                                 "/api/auth/verification", "/api/auth/verification-code",
                                 "/api/auth/refresh", "/api/auth/test").permitAll()
+
+                        .requestMatchers("/actuator/**").access(new WebExpressionAuthorizationManager("hasIpAddress('127.0.0.1')"))
 
                         .requestMatchers(("/api/circles/**")).hasRole("USER")
 

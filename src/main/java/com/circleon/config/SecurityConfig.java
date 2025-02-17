@@ -40,7 +40,7 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/auth/login", "/api/auth/signup",
                                 "/api/auth/verification", "/api/auth/verification-code",
-                                "/api/auth/refresh", "/api/auth/test").permitAll()
+                                "/api/auth/refresh", "/api/auth/test", "/health-check").permitAll()
 
                         .requestMatchers("/actuator/**")
                         .access(new WebExpressionAuthorizationManager("hasIpAddress('172.16.0.0/12')"))

@@ -27,7 +27,8 @@ services:
       - REDIS_PORT=${REDIS_PORT}
       - LOG_PATH=${LOG_PATH}
       - TZ=Asia/Seoul
-    entrypoint: ["java", "-XX:+UseContainerSupport", "-Xmx1638m", "-jar", "/app/circle-on.jar"]
+#    command: ["sleep", "infinity"]
+#    entrypoint: ["java", "-XX:+UseContainerSupport", "-Xmx1638m", "-jar", "/app/circle-on.jar"]
 
   prometheus:
     image: prom/prometheus:latest

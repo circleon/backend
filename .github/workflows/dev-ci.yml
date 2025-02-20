@@ -81,6 +81,7 @@ jobs:
             export LOG_PATH=${{ secrets.LOG_PATH }}
             export PROMETHEUS_PATH=${{ secrets.PROMETHEUS_PATH }}
             export GRAFANA_PASSWORD=${{ secrets.GRAFANA_PASSWORD }}
+            export JAVA_OPTS=-Xms800m -Xmx1.6g -XX:+UseG1GC -XX:InitiatingHeapOccupancyPercent=60 -XX:+UseContainerSupport
             docker compose down
             docker compose up --build -d
             

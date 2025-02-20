@@ -17,7 +17,7 @@ services:
       - ${IMAGE_STORAGE_PATH}:/app/images
       - ${LOG_STORAGE_PATH}:${LOG_PATH}
     environment:
-      - JAVA_OPTS=-Xms800m -Xmx1.6g -XX:+UseG1GC -XXInitiatingHeapOccupancyPercent=60 -XX:+UseContainerSupport
+      - JAVA_OPTS="-Xms800m -Xmx1.6g -XX:+UseG1GC -XX:InitiatingHeapOccupancyPercent=60 -XX:+UseContainerSupport"
       - DB_URL=${DB_URL}
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}

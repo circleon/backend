@@ -2,6 +2,7 @@ package com.circleon.domain.circle.dto;
 
 import com.circleon.domain.circle.CategoryType;
 import com.circleon.domain.circle.CircleRole;
+import com.circleon.domain.circle.MembershipStatus;
 import com.circleon.domain.circle.entity.Circle;
 import lombok.*;
 
@@ -36,13 +37,15 @@ public class CircleDetailResponse {
 
     private String summary;
 
+    private MembershipStatus membershipStatus;
+
     private CircleRole circleRole;
 
     private Long memberId;
 
     private int memberCount;
 
-    public static CircleDetailResponse fromCircle(Circle circle, CircleRole circleRole, Long memberId) {
+    public static CircleDetailResponse fromCircle(Circle circle, MembershipStatus membershipStatus, CircleRole circleRole, Long memberId) {
         return CircleDetailResponse.builder()
                 .circleId(circle.getId())
                 .circleName(circle.getName())
@@ -56,6 +59,7 @@ public class CircleDetailResponse {
                 .recruitmentEndDate(circle.getRecruitmentEndDate())
                 .createdAt(circle.getCreatedAt())
                 .memberCount(circle.getMemberCount())
+                .membershipStatus(membershipStatus)
                 .circleRole(circleRole)
                 .memberId(memberId)
                 .build();

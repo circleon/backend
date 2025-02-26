@@ -282,10 +282,10 @@ public class CircleServiceImpl implements CircleService {
         foundCircle.setMemberCount(memberCount);
 
         //현재 써클에 가입유무 후 가입 -> 역할까지
-        Optional<MyCircle> member = myCircleRepository.findJoinedMember(userId, circleId);
+        Optional<MyCircle> member = myCircleRepository.findJoinedOrPendingMember(userId, circleId);
 
-        return member.map(myCircle -> CircleDetailResponse.fromCircle(foundCircle, myCircle.getCircleRole(), myCircle.getId()))
-                .orElseGet(()-> CircleDetailResponse.fromCircle(foundCircle, null, null));
+        return member.map(myCircle -> CircleDetailResponse.fromCircle(foundCircle, myCircle.getMembershipStatus(), myCircle.getCircleRole(), myCircle.getId()))
+                .orElseGet(()-> CircleDetailResponse.fromCircle(foundCircle, null, null, null));
 
     }
 
@@ -297,23 +297,55 @@ public class CircleServiceImpl implements CircleService {
         return circles.stream().map(CircleSimpleResponse::fromCircle).toList();
     }
 
+//    @Override
+//    public Page<CircleMemberResponse> findPagedCircleMembers(Long userId, Long circleId, Pageable pageable, MembershipStatus membershipStatus) {
+//
+//
+//        //회원이면 가능하도록
+//        MyCircle member = myCircleRepository.findJoinedMember(userId, circleId)
+//                .orElseThrow(()->new CircleException(CircleResponseStatus.MEMBER_NOT_FOUND));
+//
+//        //회원이면 가입 명단만 가능하도록 해야할듯?
+//        if(member.getCircleRole() == CircleRole.MEMBER && membershipStatus != MembershipStatus.APPROVED){
+//            throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "동아리원은 가입자 명단만 조회가 가능합니다.");
+//        }
+//
+//        //TODO 가입자 명단, 가입신청자 명단, 탈퇴 신청자 명단 폼이 다 다를거 같은데
+//
+//        return myCircleRepository.findAllByCircleAndMembershipStatusWithUser(member.getCircle(), membershipStatus, pageable)
+//                .map(CircleMemberResponse::fromMyCircle);
+//    }
+
     @Override
     public Page<CircleMemberResponse> findPagedCircleMembers(Long userId, Long circleId, Pageable pageable, MembershipStatus membershipStatus) {
 
-
         //회원이면 가능하도록
-        MyCircle member = myCircleRepository.findJoinedMember(userId, circleId)
-                .orElseThrow(()->new CircleException(CircleResponseStatus.MEMBER_NOT_FOUND));
+        Optional<MyCircle> optionalMember = myCircleRepository.findJoinedMember(userId, circleId);
 
-        //회원이면 가입 명단만 가능하도록 해야할듯?
-        if(member.getCircleRole() == CircleRole.MEMBER && membershipStatus != MembershipStatus.APPROVED){
-            throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "동아리원은 가입자 명단만 조회가 가능합니다.");
+        //동아리 원이 아닌경우는 가입자만
+        if(optionalMember.isEmpty() && membershipStatus != MembershipStatus.APPROVED){
+            throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "[findPagedCircleMembers] 동아리원이 아닌 경우 가입자 명단만 조회 가능");
         }
+
+        optionalMember.ifPresent(m->{
+            if(m.getCircleRole() == CircleRole.MEMBER && membershipStatus != MembershipStatus.APPROVED){
+                throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "동아리원은 가입자 명단만 조회가 가능합니다.");
+            }
+        });
 
         //TODO 가입자 명단, 가입신청자 명단, 탈퇴 신청자 명단 폼이 다 다를거 같은데
 
-        return myCircleRepository.findAllByCircleAndMembershipStatusWithUser(member.getCircle(), membershipStatus, pageable)
-                .map(CircleMemberResponse::fromMyCircle);
+
+        return optionalMember.map(member -> myCircleRepository
+                        .findAllByCircleAndMembershipStatusWithUser(member.getCircle(), membershipStatus, pageable)
+                        .map(CircleMemberResponse::fromMyCircle))
+                .orElseGet(()-> {
+                    Circle circle = circleRepository.findById(circleId)
+                            .orElseThrow(() -> new CircleException(CircleResponseStatus.CIRCLE_NOT_FOUND, "[findPagedCircleMembers] 존재하지 않는 동아리"));
+
+                    return myCircleRepository.findAllByCircleAndMembershipStatusWithUser(circle, membershipStatus, pageable)
+                            .map(CircleMemberResponse::fromMyCircle);
+                });
     }
 
     @Override

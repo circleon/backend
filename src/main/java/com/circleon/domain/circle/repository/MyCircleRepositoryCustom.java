@@ -21,6 +21,8 @@ public interface MyCircleRepositoryCustom {
 
     Optional<MyCircle> findJoinedMember(Long userId, Long circleId);
 
+    Optional<MyCircle> findJoinedOrPendingMember(Long userId, Long circleId);
+
     Page<MyCircleSearchResponse> findAllByMyCircleSearchRequest(MyCircleSearchRequest myCircleSearchRequest);
 
     Optional<MyCircle> findByIdWithUserAndCircle(Long myCircleId);

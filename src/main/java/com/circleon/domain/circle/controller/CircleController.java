@@ -134,7 +134,7 @@ public class CircleController {
             throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "[findPagedCircleMembers] 동아리원 명단 조회에서 권한이 없는 접근");
         }
 
-        PageableValidator.validatePageable(pageable, List.of("joinedAt", "username"), 100);
+        PageableValidator.validatePageable(pageable, List.of("joinedAt", "username"), 1000);
 
         Page<CircleMemberResponse> pagedCircleMembers = circleService.findPagedCircleMembers(userId, circleId, pageable, membershipStatus);
 
@@ -143,7 +143,7 @@ public class CircleController {
 
     private boolean isAccessMembershipStatus(MembershipStatus membershipStatus) {
         return membershipStatus == MembershipStatus.APPROVED || membershipStatus == MembershipStatus.PENDING || membershipStatus == MembershipStatus.LEAVE_REQUEST;
-    }
+}
 
     @PutMapping("/{circleId}/members/{memberId}/role")
     public ResponseEntity<SuccessResponse> updateCircleMemberRole(@LoginUser Long userId,

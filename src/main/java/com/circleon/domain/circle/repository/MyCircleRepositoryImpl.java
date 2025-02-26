@@ -1,5 +1,6 @@
 package com.circleon.domain.circle.repository;
 
+import com.circleon.domain.circle.CircleRole;
 import com.circleon.domain.circle.CircleStatus;
 import com.circleon.domain.circle.MembershipStatus;
 import com.circleon.domain.circle.dto.CircleInfo;
@@ -15,6 +16,7 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -28,9 +30,11 @@ import org.springframework.stereotype.Repository;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static com.circleon.domain.circle.entity.QCircle.*;
 import static com.circleon.domain.circle.entity.QMyCircle.*;
@@ -52,7 +56,10 @@ public class MyCircleRepositoryImpl implements MyCircleRepositoryCustom{
                 .join(myCircle.user, user).fetchJoin()
                 .where(myCircle.circle.eq(circle)
                         .and(myCircle.membershipStatus.eq(membershipStatus)))
-                .orderBy(getOrderSpecifiers(pageable.getSort()))
+                .orderBy(Stream.concat(
+                        Stream.of(getCircleRoleOrderSpecifier()),
+                        Arrays.stream(getOrderSpecifiers(pageable.getSort()))
+                ).toArray(OrderSpecifier[]::new))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -67,6 +74,15 @@ public class MyCircleRepositoryImpl implements MyCircleRepositoryCustom{
                 ).orElse(0L);
 
         return new PageImpl<>(content, pageable, total);
+    }
+
+    private OrderSpecifier<Integer> getCircleRoleOrderSpecifier() {
+        return new CaseBuilder()
+                .when(myCircle.circleRole.eq(CircleRole.PRESIDENT)).then(CircleRole.PRESIDENT.getOrderPriority())
+                .when(myCircle.circleRole.eq(CircleRole.EXECUTIVE)).then(CircleRole.EXECUTIVE.getOrderPriority())
+                .when(myCircle.circleRole.eq(CircleRole.MEMBER)).then(CircleRole.MEMBER.getOrderPriority())
+                .otherwise(4)
+                .asc();
     }
 
     private OrderSpecifier<?>[] getOrderSpecifiers(Sort sort) {
@@ -164,6 +180,24 @@ public class MyCircleRepositoryImpl implements MyCircleRepositoryCustom{
                                 circleStatusEq(CircleStatus.ACTIVE),
                                 membershipStatusEq(MembershipStatus.APPROVED)
                                         .or(membershipStatusEq(MembershipStatus.LEAVE_REQUEST))
+                        ).fetchOne()
+        );
+    }
+
+    @Override
+    public Optional<MyCircle> findJoinedOrPendingMember(Long userId, Long circleId) {
+        return Optional.ofNullable(
+                jpaQueryFactory
+                        .selectFrom(myCircle)
+                        .join(myCircle.circle, circle).fetchJoin()
+                        .join(myCircle.user, user).fetchJoin()
+                        .where(userIdEq(userId),
+                                userStatusEq(UserStatus.ACTIVE),
+                                circleIdEq(circleId),
+                                circleStatusEq(CircleStatus.ACTIVE),
+                                membershipStatusEq(MembershipStatus.APPROVED)
+                                        .or(membershipStatusEq(MembershipStatus.LEAVE_REQUEST))
+                                        .or(membershipStatusEq(MembershipStatus.PENDING))
                         ).fetchOne()
         );
     }

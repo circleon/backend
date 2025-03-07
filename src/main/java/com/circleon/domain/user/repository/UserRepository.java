@@ -1,5 +1,6 @@
 package com.circleon.domain.user.repository;
 
+import com.circleon.domain.user.entity.Role;
 import com.circleon.domain.user.entity.User;
 import com.circleon.domain.user.entity.UserStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,4 +21,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findAllByStatus(UserStatus status);
 
     boolean existsByIdAndStatus(Long id, UserStatus status);
+
+    Optional<User> findByIdAndRole(Long id, Role role);
 }

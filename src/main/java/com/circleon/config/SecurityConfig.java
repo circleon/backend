@@ -46,12 +46,14 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/auth/login", "/api/auth/signup",
                                 "/api/auth/verification", "/api/auth/verification-code",
-                                "/api/auth/refresh", "/api/auth/test", "/health-check").permitAll()
+                                "/api/auth/refresh", "/api/auth/test", "/health-check",
+                                "/api/admin/auth/login", "api/admin/auth/refresh"
+                        ).permitAll()
 
                         .requestMatchers("/actuator/**")
                         .access(new WebExpressionAuthorizationManager("hasIpAddress('172.16.0.0/12')"))
 
-                        .requestMatchers(("/api/circles/**")).hasRole("USER")
+                        .requestMatchers(("/api/admin/**")).hasRole("ADMIN")
 
                         .anyRequest().authenticated()
                 )

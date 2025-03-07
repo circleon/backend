@@ -310,7 +310,7 @@ public class CircleServiceImpl implements CircleService {
 //            throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "동아리원은 가입자 명단만 조회가 가능합니다.");
 //        }
 //
-//        //TODO 가입자 명단, 가입신청자 명단, 탈퇴 신청자 명단 폼이 다 다를거 같은데
+//
 //
 //        return myCircleRepository.findAllByCircleAndMembershipStatusWithUser(member.getCircle(), membershipStatus, pageable)
 //                .map(CircleMemberResponse::fromMyCircle);

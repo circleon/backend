@@ -1,6 +1,7 @@
 package com.circleon.domain.user.service;
 
 import com.circleon.domain.user.UserResponseStatus;
+import com.circleon.domain.user.entity.Role;
 import com.circleon.domain.user.entity.User;
 import com.circleon.domain.user.entity.UserStatus;
 import com.circleon.domain.user.exception.UserException;
@@ -20,9 +21,8 @@ public class UserDataServiceImpl implements UserDataService {
     private final UserRepository userRepository;
 
     @Override
-    public User findByEmailAndStatus(String email, UserStatus status) {
-        return userRepository.findByEmailAndStatus(email, status)
-                .orElseThrow(()->new UserException(UserResponseStatus.EMAIL_NOT_FOUND));
+    public Optional<User> findByEmailAndStatus(String email, UserStatus status) {
+        return userRepository.findByEmailAndStatus(email, status);
     }
 
     @Override
@@ -38,5 +38,10 @@ public class UserDataServiceImpl implements UserDataService {
     @Override
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
+    }
+
+    @Override
+    public Optional<User> findByIdAndRole(Long id, Role role) {
+        return userRepository.findByIdAndRole(id, role);
     }
 }

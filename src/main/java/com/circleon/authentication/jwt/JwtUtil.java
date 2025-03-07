@@ -25,8 +25,8 @@ public class JwtUtil {
     //TODO 잠시 1시간으로
     private final long jwtAccessExpirationMs = 1000L * 60 * 60;
 
-    //TODO 잠시 3시간분으로
-    private final long jwtRefreshExpirationMs = 1000L * 60 * 60 * 3;
+    //1주일
+    private final long jwtRefreshExpirationMs = 1000L * 60 * 60 * 24 * 7;
 
     @PostConstruct
     protected void init() {

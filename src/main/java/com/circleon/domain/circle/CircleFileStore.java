@@ -57,11 +57,10 @@ public class CircleFileStore extends AbstractFileStore {
             BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(fileBytes));
 
             int width = bufferedImage.getWidth();
-            int height = bufferedImage.getHeight();
 
-            if(width > 800 || height > 800){
+            if(width > 800){
                 Thumbnails.of(new ByteArrayInputStream(fileBytes))
-                        .size(800, 800)
+                        .width(800)
                         .keepAspectRatio(true)
                         .toFile(uploadPath.resolve(storeFileName).toFile());
             }else{

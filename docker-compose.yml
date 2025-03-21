@@ -32,8 +32,6 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus
     restart: always
-    mem_limit: 100m
-    memswap_limit: 400m
     volumes:
       - ${PROMETHEUS_PATH}:/etc/prometheus/prometheus.yml
     ports:
@@ -44,8 +42,6 @@ services:
     image: grafana/grafana:latest
     container_name: grafana
     restart: always
-    mem_limit: 100m
-    memswap_limit: 400m
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
     ports:

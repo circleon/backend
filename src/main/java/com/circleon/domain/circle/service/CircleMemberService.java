@@ -6,6 +6,7 @@ import com.circleon.domain.circle.CircleResponseStatus;
 import com.circleon.domain.circle.CircleRole;
 import com.circleon.domain.circle.CircleStatus;
 import com.circleon.domain.circle.MembershipStatus;
+import com.circleon.domain.circle.dto.CircleLeaveMessage;
 import com.circleon.domain.circle.dto.CircleRoleUpdateRequest;
 import com.circleon.domain.circle.dto.MembershipStatusUpdateRequest;
 import com.circleon.domain.circle.entity.Circle;
@@ -54,7 +55,7 @@ public class CircleMemberService {
     public void updateMembershipStatus(Long userId, Long circleId, Long memberId, MembershipStatusUpdateRequest membershipStatusUpdateRequest) {
 
         //임원들 가능
-        MyCircle executive = validateExecutiveAccess(userId, circleId);
+        MyCircle executive = validateExecutiveAccess(userId, circleId, "[updateMembershipStatus] 멤버가 아닙니다.");
 
         //상태가 변경될 멤버
         MyCircle member = myCircleRepository.findByIdAndCircle(memberId, executive.getCircle())
@@ -98,6 +99,7 @@ public class CircleMemberService {
     private void registerMember(Circle circle, MyCircle member) {
         circle.incrementMemberCount();
         member.initJoinedAt();
+        member.setCircleRole(CircleRole.MEMBER);
     }
 
     private void leaveCircle(Circle circle) {
@@ -108,7 +110,7 @@ public class CircleMemberService {
 
         //임원들 가능
 
-        MyCircle executive = validateExecutiveAccess(userId, circleId);
+        MyCircle executive = validateExecutiveAccess(userId, circleId, "[expelMember] 멤버가 아닙니다.");
 
         //실제 가입되어 있는 유저인지
         MyCircle member = myCircleRepository.findByIdAndCircleAndMembershipStatus(memberId, executive.getCircle(), MembershipStatus.APPROVED)
@@ -127,11 +129,11 @@ public class CircleMemberService {
         executive.getCircle().decrementMemberCount();
     }
 
-    private MyCircle validateExecutiveAccess(Long userId, Long circleId) {
+    private MyCircle validateExecutiveAccess(Long userId, Long circleId, String errorMessage) {
 
 
         MyCircle member = myCircleRepository.findJoinedMember(userId, circleId)
-                .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBER_NOT_FOUND, "[validateExecutiveAccess] 멤버가 아닙니다."));
+                .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBER_NOT_FOUND, errorMessage));
 
         if(member.getCircleRole() == CircleRole.MEMBER){
             throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "동아리 임원이 아닙니다.");
@@ -149,5 +151,17 @@ public class CircleMemberService {
             throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS);
         }
         return member;
+    }
+
+    public CircleLeaveMessage findLeaveMessage(Long userId, Long circleId, Long memberId) {
+
+        //임원인지 체크
+        MyCircle executive = validateExecutiveAccess(userId, circleId, "[findLeaveMessage] 멤버가 아닙니다.");
+
+        //멤버가 가입되어 있고 탈퇴 요청 생태인지
+        MyCircle member = myCircleRepository.findByIdAndCircleAndMembershipStatus(memberId, executive.getCircle(), MembershipStatus.LEAVE_REQUEST)
+                .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBER_NOT_FOUND));
+
+        return CircleLeaveMessage.of(member.getLeaveMessage());
     }
 }

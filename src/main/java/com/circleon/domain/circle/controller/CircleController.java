@@ -178,6 +178,15 @@ public class CircleController {
         return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
     }
 
+    @GetMapping("/{circleId}/members/{memberId}/leave-message")
+    public ResponseEntity<CircleLeaveMessage> findLeaveMessage(@LoginUser Long userId,
+                                                               @PathVariable Long circleId,
+                                                               @PathVariable Long memberId){
+        CircleLeaveMessage leaveMessage = circleMemberService.findLeaveMessage(userId, circleId, memberId);
+
+        return ResponseEntity.ok(leaveMessage);
+    }
+
     @ExceptionHandler(CircleException.class)
     public ResponseEntity<ErrorResponse> handleCircleException(CircleException e) {
 

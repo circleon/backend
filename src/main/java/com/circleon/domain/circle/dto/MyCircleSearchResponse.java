@@ -1,6 +1,7 @@
 package com.circleon.domain.circle.dto;
 
 
+import com.circleon.domain.circle.CategoryType;
 import com.circleon.domain.circle.CircleRole;
 import com.circleon.domain.circle.MembershipStatus;
 import lombok.*;
@@ -14,13 +15,11 @@ import java.time.LocalDateTime;
 @Builder
 public class MyCircleSearchResponse {
 
-    private Long memberId;
+    private Long circleId;
 
-    private LocalDateTime joinedAt;
+    private String circleName;
 
-    private MembershipStatus membershipStatus;
+    private String thumbnailUrl;
 
-    private CircleRole circleRole;
-
-    private CircleInfo circleInfo;
+    private CategoryType categoryType;
 }

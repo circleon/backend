@@ -57,7 +57,6 @@ public class MyCircleServiceImpl implements MyCircleService {
         MyCircle applicant = MyCircle.builder()
                 .user(user)
                 .circle(circle)
-                .circleRole(CircleRole.MEMBER)
                 .membershipStatus(MembershipStatus.PENDING)
                 .build();
 

@@ -3,7 +3,6 @@ package com.circleon.domain.circle.repository;
 import com.circleon.domain.circle.CircleRole;
 import com.circleon.domain.circle.CircleStatus;
 import com.circleon.domain.circle.MembershipStatus;
-import com.circleon.domain.circle.dto.CircleInfo;
 
 import com.circleon.domain.circle.dto.MyCircleSearchRequest;
 import com.circleon.domain.circle.dto.MyCircleSearchResponse;
@@ -207,15 +206,11 @@ public class MyCircleRepositoryImpl implements MyCircleRepositoryCustom{
 
         List<MyCircleSearchResponse> myCircleSearchResponses = jpaQueryFactory
                 .select(Projections.constructor(MyCircleSearchResponse.class,
-                        myCircle.id,
-                        myCircle.joinedAt,
-                        myCircle.membershipStatus,
-                        myCircle.circleRole,
-                        Projections.constructor(CircleInfo.class,
-                                myCircle.circle.id,
-                                myCircle.circle.name,
-                                myCircle.circle.thumbnailUrl
-                        )))
+                        myCircle.circle.id,
+                        myCircle.circle.name,
+                        myCircle.circle.thumbnailUrl,
+                        myCircle.circle.categoryType
+                        ))
                 .from(myCircle)
                 .join(myCircle.circle, circle)
                 .where(

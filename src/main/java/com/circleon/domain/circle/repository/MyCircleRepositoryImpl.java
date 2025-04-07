@@ -50,11 +50,18 @@ public class MyCircleRepositoryImpl implements MyCircleRepositoryCustom{
     @Override
     public Page<MyCircle> findAllByCircleAndMembershipStatusWithUser(Circle circle, MembershipStatus membershipStatus, Pageable pageable) {
 
+
+        BooleanExpression membershipStatusCondition = membershipStatusEq(membershipStatus);
+
+        if(membershipStatus == MembershipStatus.APPROVED){
+            membershipStatusCondition = membershipStatusCondition.or(membershipStatusEq(MembershipStatus.LEAVE_REQUEST));
+        }
+
         List<MyCircle> content = jpaQueryFactory
                 .selectFrom(myCircle)
                 .join(myCircle.user, user).fetchJoin()
                 .where(myCircle.circle.eq(circle)
-                        .and(myCircle.membershipStatus.eq(membershipStatus)))
+                        ,membershipStatusCondition)
                 .orderBy(Stream.concat(
                         Stream.of(getCircleRoleOrderSpecifier()),
                         Arrays.stream(getOrderSpecifiers(pageable.getSort()))
@@ -68,7 +75,7 @@ public class MyCircleRepositoryImpl implements MyCircleRepositoryCustom{
                     .select(myCircle.count())
                     .from(myCircle)
                     .where(myCircle.circle.eq(circle)
-                            .and(myCircle.membershipStatus.eq(membershipStatus)))
+                            ,membershipStatusCondition)
                     .fetchOne()
                 ).orElse(0L);
 
@@ -204,6 +211,13 @@ public class MyCircleRepositoryImpl implements MyCircleRepositoryCustom{
     @Override
     public Page<MyCircleSearchResponse> findAllByMyCircleSearchRequest(MyCircleSearchRequest myCircleSearchRequest) {
 
+
+        BooleanExpression membershipStatusCondition = membershipStatusEq(myCircleSearchRequest.getMembershipStatus());
+
+        if(myCircleSearchRequest.getMembershipStatus() == MembershipStatus.APPROVED){
+            membershipStatusCondition = membershipStatusCondition.or(membershipStatusEq(MembershipStatus.LEAVE_REQUEST));
+        }
+
         List<MyCircleSearchResponse> myCircleSearchResponses = jpaQueryFactory
                 .select(Projections.constructor(MyCircleSearchResponse.class,
                         myCircle.circle.id,
@@ -215,7 +229,7 @@ public class MyCircleRepositoryImpl implements MyCircleRepositoryCustom{
                 .join(myCircle.circle, circle)
                 .where(
                         userIdEq(myCircleSearchRequest.getUserId()),
-                        membershipStatusEq(myCircleSearchRequest.getMembershipStatus()),
+                        membershipStatusCondition,
                         circleStatusEq(CircleStatus.ACTIVE)
                 )
                 .orderBy(getOrderSpecifiers(myCircleSearchRequest.getPageable().getSort()))

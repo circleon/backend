@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface MyCircleService {
 
-    MyCircleCreateResponse applyForMembership(Long userId, Long circleId);
+    MyCircleCreateResponse applyForMembership(Long userId, Long circleId, CircleJoinRequest circleJoinRequest);
 
     PaginatedResponse<MyCircleSearchResponse> findPagedMyCircles(MyCircleSearchRequest myCircleSearchRequest);
 

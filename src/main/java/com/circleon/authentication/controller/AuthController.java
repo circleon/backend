@@ -39,9 +39,17 @@ public class AuthController {
     @PostMapping("/verification")
     public CompletableFuture<ResponseEntity<SuccessResponse>> sendVerificationEmail(@Valid @RequestBody EmailVerificationRequest emailVerificationRequest) {
 
+
         return authService.sendAsyncVerificationEmail(emailVerificationRequest)
                 .thenApply(e->ResponseEntity.ok(SuccessResponse.builder().message("Success").build()));
     }
+
+//    @PostMapping("/verification")
+//    public ResponseEntity<SuccessResponse> sendVerificationEmail(@Valid @RequestBody EmailVerificationRequest emailVerificationRequest) {
+//
+//        authService.sendVerificationEmail(emailVerificationRequest);
+//        return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
+//    }
 
     @PostMapping("/verification-code")
     public ResponseEntity<SuccessResponse> verifyCode(@Valid @RequestBody VerificationCodeRequest verificationCodeRequest) {

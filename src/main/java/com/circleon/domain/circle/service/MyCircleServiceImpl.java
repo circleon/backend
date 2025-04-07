@@ -35,7 +35,7 @@ public class MyCircleServiceImpl implements MyCircleService {
 
 
     @Override
-    public MyCircleCreateResponse applyForMembership(Long userId, Long circleId) {
+    public MyCircleCreateResponse applyForMembership(Long userId, Long circleId, CircleJoinRequest circleJoinRequest) {
 
         //이미 가입되어 있는지 확인
         User user = userDataService.findById(userId)
@@ -58,6 +58,7 @@ public class MyCircleServiceImpl implements MyCircleService {
                 .user(user)
                 .circle(circle)
                 .membershipStatus(MembershipStatus.PENDING)
+                .joinMessage(circleJoinRequest.getJoinMessage())
                 .build();
 
         MyCircle savedMyCircle = myCircleRepository.save(applicant);
@@ -121,6 +122,11 @@ public class MyCircleServiceImpl implements MyCircleService {
         MyCircle member = myCircleRepository.findByIdWithUserAndCircle(memberId)
                 .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBER_NOT_FOUND,
                         "[processLeaveRequest] 존재하지 않은 동아리 회원"));
+
+        //회장이면 불가능
+        if(member.getCircleRole() == CircleRole.PRESIDENT){
+            throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "[processLeaveRequest] 회장은 탈퇴 신청 불가능");
+        }
 
         //해당 유저가 맞는지 체크
         validateOwnership(userId, member, "[processLeaveRequest] 다른 유저의 동아리 탈퇴 신청 시도");

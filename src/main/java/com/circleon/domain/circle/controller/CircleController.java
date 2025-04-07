@@ -187,6 +187,16 @@ public class CircleController {
         return ResponseEntity.ok(leaveMessage);
     }
 
+    @GetMapping("/{circleId}/members/{memberId}/join-message")
+    public ResponseEntity<CircleJoinMessage> findJoinMessage(@LoginUser Long userId,
+                                                             @PathVariable Long circleId,
+                                                             @PathVariable Long memberId){
+
+        CircleJoinMessage joinMessage = circleMemberService.findJoinMessage(userId, circleId, memberId);
+
+        return ResponseEntity.ok(joinMessage);
+    }
+
     @ExceptionHandler(CircleException.class)
     public ResponseEntity<ErrorResponse> handleCircleException(CircleException e) {
 

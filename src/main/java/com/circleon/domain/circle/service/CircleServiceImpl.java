@@ -70,9 +70,22 @@ public class CircleServiceImpl implements CircleService {
                 .summary(circleCreateRequest.getSummary())
                 .recruitmentStartDate(circleCreateRequest.getRecruitmentStartDate())
                 .recruitmentEndDate(circleCreateRequest.getRecruitmentEndDate())
+                .memberCount(1)
                 .build();
 
         Circle savedCircle = circleRepository.save(circle);
+
+        MyCircle myCircle = MyCircle.builder()
+                .circleRole(CircleRole.PRESIDENT)
+                .membershipStatus(MembershipStatus.APPROVED)
+                .circle(savedCircle)
+                .user(foundUser)
+                .joinMessage("")
+                .build();
+
+        myCircle.initJoinedAt();
+
+        myCircleRepository.save(myCircle);
 
 
         //프로필 이미지 유효할때

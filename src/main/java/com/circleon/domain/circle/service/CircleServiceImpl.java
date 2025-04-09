@@ -64,7 +64,7 @@ public class CircleServiceImpl implements CircleService {
         Circle circle = Circle.builder()
                 .applicant(foundUser)
                 .name(circleCreateRequest.getCircleName())
-                .circleStatus(CircleStatus.PENDING)
+                .circleStatus(CircleStatus.ACTIVE)
                 .categoryType(circleCreateRequest.getCategory())
                 .introduction(circleCreateRequest.getIntroduction())
                 .summary(circleCreateRequest.getSummary())

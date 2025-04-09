@@ -71,7 +71,8 @@ public class MyCircleController {
     }
 
     private boolean isValidMembershipStatusForSearch(MembershipStatus membershipStatus) {
-        return MembershipStatus.APPROVED == membershipStatus || MembershipStatus.PENDING == membershipStatus;
+        return MembershipStatus.APPROVED == membershipStatus || MembershipStatus.PENDING == membershipStatus
+                || MembershipStatus.LEAVE_REQUEST == membershipStatus;
     }
 
     @DeleteMapping("/{memberId}/application")

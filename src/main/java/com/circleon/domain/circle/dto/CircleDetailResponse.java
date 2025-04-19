@@ -3,6 +3,7 @@ package com.circleon.domain.circle.dto;
 import com.circleon.domain.circle.CategoryType;
 import com.circleon.domain.circle.CircleRole;
 import com.circleon.domain.circle.MembershipStatus;
+import com.circleon.domain.circle.OfficialStatus;
 import com.circleon.domain.circle.entity.Circle;
 import lombok.*;
 
@@ -45,6 +46,8 @@ public class CircleDetailResponse {
 
     private int memberCount;
 
+    private OfficialStatus officialStatus;
+
     public static CircleDetailResponse fromCircle(Circle circle, MembershipStatus membershipStatus, CircleRole circleRole, Long memberId) {
         return CircleDetailResponse.builder()
                 .circleId(circle.getId())
@@ -62,6 +65,7 @@ public class CircleDetailResponse {
                 .membershipStatus(membershipStatus)
                 .circleRole(circleRole)
                 .memberId(memberId)
+                .officialStatus(circle.getOfficialStatus())
                 .build();
     }
 }

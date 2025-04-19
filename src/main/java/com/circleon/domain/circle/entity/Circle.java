@@ -3,6 +3,7 @@ package com.circleon.domain.circle.entity;
 import com.circleon.common.BaseEntity;
 import com.circleon.domain.circle.CategoryType;
 import com.circleon.domain.circle.CircleStatus;
+import com.circleon.domain.circle.OfficialStatus;
 import com.circleon.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -51,6 +52,9 @@ public class Circle extends BaseEntity {
 
     @Column
     private LocalDateTime recruitmentEndDate;
+
+    @Column
+    private OfficialStatus officialStatus;
 
     @Column(nullable = false)
     private int memberCount;

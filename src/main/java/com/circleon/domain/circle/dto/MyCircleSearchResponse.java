@@ -22,4 +22,5 @@ public class MyCircleSearchResponse {
     private String thumbnailUrl;
 
     private CategoryType categoryType;
+
 }

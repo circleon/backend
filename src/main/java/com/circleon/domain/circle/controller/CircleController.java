@@ -12,6 +12,7 @@ import com.circleon.domain.circle.CategoryType;
 
 import com.circleon.domain.circle.CircleResponseStatus;
 import com.circleon.domain.circle.MembershipStatus;
+import com.circleon.domain.circle.OfficialStatus;
 import com.circleon.domain.circle.dto.*;
 import com.circleon.domain.circle.exception.CircleException;
 import com.circleon.domain.circle.service.CircleMemberService;
@@ -195,6 +196,16 @@ public class CircleController {
         CircleJoinMessage joinMessage = circleMemberService.findJoinMessage(userId, circleId, memberId);
 
         return ResponseEntity.ok(joinMessage);
+    }
+
+    @PutMapping("/{circleId}/official")
+    public ResponseEntity<SuccessResponse> updateOfficial(@LoginUser Long userId,
+                                                          @PathVariable Long circleId,
+                                                          @RequestParam(defaultValue = "UNOFFICIAL") OfficialStatus officialStatus){
+
+        circleService.updateOfficialStatus(userId, circleId, officialStatus);
+
+        return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
     }
 
     @ExceptionHandler(CircleException.class)

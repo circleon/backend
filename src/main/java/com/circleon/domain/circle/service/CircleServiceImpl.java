@@ -18,6 +18,7 @@ import com.circleon.domain.post.service.CommentDataService;
 import com.circleon.domain.post.service.PostDataService;
 import com.circleon.domain.post.service.PostImageDataService;
 import com.circleon.domain.schedule.circle.service.CircleScheduleDataService;
+import com.circleon.domain.user.entity.Role;
 import com.circleon.domain.user.entity.User;
 import com.circleon.domain.user.entity.UserStatus;
 import com.circleon.domain.user.service.UserDataService;
@@ -70,6 +71,7 @@ public class CircleServiceImpl implements CircleService {
                 .summary(circleCreateRequest.getSummary())
                 .recruitmentStartDate(circleCreateRequest.getRecruitmentStartDate())
                 .recruitmentEndDate(circleCreateRequest.getRecruitmentEndDate())
+                .officialStatus(OfficialStatus.UNOFFICIAL)
                 .memberCount(1)
                 .build();
 
@@ -362,6 +364,21 @@ public class CircleServiceImpl implements CircleService {
                     return myCircleRepository.findAllByCircleAndMembershipStatusWithUser(circle, membershipStatus, pageable)
                             .map(CircleMemberResponse::fromMyCircle);
                 });
+    }
+
+    @Override
+    public void updateOfficialStatus(Long userId, Long circleId, OfficialStatus officialStatus) {
+
+        //가입 유저인지 체크 + 회장 권한 체크
+        MyCircle president = validatePresidentAccess(userId, circleId);
+
+        //공식 인증을 하는데 관리자가 아니면 예외
+        if(officialStatus == OfficialStatus.OFFICIAL) {
+
+            throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "[updateOfficialStatus] 관리자 권한이 필요합니다.");
+        }
+
+        president.getCircle().setOfficialStatus(officialStatus);
     }
 
     @Override

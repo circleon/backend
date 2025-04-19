@@ -4,6 +4,7 @@ import com.circleon.common.dto.PaginatedResponse;
 import com.circleon.domain.circle.CategoryType;
 import com.circleon.domain.circle.CircleStatus;
 import com.circleon.domain.circle.MembershipStatus;
+import com.circleon.domain.circle.OfficialStatus;
 import com.circleon.domain.circle.dto.*;
 import com.circleon.domain.circle.entity.Circle;
 import org.springframework.core.io.Resource;
@@ -32,6 +33,8 @@ public interface CircleService {
     List<CircleSimpleResponse> findAllCirclesSimple();
 
     Page<CircleMemberResponse> findPagedCircleMembers(Long userid, Long circleId, Pageable pageable, MembershipStatus membershipStatus);
+
+    void updateOfficialStatus(Long userId, Long circleId, OfficialStatus officialStatus);
 
     //TODO 동아리 삭제
 

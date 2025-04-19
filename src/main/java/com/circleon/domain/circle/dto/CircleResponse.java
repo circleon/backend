@@ -1,6 +1,7 @@
 package com.circleon.domain.circle.dto;
 
 import com.circleon.domain.circle.CategoryType;
+import com.circleon.domain.circle.OfficialStatus;
 import com.circleon.domain.circle.entity.Circle;
 import lombok.*;
 
@@ -29,6 +30,8 @@ public class CircleResponse {
 
     private int memberCount;
 
+    private OfficialStatus officialStatus;
+
     public static CircleResponse fromCircle(Circle circle) {
         return CircleResponse.builder()
                 .circleId(circle.getId())
@@ -39,6 +42,7 @@ public class CircleResponse {
                 .createdAt(circle.getCreatedAt())
                 .memberCount(circle.getMemberCount())
                 .summary(circle.getSummary())
+                .officialStatus(circle.getOfficialStatus())
                 .build();
     }
 }

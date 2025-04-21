@@ -3,6 +3,8 @@ package com.circleon.domain.report.controller;
 import com.circleon.common.annotation.LoginUser;
 import com.circleon.common.dto.ErrorResponse;
 import com.circleon.common.dto.SuccessResponse;
+import com.circleon.domain.post.PostResponseStatus;
+import com.circleon.domain.post.exception.PostException;
 import com.circleon.domain.report.ReportResponseStatus;
 import com.circleon.domain.report.ReportType;
 import com.circleon.domain.report.dto.CreateReportCommand;
@@ -54,6 +56,23 @@ public class ReportController {
 
         log.error("ReportException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
 
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode(status.getCode())
+                .errorMessage(status.getMessage())
+                .build();
+
+        return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
+    }
+
+    @ExceptionHandler(PostException.class)
+    public ResponseEntity<ErrorResponse> handlePostException(PostException e) {
+
+        PostResponseStatus status = e.getStatus();
+
+        log.error("PostException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
+
+        log.error("PostException {}", e.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorCode(status.getCode())

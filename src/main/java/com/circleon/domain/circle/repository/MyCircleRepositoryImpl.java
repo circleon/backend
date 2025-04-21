@@ -223,7 +223,8 @@ public class MyCircleRepositoryImpl implements MyCircleRepositoryCustom{
                         myCircle.circle.id,
                         myCircle.circle.name,
                         myCircle.circle.thumbnailUrl,
-                        myCircle.circle.categoryType
+                        myCircle.circle.categoryType,
+                        myCircle.id
                         ))
                 .from(myCircle)
                 .join(myCircle.circle, circle)

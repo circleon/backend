@@ -23,4 +23,6 @@ public class MyCircleSearchResponse {
 
     private CategoryType categoryType;
 
+    private Long memberId;
+
 }

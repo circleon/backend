@@ -13,6 +13,11 @@ logback-local.xml
 *.log
 logs/
 
+/certbot
+*.pem
+*.key
+*.json
+
 ### mac ###
 .DS_Store
 

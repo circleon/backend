@@ -49,7 +49,7 @@ services:
     environment:
       - EMAIL=${EMAIL}
     entrypoint: >
-      sh -c "sleep 10 && certbot certonly \
+      sh -c "certbot certonly \
       --webroot \
       --webroot-path=/var/www/certbot \
       --email ${EMAIL} \

@@ -58,6 +58,33 @@ jobs:
           source: "Dockerfile,docker-compose.yml,prometheus.yml,nginx/nginx.conf,build/libs/circle-on-0.0.1-SNAPSHOT.jar"
           target: "~/circle-on"
 
+      - name: Create .env file
+        run: |
+          echo "DB_URL=${{ secrets.DB_URL_DEV }}" > .env
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME_DEV }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD_DEV }}" >> .env
+          echo "AWS_SES_ACCESS_KEY=${{ secrets.AWS_SES_ACCESS_KEY }}" >> .env
+          echo "AWS_SES_SECRET_ACCESS_KEY=${{ secrets.AWS_SES_SECRET_ACCESS_KEY }}" >> .env
+          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+          echo "IMAGE_STORAGE_PATH=${{ secrets.IMAGE_STORAGE_PATH }}" >> .env
+          echo "REDIS_HOST=${{ secrets.REDIS_HOST_DEV }}" >> .env
+          echo "REDIS_PORT=${{ secrets.REDIS_PORT_DEV }}" >> .env
+          echo "LOG_STORAGE_PATH=${{ secrets.LOG_STORAGE_PATH }}" >> .env
+          echo "LOG_PATH=${{ secrets.LOG_PATH }}" >> .env
+          echo "PROMETHEUS_PATH=${{ secrets.PROMETHEUS_PATH }}" >> .env
+          echo "GRAFANA_PASSWORD=${{ secrets.GRAFANA_PASSWORD }}" >> .env
+          echo "EMAIL=${{ secrets.EMAIL }}" >> .env
+
+      - name: Upload .env to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_DEV_HOST }}
+          username: ${{ secrets.EC2_DEV_USER }}
+          key: ${{ secrets.EC2_DEV_SSH_KEY }}
+          port: 22
+          source: ".env"
+          target: "~/circle-on"
+
       - name: Run Docker Compose on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -68,20 +95,6 @@ jobs:
           script: |
             mkdir -p ~/circle-on
             cd ~/circle-on
-            export DB_URL=${{ secrets.DB_URL_DEV }}
-            export DB_USERNAME=${{ secrets.DB_USERNAME_DEV }}
-            export DB_PASSWORD=${{ secrets.DB_PASSWORD_DEV }}
-            export AWS_SES_ACCESS_KEY=${{ secrets.AWS_SES_ACCESS_KEY }}
-            export AWS_SES_SECRET_ACCESS_KEY=${{ secrets.AWS_SES_SECRET_ACCESS_KEY }}
-            export JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
-            export IMAGE_STORAGE_PATH=${{ secrets.IMAGE_STORAGE_PATH }}
-            export REDIS_HOST=${{ secrets.REDIS_HOST_DEV }}
-            export REDIS_PORT=${{ secrets.REDIS_PORT_DEV }}
-            export LOG_STORAGE_PATH=${{ secrets.LOG_STORAGE_PATH }}
-            export LOG_PATH=${{ secrets.LOG_PATH }}
-            export PROMETHEUS_PATH=${{ secrets.PROMETHEUS_PATH }}
-            export GRAFANA_PASSWORD=${{ secrets.GRAFANA_PASSWORD }}
-            export EMAIL=${{ secrets.EMAIL }}
             
             docker compose stop backend prometheus grafana
             

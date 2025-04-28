@@ -8,7 +8,8 @@ import lombok.Getter;
 public enum ReportType implements CommonEnum {
 
     POST("게시글"),
-    COMMENT("댓글");
+    COMMENT("댓글"),
+    CIRCLE("동아리");
 
     private final String description;
 

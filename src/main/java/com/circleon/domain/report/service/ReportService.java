@@ -1,7 +1,5 @@
 package com.circleon.domain.report.service;
 
-import com.circleon.common.CommonResponseStatus;
-import com.circleon.common.exception.CommonException;
 import com.circleon.domain.circle.entity.MyCircle;
 import com.circleon.domain.circle.service.MyCircleDataService;
 import com.circleon.domain.report.ReportHandler;
@@ -11,9 +9,7 @@ import com.circleon.domain.report.dto.CreateReportCommand;
 import com.circleon.domain.report.entity.Report;
 import com.circleon.domain.report.exception.ReportException;
 import com.circleon.domain.report.repository.ReportRepository;
-import com.circleon.domain.user.entity.User;
-import com.circleon.domain.user.service.UserDataService;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

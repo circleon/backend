@@ -1,7 +1,7 @@
 package com.circleon.domain.admin.controller;
 
 import com.circleon.common.annotation.LoginUser;
-import com.circleon.common.dto.SuccessResponse;
+import com.circleon.common.dto.ErrorResponse;
 import com.circleon.domain.admin.AdminResponseStatus;
 import com.circleon.domain.admin.dto.LoginRequest;
 import com.circleon.domain.admin.dto.LoginResponse;
@@ -9,16 +9,20 @@ import com.circleon.domain.admin.dto.Token;
 import com.circleon.domain.admin.dto.UserInfo;
 import com.circleon.domain.admin.exception.AdminException;
 import com.circleon.domain.admin.service.AdminAuthService;
+import com.circleon.domain.circle.CircleResponseStatus;
+import com.circleon.domain.circle.exception.CircleException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/api/admin")
-public class AdminController {
+public class AdminAuthController {
 
 
     private final AdminAuthService adminAuthService;
@@ -46,5 +50,23 @@ public class AdminController {
     public ResponseEntity<UserInfo> getAdminInfo(@LoginUser Long userId){
         UserInfo adminInfo = adminAuthService.getAdminInfo(userId);
         return ResponseEntity.ok(adminInfo);
+    }
+
+    @ExceptionHandler(AdminException.class)
+    public ResponseEntity<ErrorResponse> handleCircleException(AdminException e) {
+
+        AdminResponseStatus status = e.getStatus();
+
+        log.error("AdminException: {}", e.getMessage());
+
+        log.error("AdminException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
+
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode(status.getCode())
+                .errorMessage(status.getMessage())
+                .build();
+
+        return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
     }
 }

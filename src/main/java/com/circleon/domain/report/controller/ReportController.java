@@ -3,6 +3,8 @@ package com.circleon.domain.report.controller;
 import com.circleon.common.annotation.LoginUser;
 import com.circleon.common.dto.ErrorResponse;
 import com.circleon.common.dto.SuccessResponse;
+import com.circleon.domain.circle.CircleResponseStatus;
+import com.circleon.domain.circle.exception.CircleException;
 import com.circleon.domain.post.PostResponseStatus;
 import com.circleon.domain.post.exception.PostException;
 import com.circleon.domain.report.ReportResponseStatus;
@@ -23,6 +25,16 @@ import org.springframework.web.bind.annotation.*;
 public class ReportController {
 
     private final ReportService reportService;
+
+    @PostMapping("/{circleId}/reports")
+    public ResponseEntity<SuccessResponse> createCircleReport(@LoginUser Long userId,
+                                                            @PathVariable Long circleId,
+                                                            @RequestBody ReportCreateRequest reportCreateRequest) {
+
+        CreateReportCommand createReportCommand = CreateReportCommand.of(ReportType.CIRCLE, circleId, userId, circleId, reportCreateRequest.getReason());
+        reportService.createReport(createReportCommand);
+        return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
+    }
 
     @PostMapping("/{circleId}/posts/{postId}/reports")
     public ResponseEntity<SuccessResponse> createPostReport(@LoginUser Long userId,
@@ -73,6 +85,24 @@ public class ReportController {
         log.error("PostException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
 
         log.error("PostException {}", e.getMessage());
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode(status.getCode())
+                .errorMessage(status.getMessage())
+                .build();
+
+        return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
+    }
+
+    @ExceptionHandler(CircleException.class)
+    public ResponseEntity<ErrorResponse> handleCircleException(CircleException e) {
+
+        CircleResponseStatus status = e.getStatus();
+
+        log.error("CircleException: {}", e.getMessage());
+
+        log.error("CircleException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
+
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorCode(status.getCode())

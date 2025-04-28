@@ -165,20 +165,6 @@ public class CircleServiceImpl implements CircleService {
         return CircleInfoUpdateResponse.fromCircle(foundCircle);
     }
 
-//    private Circle validatePresidentAccess(User user, Long circleId) {
-//        Circle foundCircle = circleRepository.findByIdAndCircleStatus(circleId, CircleStatus.ACTIVE)
-//                .orElseThrow(() -> new CircleException(CircleResponseStatus.CIRCLE_NOT_FOUND));
-//
-//        // 요청 유저가 해당 써클의 회장이나 임원인지? 회장만
-//        MyCircle foundMyCircle = myCircleRepository.findByUserAndCircleAndMembershipStatus(user, foundCircle, MembershipStatus.APPROVED)
-//                .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBERSHIP_NOT_FOUND));
-//
-//
-//        if (foundMyCircle.getCircleRole() != CircleRole.PRESIDENT) {
-//            throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS);
-//        }
-//        return foundCircle;
-//    }
 
     private MyCircle validatePresidentAccess(Long userId, Long circleId) {
 
@@ -315,24 +301,6 @@ public class CircleServiceImpl implements CircleService {
         return circles.stream().map(CircleSimpleResponse::fromCircle).toList();
     }
 
-//    @Override
-//    public Page<CircleMemberResponse> findPagedCircleMembers(Long userId, Long circleId, Pageable pageable, MembershipStatus membershipStatus) {
-//
-//
-//        //회원이면 가능하도록
-//        MyCircle member = myCircleRepository.findJoinedMember(userId, circleId)
-//                .orElseThrow(()->new CircleException(CircleResponseStatus.MEMBER_NOT_FOUND));
-//
-//        //회원이면 가입 명단만 가능하도록 해야할듯?
-//        if(member.getCircleRole() == CircleRole.MEMBER && membershipStatus != MembershipStatus.APPROVED){
-//            throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "동아리원은 가입자 명단만 조회가 가능합니다.");
-//        }
-//
-//
-//
-//        return myCircleRepository.findAllByCircleAndMembershipStatusWithUser(member.getCircle(), membershipStatus, pageable)
-//                .map(CircleMemberResponse::fromMyCircle);
-//    }
 
     @Override
     public Page<CircleMemberResponse> findPagedCircleMembers(Long userId, Long circleId, Pageable pageable, MembershipStatus membershipStatus) {
@@ -379,6 +347,15 @@ public class CircleServiceImpl implements CircleService {
         }
 
         president.getCircle().setOfficialStatus(officialStatus);
+    }
+
+    @Override
+    public void updateRecruitingStatus(Long userId, Long circleId, RecruitingStatusUpdateRequest recruitingStatusUpdateRequest) {
+
+        //가입 유저인지 체크 + 회장 권한 체크
+        MyCircle president = validatePresidentAccess(userId, circleId);
+
+        president.getCircle().setRecruiting(recruitingStatusUpdateRequest.isRecruiting());
     }
 
     @Override

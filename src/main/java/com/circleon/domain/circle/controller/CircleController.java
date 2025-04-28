@@ -38,8 +38,6 @@ import java.util.List;
 public class CircleController {
 
     private final CircleService circleService;
-    private final FileStore circleFileStore;
-    private final CircleMemberService circleMemberService;
 
     @PostMapping
     public ResponseEntity<SuccessResponse> createCircle(@Valid @ModelAttribute CircleCreateRequest circleCreateRequest,
@@ -205,6 +203,16 @@ public class CircleController {
                                                           @RequestParam(defaultValue = "UNOFFICIAL") OfficialStatus officialStatus){
 
         circleService.updateOfficialStatus(userId, circleId, officialStatus);
+
+        return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
+    }
+
+    @PutMapping("/{circleId}/recruiting")
+    public ResponseEntity<SuccessResponse> updateRecruitingStatus(@LoginUser Long userId,
+                                                                  @PathVariable Long circleId,
+                                                                  @RequestBody RecruitingStatusUpdateRequest recruitingStatusUpdateRequest){
+
+        circleService.updateRecruitingStatus(userId, circleId, recruitingStatusUpdateRequest);
 
         return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
     }

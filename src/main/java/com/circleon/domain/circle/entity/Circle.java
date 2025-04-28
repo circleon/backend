@@ -53,8 +53,11 @@ public class Circle extends BaseEntity {
     @Column
     private LocalDateTime recruitmentEndDate;
 
-    @Column
+    @Column(nullable = false)
     private OfficialStatus officialStatus;
+
+    @Column(nullable = false)
+    private boolean isRecruiting;
 
     @Column(nullable = false)
     private int memberCount;

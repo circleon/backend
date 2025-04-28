@@ -29,6 +29,7 @@ public class Report extends BaseEntity {
     @Column(length = 1000, nullable = false)
     private String reason;
 
+    @Column(nullable = false)
     private boolean handled;
 
     @ManyToOne(fetch = FetchType.LAZY)

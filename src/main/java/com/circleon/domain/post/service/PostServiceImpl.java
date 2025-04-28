@@ -5,12 +5,10 @@ import com.circleon.common.CommonStatus;
 import com.circleon.common.dto.PaginatedResponse;
 import com.circleon.common.exception.CommonException;
 import com.circleon.common.file.FileStore;
-import com.circleon.domain.circle.CircleResponseStatus;
+import com.circleon.domain.circle.CircleAuthValidator;
 import com.circleon.domain.circle.CircleRole;
 
 import com.circleon.domain.circle.entity.MyCircle;
-import com.circleon.domain.circle.exception.CircleException;
-import com.circleon.domain.circle.service.MyCircleDataService;
 import com.circleon.domain.post.PostResponseStatus;
 import com.circleon.domain.post.PostType;
 import com.circleon.domain.post.dto.*;
@@ -40,15 +38,15 @@ import java.util.List;
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
-    private final MyCircleDataService myCircleDataService;
     private final FileStore postFileStore;
     private final PostImageRepository postImageRepository;
     private final CommentRepository commentRepository;
+    private final CircleAuthValidator circleAuthValidator;
 
     @Override
     public PostCreateResponse createPost(Long userId, Long circleId, PostCreateRequest postCreateRequest) {
 
-        MyCircle member = validateMembership(userId, circleId);
+        MyCircle member = circleAuthValidator.validateMembership(userId, circleId);
 
         //동아리 원이 공지사항 작성 시에 예외
         validateAuthorizationForPostType(postCreateRequest.getPostType(), member.getCircleRole());
@@ -84,16 +82,11 @@ public class PostServiceImpl implements PostService {
         return PostCreateResponse.fromPost(savedPost, postImgUrl);
     }
 
-    private MyCircle validateMembership(Long userId, Long circleId) {
-        return myCircleDataService.findJoinedMember(userId, circleId)
-                .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBERSHIP_NOT_FOUND));
-    }
-
     @Override
     public PaginatedResponse<PostResponse> findPagedPosts(Long userId, Long circleId, PostType postType, Pageable pageable) {
 
         // 멤버 검증
-        MyCircle member = validateMembership(userId, circleId);
+        MyCircle member = circleAuthValidator.validateMembership(userId, circleId);
 
         List<PostResponse> posts = postRepository.findPosts(member.getCircle().getId(), postType, pageable);
 
@@ -113,7 +106,7 @@ public class PostServiceImpl implements PostService {
     public PostUpdateResponse updatePost(Long userId, Long circleId, Long postId, PostUpdateRequest postUpdateRequest) {
 
         //회원
-        MyCircle member = validateMembership(userId, circleId);
+        MyCircle member = circleAuthValidator.validateMembership(userId, circleId);
 
         //검증
         validateAuthorizationForPostType(postUpdateRequest.getPostType(), member.getCircleRole());
@@ -139,7 +132,7 @@ public class PostServiceImpl implements PostService {
     public void updatePin(Long userId, Long circleId, Long postId, PostPinUpdateRequest postPinUpdateRequest) {
 
         //회원
-        MyCircle member = validateMembership(userId, circleId);
+        MyCircle member = circleAuthValidator.validateMembership(userId, circleId);
 
         //권한 검증
         if(member.getCircleRole() == CircleRole.MEMBER) {
@@ -162,7 +155,7 @@ public class PostServiceImpl implements PostService {
     public void softDeletePost(Long userId, Long circleId, Long postId) {
 
         //회원
-        MyCircle member = validateMembership(userId, circleId);
+        MyCircle member = circleAuthValidator.validateMembership(userId, circleId);
 
         Post post = postRepository.findByIdAndCircleAndStatus(postId, member.getCircle(), CommonStatus.ACTIVE)
                 .orElseThrow(() -> new PostException(PostResponseStatus.POST_NOT_FOUND, "[deletePost] 게시글이 존재하지 않습니다."));

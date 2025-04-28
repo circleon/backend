@@ -4,6 +4,7 @@ import com.circleon.common.CommonResponseStatus;
 import com.circleon.common.CommonStatus;
 import com.circleon.common.dto.PaginatedResponse;
 import com.circleon.common.exception.CommonException;
+import com.circleon.domain.circle.CircleAuthValidator;
 import com.circleon.domain.circle.CircleResponseStatus;
 import com.circleon.domain.circle.entity.Circle;
 import com.circleon.domain.circle.entity.MyCircle;
@@ -34,13 +35,13 @@ import java.util.List;
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
-    private final MyCircleDataService myCircleDataService;
     private final PostRepository postRepository;
+    private final CircleAuthValidator circleAuthValidator;
 
     @Override
     public CommentCreateResponse createComment(RequestIdentifiers identifiers, CommentCreateRequest commentCreateRequest) {
 
-        MyCircle member = validateMembership(identifiers.getUserId(), identifiers.getCircleId());
+        MyCircle member = circleAuthValidator.validateMembership(identifiers.getUserId(), identifiers.getCircleId());
 
         Post post = validatePost(identifiers.getPostId(), member.getCircle(), "[createComment] 게시글이 존재하지 않음.");
 
@@ -58,15 +59,10 @@ public class CommentServiceImpl implements CommentService {
         return CommentCreateResponse.fromComment(savedComment);
     }
 
-    private MyCircle validateMembership(Long userId, Long circleId) {
-        return myCircleDataService.findJoinedMember(userId, circleId)
-                .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBERSHIP_NOT_FOUND));
-    }
-
     @Override
     public PaginatedResponse<CommentSearchResponse> findPagedComments(RequestIdentifiers identifiers, Pageable pageable) {
 
-        MyCircle member = validateMembership(identifiers.getUserId(), identifiers.getCircleId());
+        MyCircle member = circleAuthValidator.validateMembership(identifiers.getUserId(), identifiers.getCircleId());
 
         Post post = validatePost(identifiers.getPostId(), member.getCircle(), "[findPagedComments] 게시글이 존재하지 않음.");
 
@@ -89,7 +85,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentUpdateResponse updateComment(RequestIdentifiers identifiers, Long commentId, CommentUpdateRequest commentUpdateRequest) {
 
-        validateMembership(identifiers.getUserId(), identifiers.getCircleId());
+        circleAuthValidator.validateMembership(identifiers.getUserId(), identifiers.getCircleId());
 
         Comment comment = commentRepository.findByIdAndStatus(commentId, CommonStatus.ACTIVE)
                 .orElseThrow(() -> new PostException(PostResponseStatus.COMMENT_NOT_FOUND, "[updateComment] 댓글이 존재하지 않습니다."));
@@ -104,7 +100,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void deleteComment(RequestIdentifiers identifiers, Long commentId) {
 
-        MyCircle member = validateMembership(identifiers.getUserId(), identifiers.getCircleId());
+        MyCircle member = circleAuthValidator.validateMembership(identifiers.getUserId(), identifiers.getCircleId());
 
         Post post = validatePost(identifiers.getPostId(), member.getCircle(), "[deleteComment] 게시글이 존재하지 않음.");
 

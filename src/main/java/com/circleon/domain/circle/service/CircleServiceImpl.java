@@ -18,13 +18,11 @@ import com.circleon.domain.post.service.CommentDataService;
 import com.circleon.domain.post.service.PostDataService;
 import com.circleon.domain.post.service.PostImageDataService;
 import com.circleon.domain.schedule.circle.service.CircleScheduleDataService;
-import com.circleon.domain.user.entity.Role;
 import com.circleon.domain.user.entity.User;
 import com.circleon.domain.user.entity.UserStatus;
 import com.circleon.domain.user.service.UserDataService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -51,6 +49,7 @@ public class CircleServiceImpl implements CircleService {
     private final PostDataService postDataService;
     private final CommentDataService commentDataService;
     private final PostImageDataService postImageDataService;
+    private final CircleAuthValidator circleAuthValidator;
 
 
     @Override
@@ -152,7 +151,7 @@ public class CircleServiceImpl implements CircleService {
 
 
         // 수정 권한 체크
-        Circle foundCircle = validatePresidentAccess(userId, circleId).getCircle();
+        Circle foundCircle = circleAuthValidator.validatePresidentAccess(userId, circleId).getCircle();
 
         //수정
         foundCircle.setName(circleInfoUpdateRequest.getCircleName());
@@ -163,18 +162,6 @@ public class CircleServiceImpl implements CircleService {
         foundCircle.setSummary(circleInfoUpdateRequest.getSummary());
 
         return CircleInfoUpdateResponse.fromCircle(foundCircle);
-    }
-
-
-    private MyCircle validatePresidentAccess(Long userId, Long circleId) {
-
-        MyCircle member = myCircleRepository.findJoinedMember(userId, circleId)
-                .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBER_NOT_FOUND, "[validatePresidentAccess] 멤버가 아닙니다."));
-
-        if (member.getCircleRole() != CircleRole.PRESIDENT) {
-            throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS);
-        }
-        return member;
     }
 
 //    @Override
@@ -233,17 +220,6 @@ public class CircleServiceImpl implements CircleService {
         return thumbnailUrl;
     }
 
-    private void deleteImg(String imgUrl) {
-
-        if(imgUrl == null){
-            return ;
-        }
-
-        boolean isDeletedImg = circleFileStore.deleteFile(imgUrl);
-        if(!isDeletedImg){
-            log.warn("동아리 파일 삭제 실패 {}", imgUrl);
-        }
-    }
 
 //    @Override
 //    public void deleteCircleImages(Long userId, Long circleId, boolean deleteProfileImg, boolean deleteIntroImg) {
@@ -338,7 +314,7 @@ public class CircleServiceImpl implements CircleService {
     public void updateOfficialStatus(Long userId, Long circleId, OfficialStatus officialStatus) {
 
         //가입 유저인지 체크 + 회장 권한 체크
-        MyCircle president = validatePresidentAccess(userId, circleId);
+        MyCircle president = circleAuthValidator.validatePresidentAccess(userId, circleId);
 
         //공식 인증을 하는데 관리자가 아니면 예외
         if(officialStatus == OfficialStatus.OFFICIAL) {
@@ -353,7 +329,7 @@ public class CircleServiceImpl implements CircleService {
     public void updateRecruitingStatus(Long userId, Long circleId, RecruitingStatusUpdateRequest recruitingStatusUpdateRequest) {
 
         //가입 유저인지 체크 + 회장 권한 체크
-        MyCircle president = validatePresidentAccess(userId, circleId);
+        MyCircle president = circleAuthValidator.validatePresidentAccess(userId, circleId);
 
         president.getCircle().setRecruiting(recruitingStatusUpdateRequest.isRecruiting());
     }

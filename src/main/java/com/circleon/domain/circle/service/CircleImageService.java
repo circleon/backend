@@ -3,14 +3,10 @@ package com.circleon.domain.circle.service;
 import com.circleon.common.CommonResponseStatus;
 import com.circleon.common.exception.CommonException;
 import com.circleon.common.file.FileStore;
-import com.circleon.domain.circle.CircleResponseStatus;
-import com.circleon.domain.circle.CircleRole;
+import com.circleon.domain.circle.CircleAuthValidator;
 import com.circleon.domain.circle.dto.CircleImagesUpdateRequest;
 import com.circleon.domain.circle.dto.CircleImagesUpdateResponse;
 import com.circleon.domain.circle.entity.Circle;
-import com.circleon.domain.circle.entity.MyCircle;
-import com.circleon.domain.circle.exception.CircleException;
-import com.circleon.domain.circle.repository.MyCircleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -24,14 +20,13 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class CircleImageService {
 
-
     private final FileStore circleFileStore;
-    private final MyCircleRepository myCircleRepository;
+    private final CircleAuthValidator circleAuthValidator;
 
     @Transactional
     public CircleImagesUpdateResponse updateCircleImages(Long userId, Long circleId, CircleImagesUpdateRequest circleImageUpdateRequest) {
 
-        Circle foundCircle = validatePresidentAccess(userId, circleId).getCircle();
+        Circle foundCircle = circleAuthValidator.validatePresidentAccess(userId, circleId).getCircle();
 
         // 이미지 저장 null값이면 수정 안함
 
@@ -71,7 +66,7 @@ public class CircleImageService {
     public void deleteCircleImages(Long userId, Long circleId, boolean deleteProfileImg, boolean deleteIntroImg) {
 
         //권한 체크
-        Circle foundCircle = validatePresidentAccess(userId, circleId).getCircle();
+        Circle foundCircle = circleAuthValidator.validatePresidentAccess(userId, circleId).getCircle();
 
         //이미지 삭제
         if(deleteProfileImg){
@@ -120,16 +115,5 @@ public class CircleImageService {
         if(!isDeletedImg){
             log.warn("동아리 파일 삭제 실패 {}", imgUrl);
         }
-    }
-
-    private MyCircle validatePresidentAccess(Long userId, Long circleId) {
-
-        MyCircle member = myCircleRepository.findJoinedMember(userId, circleId)
-                .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBER_NOT_FOUND, "[validatePresidentAccess] 멤버가 아닙니다."));
-
-        if (member.getCircleRole() != CircleRole.PRESIDENT) {
-            throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS);
-        }
-        return member;
     }
 }

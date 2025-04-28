@@ -6,10 +6,7 @@ import com.circleon.domain.circle.CircleResponseStatus;
 import com.circleon.domain.circle.CircleRole;
 import com.circleon.domain.circle.CircleStatus;
 import com.circleon.domain.circle.MembershipStatus;
-import com.circleon.domain.circle.dto.CircleJoinMessage;
-import com.circleon.domain.circle.dto.CircleLeaveMessage;
-import com.circleon.domain.circle.dto.CircleRoleUpdateRequest;
-import com.circleon.domain.circle.dto.MembershipStatusUpdateRequest;
+import com.circleon.domain.circle.dto.*;
 import com.circleon.domain.circle.entity.Circle;
 import com.circleon.domain.circle.entity.MyCircle;
 import com.circleon.domain.circle.exception.CircleException;
@@ -19,17 +16,22 @@ import com.circleon.domain.user.entity.User;
 import com.circleon.domain.user.entity.UserStatus;
 import com.circleon.domain.user.service.UserDataService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class CircleMemberService {
 
 
     private final MyCircleRepository myCircleRepository;
+    private final CircleRepository circleRepository;
 
+    @Transactional
     public void updateCircleMemberRole(Long userId, Long circleId, Long memberId, CircleRoleUpdateRequest circleRoleUpdateRequest) {
 
         // 회장만 가능
@@ -53,6 +55,7 @@ public class CircleMemberService {
         }
     }
 
+    @Transactional
     public void updateMembershipStatus(Long userId, Long circleId, Long memberId, MembershipStatusUpdateRequest membershipStatusUpdateRequest) {
 
         //임원들 가능
@@ -107,6 +110,7 @@ public class CircleMemberService {
         circle.decrementMemberCount();
     }
 
+    @Transactional
     public void expelMember(Long userId, Long circleId, Long memberId) {
 
         //임원들 가능
@@ -154,6 +158,7 @@ public class CircleMemberService {
         return member;
     }
 
+    @Transactional(readOnly = true)
     public CircleLeaveMessage findLeaveMessage(Long userId, Long circleId, Long memberId) {
 
         //임원인지 체크
@@ -166,6 +171,7 @@ public class CircleMemberService {
         return CircleLeaveMessage.of(member.getLeaveMessage());
     }
 
+    @Transactional(readOnly = true)
     public CircleJoinMessage findJoinMessage(Long userId, Long circleId, Long memberId) {
 
         //임원인지 체크
@@ -176,5 +182,37 @@ public class CircleMemberService {
                 .orElseThrow(() -> new CircleException(CircleResponseStatus.MEMBER_NOT_FOUND));
 
         return CircleJoinMessage.of(member.getJoinMessage());
+    }
+
+    @Transactional(readOnly = true)
+    public Page<CircleMemberResponse> findPagedCircleMembers(Long userId, Long circleId, Pageable pageable, MembershipStatus membershipStatus) {
+
+        //회원이면 가능하도록
+        Optional<MyCircle> optionalMember = myCircleRepository.findJoinedMember(userId, circleId);
+
+        //동아리 원이 아닌경우는 가입자만
+        if(optionalMember.isEmpty() && membershipStatus != MembershipStatus.APPROVED){
+            throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "[findPagedCircleMembers] 동아리원이 아닌 경우 가입자 명단만 조회 가능");
+        }
+
+        optionalMember.ifPresent(m->{
+            if(m.getCircleRole() == CircleRole.MEMBER && membershipStatus != MembershipStatus.APPROVED){
+                throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "동아리원은 가입자 명단만 조회가 가능합니다.");
+            }
+        });
+
+        //TODO 가입자 명단, 가입신청자 명단, 탈퇴 신청자 명단 폼이 다 다를거 같은데
+
+
+        return optionalMember.map(member -> myCircleRepository
+                        .findAllByCircleAndMembershipStatusWithUser(member.getCircle(), membershipStatus, pageable)
+                        .map(CircleMemberResponse::fromMyCircle))
+                .orElseGet(()-> {
+                    Circle circle = circleRepository.findById(circleId)
+                            .orElseThrow(() -> new CircleException(CircleResponseStatus.CIRCLE_NOT_FOUND, "[findPagedCircleMembers] 존재하지 않는 동아리"));
+
+                    return myCircleRepository.findAllByCircleAndMembershipStatusWithUser(circle, membershipStatus, pageable)
+                            .map(CircleMemberResponse::fromMyCircle);
+                });
     }
 }

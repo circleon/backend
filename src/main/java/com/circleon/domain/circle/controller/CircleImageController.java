@@ -8,7 +8,7 @@ import com.circleon.domain.circle.CircleResponseStatus;
 import com.circleon.domain.circle.dto.CircleImagesUpdateRequest;
 import com.circleon.domain.circle.dto.CircleImagesUpdateResponse;
 import com.circleon.domain.circle.exception.CircleException;
-import com.circleon.domain.circle.service.CircleService;
+import com.circleon.domain.circle.service.CircleImageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/circles")
 public class CircleImageController {
 
-    private final CircleService circleService;
+    private final CircleImageService circleImageService;
     private final FileStore circleFileStore;
 
     @PutMapping("/{circleId}/images")
@@ -31,7 +31,7 @@ public class CircleImageController {
                                                                          @LoginUser Long userId,
                                                                          @PathVariable Long circleId){
 
-        CircleImagesUpdateResponse circleImagesUpdateResponse = circleService.updateCircleImages(userId, circleId, circleImagesUpdateRequest);
+        CircleImagesUpdateResponse circleImagesUpdateResponse = circleImageService.updateCircleImages(userId, circleId, circleImagesUpdateRequest);
 
         return ResponseEntity.ok(circleImagesUpdateResponse);
     }
@@ -42,7 +42,7 @@ public class CircleImageController {
                                                               @RequestParam boolean deleteProfileImg,
                                                               @RequestParam boolean deleteIntroImg){
 
-        circleService.deleteCircleImages(userId, circleId, deleteProfileImg, deleteIntroImg);
+        circleImageService.deleteCircleImages(userId, circleId, deleteProfileImg, deleteIntroImg);
 
         return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
     }
@@ -53,7 +53,7 @@ public class CircleImageController {
                                               @PathVariable String filename){
 
         String filePath = circleId + "/" + directory + "/" + filename;
-        Resource resource = circleService.loadImageAsResource(filePath);
+        Resource resource = circleImageService.loadImageAsResource(filePath);
         String extension = circleFileStore.extractExtension(filename);
 
         MediaType mediaType;

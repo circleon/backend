@@ -177,44 +177,44 @@ public class CircleServiceImpl implements CircleService {
         return member;
     }
 
-    @Override
-    public CircleImagesUpdateResponse updateCircleImages(Long userId, Long circleId, CircleImagesUpdateRequest circleImageUpdateRequest) {
-
-        Circle foundCircle = validatePresidentAccess(userId, circleId).getCircle();
-
-        // 이미지 저장 null값이면 수정 안함
-
-        //프로필 사진
-        if(circleFileStore.isValidFile(circleImageUpdateRequest.getProfileImg())) {
-
-            //기존 사진들 삭제
-            deleteImg(foundCircle.getProfileImgUrl());
-
-            deleteImg(foundCircle.getThumbnailUrl());
-
-            //저장
-            String profileImgUrl = storeImg(circleImageUpdateRequest.getProfileImg(), foundCircle.getId());
-
-            String thumbnailUrl = storeThumbnail(circleImageUpdateRequest.getProfileImg(), foundCircle.getId());
-
-            foundCircle.setProfileImgUrl(profileImgUrl);
-            foundCircle.setThumbnailUrl(thumbnailUrl);
-
-        }
-
-        //소개글 사진
-        if(circleFileStore.isValidFile(circleImageUpdateRequest.getIntroImg())){
-
-            deleteImg(foundCircle.getIntroImgUrl());
-
-            String introImgUrl = storeImg(circleImageUpdateRequest.getIntroImg(), foundCircle.getId());
-
-            foundCircle.setIntroImgUrl(introImgUrl);
-
-        }
-
-        return CircleImagesUpdateResponse.fromCircle(foundCircle);
-    }
+//    @Override
+//    public CircleImagesUpdateResponse updateCircleImages(Long userId, Long circleId, CircleImagesUpdateRequest circleImageUpdateRequest) {
+//
+//        Circle foundCircle = validatePresidentAccess(userId, circleId).getCircle();
+//
+//        // 이미지 저장 null값이면 수정 안함
+//
+//        //프로필 사진
+//        if(circleFileStore.isValidFile(circleImageUpdateRequest.getProfileImg())) {
+//
+//            //기존 사진들 삭제
+//            deleteImg(foundCircle.getProfileImgUrl());
+//
+//            deleteImg(foundCircle.getThumbnailUrl());
+//
+//            //저장
+//            String profileImgUrl = storeImg(circleImageUpdateRequest.getProfileImg(), foundCircle.getId());
+//
+//            String thumbnailUrl = storeThumbnail(circleImageUpdateRequest.getProfileImg(), foundCircle.getId());
+//
+//            foundCircle.setProfileImgUrl(profileImgUrl);
+//            foundCircle.setThumbnailUrl(thumbnailUrl);
+//
+//        }
+//
+//        //소개글 사진
+//        if(circleFileStore.isValidFile(circleImageUpdateRequest.getIntroImg())){
+//
+//            deleteImg(foundCircle.getIntroImgUrl());
+//
+//            String introImgUrl = storeImg(circleImageUpdateRequest.getIntroImg(), foundCircle.getId());
+//
+//            foundCircle.setIntroImgUrl(introImgUrl);
+//
+//        }
+//
+//        return CircleImagesUpdateResponse.fromCircle(foundCircle);
+//    }
 
     private String storeImg(MultipartFile file, Long circleId) {
         String imgUrl = circleFileStore.storeFile(file, circleId);
@@ -245,32 +245,32 @@ public class CircleServiceImpl implements CircleService {
         }
     }
 
-    @Override
-    public void deleteCircleImages(Long userId, Long circleId, boolean deleteProfileImg, boolean deleteIntroImg) {
-
-        //권한 체크
-        Circle foundCircle = validatePresidentAccess(userId, circleId).getCircle();
-
-        //이미지 삭제
-        if(deleteProfileImg){
-            deleteImg(foundCircle.getProfileImgUrl());
-            deleteImg(foundCircle.getThumbnailUrl());
-
-            foundCircle.setProfileImgUrl(null);
-            foundCircle.setThumbnailUrl(null);
-        }
-
-        if(deleteIntroImg){
-            deleteImg(foundCircle.getIntroImgUrl());
-
-            foundCircle.setIntroImgUrl(null);
-        }
-    }
-
-    @Override
-    public Resource loadImageAsResource(String filePath) {
-        return circleFileStore.loadFileAsResource(filePath);
-    }
+//    @Override
+//    public void deleteCircleImages(Long userId, Long circleId, boolean deleteProfileImg, boolean deleteIntroImg) {
+//
+//        //권한 체크
+//        Circle foundCircle = validatePresidentAccess(userId, circleId).getCircle();
+//
+//        //이미지 삭제
+//        if(deleteProfileImg){
+//            deleteImg(foundCircle.getProfileImgUrl());
+//            deleteImg(foundCircle.getThumbnailUrl());
+//
+//            foundCircle.setProfileImgUrl(null);
+//            foundCircle.setThumbnailUrl(null);
+//        }
+//
+//        if(deleteIntroImg){
+//            deleteImg(foundCircle.getIntroImgUrl());
+//
+//            foundCircle.setIntroImgUrl(null);
+//        }
+//    }
+//
+//    @Override
+//    public Resource loadImageAsResource(String filePath) {
+//        return circleFileStore.loadFileAsResource(filePath);
+//    }
 
     @Override
     public CircleDetailResponse findCircleDetail(Long userId, Long circleId) {
@@ -302,37 +302,37 @@ public class CircleServiceImpl implements CircleService {
     }
 
 
-    @Override
-    public Page<CircleMemberResponse> findPagedCircleMembers(Long userId, Long circleId, Pageable pageable, MembershipStatus membershipStatus) {
-
-        //회원이면 가능하도록
-        Optional<MyCircle> optionalMember = myCircleRepository.findJoinedMember(userId, circleId);
-
-        //동아리 원이 아닌경우는 가입자만
-        if(optionalMember.isEmpty() && membershipStatus != MembershipStatus.APPROVED){
-            throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "[findPagedCircleMembers] 동아리원이 아닌 경우 가입자 명단만 조회 가능");
-        }
-
-        optionalMember.ifPresent(m->{
-            if(m.getCircleRole() == CircleRole.MEMBER && membershipStatus != MembershipStatus.APPROVED){
-                throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "동아리원은 가입자 명단만 조회가 가능합니다.");
-            }
-        });
-
-        //TODO 가입자 명단, 가입신청자 명단, 탈퇴 신청자 명단 폼이 다 다를거 같은데
-
-
-        return optionalMember.map(member -> myCircleRepository
-                        .findAllByCircleAndMembershipStatusWithUser(member.getCircle(), membershipStatus, pageable)
-                        .map(CircleMemberResponse::fromMyCircle))
-                .orElseGet(()-> {
-                    Circle circle = circleRepository.findById(circleId)
-                            .orElseThrow(() -> new CircleException(CircleResponseStatus.CIRCLE_NOT_FOUND, "[findPagedCircleMembers] 존재하지 않는 동아리"));
-
-                    return myCircleRepository.findAllByCircleAndMembershipStatusWithUser(circle, membershipStatus, pageable)
-                            .map(CircleMemberResponse::fromMyCircle);
-                });
-    }
+//    @Override
+//    public Page<CircleMemberResponse> findPagedCircleMembers(Long userId, Long circleId, Pageable pageable, MembershipStatus membershipStatus) {
+//
+//        //회원이면 가능하도록
+//        Optional<MyCircle> optionalMember = myCircleRepository.findJoinedMember(userId, circleId);
+//
+//        //동아리 원이 아닌경우는 가입자만
+//        if(optionalMember.isEmpty() && membershipStatus != MembershipStatus.APPROVED){
+//            throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "[findPagedCircleMembers] 동아리원이 아닌 경우 가입자 명단만 조회 가능");
+//        }
+//
+//        optionalMember.ifPresent(m->{
+//            if(m.getCircleRole() == CircleRole.MEMBER && membershipStatus != MembershipStatus.APPROVED){
+//                throw new CommonException(CommonResponseStatus.FORBIDDEN_ACCESS, "동아리원은 가입자 명단만 조회가 가능합니다.");
+//            }
+//        });
+//
+//        //TODO 가입자 명단, 가입신청자 명단, 탈퇴 신청자 명단 폼이 다 다를거 같은데
+//
+//
+//        return optionalMember.map(member -> myCircleRepository
+//                        .findAllByCircleAndMembershipStatusWithUser(member.getCircle(), membershipStatus, pageable)
+//                        .map(CircleMemberResponse::fromMyCircle))
+//                .orElseGet(()-> {
+//                    Circle circle = circleRepository.findById(circleId)
+//                            .orElseThrow(() -> new CircleException(CircleResponseStatus.CIRCLE_NOT_FOUND, "[findPagedCircleMembers] 존재하지 않는 동아리"));
+//
+//                    return myCircleRepository.findAllByCircleAndMembershipStatusWithUser(circle, membershipStatus, pageable)
+//                            .map(CircleMemberResponse::fromMyCircle);
+//                });
+//    }
 
     @Override
     public void updateOfficialStatus(Long userId, Long circleId, OfficialStatus officialStatus) {

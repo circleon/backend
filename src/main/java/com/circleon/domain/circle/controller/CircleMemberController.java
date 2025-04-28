@@ -27,7 +27,6 @@ import java.util.List;
 public class CircleMemberController {
 
     private final CircleMemberService circleMemberService;
-    private final CircleService circleService;
 
     @GetMapping("/{circleId}/members")
     public ResponseEntity<PaginatedResponse<CircleMemberResponse>> findPagedCircleMembers(@LoginUser Long userId,
@@ -40,7 +39,7 @@ public class CircleMemberController {
 
         PageableValidator.validatePageable(pageable, List.of("joinedAt", "username"), 1000);
 
-        Page<CircleMemberResponse> pagedCircleMembers = circleService.findPagedCircleMembers(userId, circleId, pageable, membershipStatus);
+        Page<CircleMemberResponse> pagedCircleMembers = circleMemberService.findPagedCircleMembers(userId, circleId, pageable, membershipStatus);
 
         return ResponseEntity.ok(PaginatedResponse.fromPage(pagedCircleMembers));
     }

@@ -48,6 +48,8 @@ public class CircleDetailResponse {
 
     private OfficialStatus officialStatus;
 
+    private boolean recruiting;
+
     public static CircleDetailResponse fromCircle(Circle circle, MembershipStatus membershipStatus, CircleRole circleRole, Long memberId) {
         return CircleDetailResponse.builder()
                 .circleId(circle.getId())
@@ -66,6 +68,7 @@ public class CircleDetailResponse {
                 .circleRole(circleRole)
                 .memberId(memberId)
                 .officialStatus(circle.getOfficialStatus())
+                .recruiting(circle.isRecruiting())
                 .build();
     }
 }

@@ -7,6 +7,7 @@ import com.circleon.domain.circle.entity.Circle;
 import com.circleon.domain.circle.entity.MyCircle;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -25,8 +26,10 @@ public interface CircleRepository extends JpaRepository<Circle, Long>, CircleRep
 
     Page<Circle> findAllByCategoryTypeAndCircleStatus(CategoryType categoryType, CircleStatus circleStatus, Pageable pageable);
 
+    @EntityGraph(attributePaths = "applicant")
     Page<Circle> findAllByCircleStatusAndCategoryTypeAndOfficialStatus(CircleStatus circleStatus, CategoryType categoryType, OfficialStatus officialStatus, Pageable pageable);
 
+    @EntityGraph(attributePaths = "applicant")
     Page<Circle> findAllByCircleStatusAndOfficialStatus(CircleStatus circleStatus, OfficialStatus officialStatus, Pageable pageable);
 
     //데이터로더 용

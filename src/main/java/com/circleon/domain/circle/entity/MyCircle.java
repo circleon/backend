@@ -34,6 +34,7 @@ public class MyCircle extends BaseEntity {
     private String leaveMessage;
 
     @Column
+    @Builder.Default
     private String joinMessage="";
 
     @ManyToOne(fetch = FetchType.LAZY)

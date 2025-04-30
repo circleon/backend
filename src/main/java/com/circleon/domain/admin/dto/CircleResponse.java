@@ -17,6 +17,10 @@ public class CircleResponse {
 
     private String name;
 
+    private String presidentEmail;
+
+    private String presidentName;
+
     private String profileImgUrl;
 
     private String thumbnailUrl;
@@ -37,6 +41,8 @@ public class CircleResponse {
         return CircleResponse.builder()
                 .id(circle.getId())
                 .name(circle.getName())
+                .presidentEmail(circle.getApplicant().getEmail())
+                .presidentName(circle.getApplicant().getUsername())
                 .profileImgUrl(circle.getProfileImgUrl())
                 .thumbnailUrl(circle.getThumbnailUrl())
                 .introImgUrl(circle.getIntroImgUrl())

@@ -42,6 +42,7 @@ jobs:
           AWS_SES_ACCESS_KEY: ${{ secrets.AWS_SES_ACCESS_KEY }}
           AWS_SES_SECRET_ACCESS_KEY: ${{ secrets.AWS_SES_SECRET_ACCESS_KEY }}
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          SIGNED_URL_SECRET_KEY: ${{ secrets.SIGNED_URL_SECRET_KEY }}
           REDIS_HOST: ${{ secrets.REDIS_HOST_DEV }}
           REDIS_PORT: ${{ secrets.REDIS_PORT_DEV }}
 
@@ -74,6 +75,7 @@ jobs:
           echo "PROMETHEUS_PATH=${{ secrets.PROMETHEUS_PATH }}" >> .env
           echo "GRAFANA_PASSWORD=${{ secrets.GRAFANA_PASSWORD }}" >> .env
           echo "EMAIL=${{ secrets.EMAIL }}" >> .env
+          echo "SIGNED_URL_SECRET_KEY=${{ secrets.SIGNED_URL_SECRET_KEY }}" >> .env
 
       - name: Upload .env to EC2
         uses: appleboy/scp-action@v0.1.7

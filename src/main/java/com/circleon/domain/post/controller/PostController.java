@@ -23,12 +23,15 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.CacheControl;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequiredArgsConstructor
@@ -96,21 +99,24 @@ public class PostController {
     @GetMapping("/posts/images/{circleId}/{directory}/{filename}")
     public ResponseEntity<Resource> findImage(@PathVariable Long circleId,
                                               @PathVariable String directory,
-                                              @PathVariable String filename){
+                                              @PathVariable String filename,
+                                              @RequestParam String expires,
+                                              @RequestParam String signature){
 
 
         String filePath = circleId + "/" + directory + "/" + filename;
-        Resource resource = postService.loadImageAsResource(filePath);
+        Resource resource = postService.loadImageAsResource(filePath, expires, signature);
         String extension = postFileStore.extractExtension(filename);
-        MediaType mediaType;
+        MediaType mediaType = extension.equals("png") ? MediaType.IMAGE_PNG : MediaType.IMAGE_JPEG;;
 
-        if(extension.equals("png")){
-            mediaType = MediaType.IMAGE_PNG;
-        }else{
-            mediaType = MediaType.IMAGE_JPEG;
-        }
+        //캐시 만료 시간 계산
+        long now = Instant.now().getEpochSecond();
+        long exp = Long.parseLong(expires);
+        long maxAge = Math.max(0, exp - now);
+
         return ResponseEntity.ok()
                 .contentType(mediaType)
+                .cacheControl(CacheControl.maxAge(maxAge, TimeUnit.SECONDS).cachePublic())
                 .body(resource);
     }
 

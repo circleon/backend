@@ -54,7 +54,7 @@ public class AdminAuthService {
         //TODO secure 설정 해야함
         ResponseCookie responseCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-//                .secure(true)
+                .secure(true)
                 .sameSite("Strict")
                 .path("/")
                 .maxAge(7 * 24 * 60 * 60) // 7일
@@ -76,7 +76,7 @@ public class AdminAuthService {
         //TODO secure 설정 해야함
         ResponseCookie responseCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-//                .secure(true)
+                .secure(true)
                 .sameSite("Strict")
                 .path("/")
                 .maxAge(7 * 24 * 60 * 60) // 7일

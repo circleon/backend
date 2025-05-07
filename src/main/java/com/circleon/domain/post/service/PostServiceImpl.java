@@ -42,6 +42,7 @@ public class PostServiceImpl implements PostService {
     private final PostImageRepository postImageRepository;
     private final CommentRepository commentRepository;
     private final CircleAuthValidator circleAuthValidator;
+    private final SignedUrlManager signedUrlManager;
 
     @Override
     public PostCreateResponse createPost(Long userId, Long circleId, PostCreateRequest postCreateRequest) {
@@ -90,6 +91,13 @@ public class PostServiceImpl implements PostService {
 
         List<PostResponse> posts = postRepository.findPosts(member.getCircle().getId(), postType, pageable);
 
+        for(PostResponse post : posts) {
+            String originUrl = post.getPostImgUrl();
+            if(originUrl != null && !originUrl.isBlank()) {
+                post.setPostImgUrl(signedUrlManager.createSignedUrl(originUrl));
+            }
+        }
+
         Long totalPosts = postRepository.countPosts(circleId, postType).getPostCount();
 
         Page<PostResponse> pagedPosts = new PageImpl<>(posts, pageable, totalPosts);
@@ -98,7 +106,15 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Resource loadImageAsResource(String filePath) {
+    public Resource loadImageAsResource(String filePath, String expires, String signature) {
+
+        if(!signedUrlManager.isValidSignedUrl(filePath, expires, signature)){
+            throw new PostException(PostResponseStatus.POST_NOT_FOUND, "[loadImageAsResource] 이미지 서명이 다름");
+        }
+
+        if(signedUrlManager.isExpired(expires)){
+            throw new PostException(PostResponseStatus.POST_NOT_FOUND, "[loadImageAsResource] 이미지 서명 유효기간 종료");
+        }
         return postFileStore.loadFileAsResource(filePath);
     }
 

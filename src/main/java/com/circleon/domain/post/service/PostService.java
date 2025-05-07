@@ -17,7 +17,7 @@ public interface PostService {
 
     PaginatedResponse<PostResponse> findPagedPosts(Long userId, Long circleId, PostType postType, Pageable pageable);
 
-    Resource loadImageAsResource(String filePath);
+    Resource loadImageAsResource(String filePath, String expires, String signature);
 
     PostUpdateResponse updatePost(Long userId, Long circleId, Long postId, PostUpdateRequest postUpdateRequest);
 

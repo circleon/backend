@@ -13,9 +13,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
+import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @Slf4j
@@ -56,15 +59,11 @@ public class CircleImageController {
         Resource resource = circleImageService.loadImageAsResource(filePath);
         String extension = circleFileStore.extractExtension(filename);
 
-        MediaType mediaType;
-        if(extension.equals("png")){
-            mediaType = MediaType.IMAGE_PNG;
-        }else{
-            mediaType = MediaType.IMAGE_JPEG;
-        }
+        MediaType mediaType = extension.equals("png") ? MediaType.IMAGE_PNG : MediaType.IMAGE_JPEG;;
 
         return ResponseEntity.ok()
                 .contentType(mediaType)
+                .cacheControl(CacheControl.maxAge(1, TimeUnit.MINUTES).cachePublic())
                 .body(resource);
     }
 

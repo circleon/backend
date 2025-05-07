@@ -47,7 +47,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login", "/api/auth/signup",
                                 "/api/auth/verification", "/api/auth/verification-code",
                                 "/api/auth/refresh", "/api/auth/test", "/health-check",
-                                "/api/admin/auth/login", "api/admin/auth/refresh"
+                                "/api/admin/auth/login", "/api/admin/auth/refresh",
+                                "/api/posts/images/**", "/api/circles/images/**"
                         ).permitAll()
 
                         .requestMatchers("/actuator/**")

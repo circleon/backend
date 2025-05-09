@@ -26,6 +26,8 @@ public class AdminCsrfFilter extends OncePerRequestFilter {
             String origin = request.getHeader("Origin");
             String referer = request.getHeader("Referer");
 
+            log.info("Origin: {}, Referer: {}", origin, referer);
+
             if( !(isValidOrigin(origin) || isValidReferer(referer)) ){
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "CSRF suspected");
                 log.warn("CSRF suspected - origin: {}, referer: {}", origin, referer);

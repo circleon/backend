@@ -55,7 +55,7 @@ public class AdminAuthService {
         ResponseCookie responseCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .secure(true)
-                .sameSite("Strict")
+                .sameSite("None")
                 .path("/")
                 .maxAge(7 * 24 * 60 * 60) // 7일
                 .build();
@@ -77,7 +77,7 @@ public class AdminAuthService {
         ResponseCookie responseCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .secure(true)
-                .sameSite("Strict")
+                .sameSite("None")
                 .path("/")
                 .maxAge(7 * 24 * 60 * 60) // 7일
                 .build();

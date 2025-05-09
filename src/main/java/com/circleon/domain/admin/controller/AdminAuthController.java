@@ -11,6 +11,7 @@ import com.circleon.domain.admin.exception.AdminException;
 import com.circleon.domain.admin.service.AdminAuthService;
 import com.circleon.domain.circle.CircleResponseStatus;
 import com.circleon.domain.circle.exception.CircleException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class AdminAuthController {
 
     @GetMapping("/auth/refresh")
     public ResponseEntity<Token> refresh(@CookieValue(name = "refreshToken", required = false) String refreshToken,
-                                         HttpServletResponse response){
+                                         HttpServletResponse response) {
 
         if(refreshToken == null){
             throw new AdminException(AdminResponseStatus.REFRESH_TOKEN_NOT_FOUND, "[Admin] Refresh token not found");

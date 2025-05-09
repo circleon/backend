@@ -18,17 +18,9 @@ public interface CircleService {
 
     CircleInfoUpdateResponse updateCircleInfo(Long userId, Long circleId, CircleInfoUpdateRequest circleInfoUpdateRequest);
 
-//    CircleImagesUpdateResponse updateCircleImages(Long userId, Long circleId, CircleImagesUpdateRequest circleImageUpdateRequest);
-//
-//    void deleteCircleImages(Long userId, Long circleId, boolean deleteProfileImg, boolean deleteIntroImg);
-//
-//    Resource loadImageAsResource(String filePath);
-
     CircleDetailResponse findCircleDetail(Long userId, Long circleId);
 
     List<CircleSimpleResponse> findAllCirclesSimple();
-
-//    Page<CircleMemberResponse> findPagedCircleMembers(Long userid, Long circleId, Pageable pageable, MembershipStatus membershipStatus);
 
     void updateOfficialStatus(Long userId, Long circleId, OfficialStatus officialStatus);
 

@@ -29,6 +29,8 @@ public class CircleInfoUpdateRequest {
 
     private LocalDateTime recruitmentEndDate;
 
+    private boolean recruiting;
+
     @NotNull
     private CategoryType categoryType;
     

@@ -27,6 +27,8 @@ public class CircleInfoUpdateResponse {
 
     private LocalDateTime recruitmentEndDate;
 
+    private boolean recruiting;
+
     public static CircleInfoUpdateResponse fromCircle(Circle circle) {
         return CircleInfoUpdateResponse.builder()
                 .circleId(circle.getId())
@@ -36,6 +38,7 @@ public class CircleInfoUpdateResponse {
                 .recruitmentStartDate(circle.getRecruitmentStartDate())
                 .recruitmentEndDate(circle.getRecruitmentEndDate())
                 .summary(circle.getSummary())
+                .recruiting(circle.isRecruiting())
                 .build();
     }
 }

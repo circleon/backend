@@ -8,7 +8,8 @@ public enum PostResponseStatus {
 
     POST_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "061", "게시글이 존재하지 않습니다."),
     NOT_NOTICE(HttpStatus.BAD_REQUEST.value(), "062", "공지사항이 아닙니다."),
-    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "063", "댓글이 존재하지 않습니다.");
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "063", "댓글이 존재하지 않습니다."),
+    POST_IMAGE_NOT_FOUND(HttpStatus.FORBIDDEN.value(), "064", "게시글 이미지가 존재하지 않습니다.");
 
     private final int httpStatusCode;
     private final String code;

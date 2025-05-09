@@ -24,7 +24,7 @@ public interface CircleService {
 
     void updateOfficialStatus(Long userId, Long circleId, OfficialStatus officialStatus);
 
-    void updateRecruitingStatus(Long userId, Long circleId, RecruitingStatusUpdateRequest recruitingStatusUpdateRequest);
+//    void updateRecruitingStatus(Long userId, Long circleId, RecruitingStatusUpdateRequest recruitingStatusUpdateRequest);
 
     //TODO 동아리 삭제
 

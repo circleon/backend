@@ -228,14 +228,14 @@ public class CircleServiceImpl implements CircleService {
         president.getCircle().setOfficialStatus(officialStatus);
     }
 
-    @Override
-    public void updateRecruitingStatus(Long userId, Long circleId, RecruitingStatusUpdateRequest recruitingStatusUpdateRequest) {
-
-        //가입 유저인지 체크 + 회장 권한 체크
-        MyCircle president = circleAuthValidator.validatePresidentAccess(userId, circleId);
-
-        president.getCircle().setRecruiting(recruitingStatusUpdateRequest.isRecruiting());
-    }
+//    @Override
+//    public void updateRecruitingStatus(Long userId, Long circleId, RecruitingStatusUpdateRequest recruitingStatusUpdateRequest) {
+//
+//        //가입 유저인지 체크 + 회장 권한 체크
+//        MyCircle president = circleAuthValidator.validatePresidentAccess(userId, circleId);
+//
+//        president.getCircle().setRecruiting(recruitingStatusUpdateRequest.isRecruiting());
+//    }
 
     @Override
     public void deleteSoftDeletedCircles() {

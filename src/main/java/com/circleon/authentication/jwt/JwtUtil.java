@@ -22,7 +22,7 @@ public class JwtUtil {
 
     private Key key;
 
-    //TODO 잠시 1시간으로
+    //1시간
     private final long jwtAccessExpirationMs = 1000L * 60 * 60;
 
     //1주일

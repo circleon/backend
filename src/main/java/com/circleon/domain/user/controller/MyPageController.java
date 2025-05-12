@@ -4,8 +4,7 @@ import com.circleon.common.PageableValidator;
 import com.circleon.common.annotation.LoginUser;
 import com.circleon.common.dto.ErrorResponse;
 import com.circleon.common.dto.PaginatedResponse;
-import com.circleon.domain.circle.CircleResponseStatus;
-import com.circleon.domain.circle.exception.CircleException;
+
 import com.circleon.domain.user.UserResponseStatus;
 import com.circleon.domain.user.dto.MyPostResponse;
 import com.circleon.domain.user.exception.UserException;

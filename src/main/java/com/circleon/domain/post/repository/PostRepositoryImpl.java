@@ -3,6 +3,7 @@ package com.circleon.domain.post.repository;
 import com.circleon.common.CommonStatus;
 
 import com.circleon.common.SortUtils;
+import com.circleon.common.dto.PaginatedResponse;
 import com.circleon.domain.post.PostType;
 import com.circleon.domain.post.dto.Author;
 import com.circleon.domain.post.dto.PostCount;
@@ -10,6 +11,9 @@ import com.circleon.domain.post.dto.PostResponse;
 
 import com.circleon.domain.post.entity.Comment;
 import com.circleon.domain.post.entity.Post;
+import com.circleon.domain.user.dto.MyPostResponse;
+import com.circleon.domain.user.entity.QUser;
+import com.circleon.domain.user.entity.User;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
@@ -19,6 +23,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
@@ -69,6 +75,45 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                 .fetch();
     }
 
+    @Override
+    public PaginatedResponse<MyPostResponse> findMyPosts(Long userId, Pageable pageable) {
+
+        List<MyPostResponse> content = jpaQueryFactory
+                .select(Projections.constructor(MyPostResponse.class,
+                        post.id,
+                        post.content,
+                        post.postType,
+                        post.commentCount,
+                        post.isPinned,
+                        postImage.postImgUrl))
+                .from(post)
+                .leftJoin(postImage).on(postImage.post.id.eq(post.id),
+                        postImage.status.eq(CommonStatus.ACTIVE))
+                .where(
+                        authorIdEq(userId),
+                        post.status.eq(CommonStatus.ACTIVE)
+                )
+                .orderBy(SortUtils.getOrderSpecifiers(pageable.getSort(), Post.class, post))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        Long totalPosts = Optional.ofNullable(
+                jpaQueryFactory
+                        .select(post.count())
+                        .from(post)
+                        .where(
+                                authorIdEq(userId),
+                                post.status.eq(CommonStatus.ACTIVE)
+                        )
+                        .fetchOne())
+                .orElse(0L);
+
+        Page<MyPostResponse> pagedPosts = new PageImpl<>(content, pageable, totalPosts);
+
+        return PaginatedResponse.fromPage(pagedPosts);
+    }
+
     // TODO 캐시를 꼭 해야 하는지 테스트 해봐야함
 //    @Cacheable(value = "postCount", key = "#circleId + ':' + #postType")
     @Override
@@ -91,6 +136,10 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
 
     private BooleanExpression circleIdEq(Long circleId){
         return circleId != null ? circle.id.eq(circleId) : null;
+    }
+
+    private BooleanExpression authorIdEq(Long userId){
+        return userId != null ? post.author.id.eq(userId) : null;
     }
 
     private BooleanExpression postTypeEq(PostType postType){

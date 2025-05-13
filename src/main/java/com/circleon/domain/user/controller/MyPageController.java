@@ -6,6 +6,7 @@ import com.circleon.common.dto.ErrorResponse;
 import com.circleon.common.dto.PaginatedResponse;
 
 import com.circleon.domain.user.UserResponseStatus;
+import com.circleon.domain.user.dto.CommentedPostResponse;
 import com.circleon.domain.user.dto.MyPostResponse;
 import com.circleon.domain.user.exception.UserException;
 import com.circleon.domain.user.service.MyPageService;
@@ -37,6 +38,16 @@ public class MyPageController {
         PaginatedResponse<MyPostResponse> myPosts = myPageService.findMyPosts(userId, pageable);
 
         return ResponseEntity.ok(myPosts);
+    }
+
+    @GetMapping("/commented-posts")
+    public ResponseEntity<PaginatedResponse<CommentedPostResponse>> findMyCommentedPosts(@LoginUser Long userId,
+                                                                                         Pageable pageable) {
+        PageableValidator.validatePageable(pageable, List.of("createdAt"), 100);
+
+        PaginatedResponse<CommentedPostResponse> myCommentedPosts = myPageService.findMyCommentedPosts(userId, pageable);
+
+        return ResponseEntity.ok(myCommentedPosts);
     }
 
     @ExceptionHandler(UserException.class)

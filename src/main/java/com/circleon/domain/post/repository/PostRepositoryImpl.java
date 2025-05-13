@@ -9,16 +9,13 @@ import com.circleon.domain.post.dto.Author;
 import com.circleon.domain.post.dto.PostCount;
 import com.circleon.domain.post.dto.PostResponse;
 
-import com.circleon.domain.post.entity.Comment;
 import com.circleon.domain.post.entity.Post;
+import com.circleon.domain.user.dto.CommentedPostResponse;
 import com.circleon.domain.user.dto.MyPostResponse;
-import com.circleon.domain.user.entity.QUser;
-import com.circleon.domain.user.entity.User;
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
+
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.PathBuilder;
+
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,13 +23,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
 import static com.circleon.domain.circle.entity.QCircle.*;
+import static com.circleon.domain.post.entity.QComment.comment;
 import static com.circleon.domain.user.entity.QUser.*;
 import static com.circleon.domain.post.entity.QPost.*;
 import static com.circleon.domain.post.entity.QPostImage.*;
@@ -111,6 +109,50 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                 .orElse(0L);
 
         Page<MyPostResponse> pagedPosts = new PageImpl<>(content, pageable, totalPosts);
+
+        return PaginatedResponse.fromPage(pagedPosts);
+    }
+
+    @Override
+    public PaginatedResponse<CommentedPostResponse> findMyCommentedPosts(Long userId, Pageable pageable) {
+
+        List<CommentedPostResponse> content = jpaQueryFactory
+                .selectDistinct(Projections.constructor(CommentedPostResponse.class,
+                        post.id,
+                        post.content,
+                        post.postType,
+                        post.commentCount,
+                        post.isPinned,
+                        postImage.postImgUrl,
+                        post.circle.id))
+                .from(comment)
+                .join(comment.post, post)
+                .leftJoin(postImage).on(postImage.post.id.eq(post.id),
+                        postImage.status.eq(CommonStatus.ACTIVE))
+                .where(
+                        comment.author.id.eq(userId),
+                        post.status.eq(CommonStatus.ACTIVE),
+                        comment.status.eq(CommonStatus.ACTIVE)
+                )
+                .orderBy(SortUtils.getOrderSpecifiers(pageable.getSort(), Post.class, post))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        Long totalPosts = Optional.ofNullable(
+                jpaQueryFactory
+                        .select(post.id.countDistinct())
+                        .from(comment)
+                        .join(comment.post, post)
+                        .where(
+                                comment.author.id.eq(userId),
+                                post.status.eq(CommonStatus.ACTIVE),
+                                comment.status.eq(CommonStatus.ACTIVE)
+                        )
+                        .fetchOne())
+                .orElse(0L);
+
+        Page<CommentedPostResponse> pagedPosts = new PageImpl<>(content, pageable, totalPosts);
 
         return PaginatedResponse.fromPage(pagedPosts);
     }

@@ -49,22 +49,4 @@ public class MyPageController {
 
         return ResponseEntity.ok(myCommentedPosts);
     }
-
-    @ExceptionHandler(UserException.class)
-    public ResponseEntity<ErrorResponse> handleCircleException(UserException e) {
-
-        UserResponseStatus status = e.getStatus();
-
-        log.error("UserException: {}", e.getMessage());
-
-        log.error("UserException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
-
-
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode(status.getCode())
-                .errorMessage(status.getMessage())
-                .build();
-
-        return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
-    }
 }

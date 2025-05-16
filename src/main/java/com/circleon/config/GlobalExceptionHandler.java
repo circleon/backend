@@ -14,6 +14,7 @@ import com.circleon.domain.report.exception.ReportException;
 import com.circleon.domain.schedule.ScheduleResponseStatus;
 import com.circleon.domain.schedule.exception.ScheduleException;
 import com.circleon.domain.user.UserResponseStatus;
+import com.circleon.domain.user.exception.UserException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
@@ -115,6 +116,23 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
     }
 
+    @ExceptionHandler(UserException.class)
+    public ResponseEntity<ErrorResponse> handleCircleException(UserException e) {
+
+        UserResponseStatus status = e.getStatus();
+
+        log.error("UserException: {}", e.getMessage());
+
+        log.error("UserException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
+
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode(status.getCode())
+                .errorMessage(status.getMessage())
+                .build();
+
+        return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
+    }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {

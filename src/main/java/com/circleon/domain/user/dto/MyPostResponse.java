@@ -23,6 +23,8 @@ public class MyPostResponse {
 
     private Long circleId;
 
+    private String circleName;
+
     public void setPostImgUrl(String postImgUrl) {
         this.postImgUrl = postImgUrl;
     }

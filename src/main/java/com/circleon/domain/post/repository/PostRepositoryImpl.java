@@ -84,7 +84,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                         post.commentCount,
                         post.isPinned,
                         postImage.postImgUrl,
-                        post.circle.id))
+                        post.circle.id,
+                        post.circle.name))
                 .from(post)
                 .leftJoin(postImage).on(postImage.post.id.eq(post.id),
                         postImage.status.eq(CommonStatus.ACTIVE))

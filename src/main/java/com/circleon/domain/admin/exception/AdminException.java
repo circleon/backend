@@ -9,13 +9,11 @@ public class AdminException extends RuntimeException {
     private AdminResponseStatus status;
 
     public AdminException(String message) {
-
-      super(message);
+        super(message);
     }
 
-  public AdminException(AdminResponseStatus status, String message) {
-
-    super(message);
-    this.status = status;
-  }
+    public AdminException(AdminResponseStatus status, String message) {
+        super(message);
+        this.status = status;
+    }
 }

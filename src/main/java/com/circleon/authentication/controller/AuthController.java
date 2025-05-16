@@ -86,22 +86,4 @@ public class AuthController {
         authService.logout(logoutRequest);
         return ResponseEntity.ok(SuccessResponse.builder().message("로그아웃 성공").build());
     }
-
-
-    @ExceptionHandler(UserException.class)
-    public ResponseEntity<ErrorResponse> handleUserException(UserException e) {
-
-        UserResponseStatus status = e.getStatus();
-
-        log.error("UserException: {} {} {}", status.getHttpStatusCode(), status.getCode(), e.getMessage());
-
-        log.error("UserException: ", e);
-
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode(status.getCode())
-                .errorMessage(status.getMessage())
-                .build();
-        return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
-    }
-
 }

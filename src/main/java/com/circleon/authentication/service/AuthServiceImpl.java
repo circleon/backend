@@ -41,7 +41,6 @@ public class AuthServiceImpl implements AuthService{
     private final UserRepository userRepository;
     private final EmailVerificationRepository emailVerificationRepository;
     private final UserRefreshTokenRepository userRefreshTokenRepository;
-
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final JwtUtil jwtUtil;

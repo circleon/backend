@@ -31,9 +31,7 @@ public class CommentedPostResponse {
 
     private LocalDateTime updatedAt;
 
-    private Author postAuthor;
-
-
+    private Author author;
 
     public void setPostImgUrl(String postImgUrl) {
         this.postImgUrl = postImgUrl;

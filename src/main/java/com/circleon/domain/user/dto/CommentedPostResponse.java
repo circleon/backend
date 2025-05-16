@@ -5,6 +5,8 @@ import com.circleon.domain.post.dto.Author;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @AllArgsConstructor
 public class CommentedPostResponse {
@@ -23,7 +25,15 @@ public class CommentedPostResponse {
 
     private Long circleId;
 
+    private String circleName;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
     private Author postAuthor;
+
+
 
     public void setPostImgUrl(String postImgUrl) {
         this.postImgUrl = postImgUrl;

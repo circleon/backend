@@ -6,6 +6,8 @@ import com.circleon.domain.post.dto.Author;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @AllArgsConstructor
 @Getter
 public class MyPostResponse {
@@ -25,6 +27,10 @@ public class MyPostResponse {
     private Long circleId;
 
     private String circleName;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
     private Author postAuthor;
 

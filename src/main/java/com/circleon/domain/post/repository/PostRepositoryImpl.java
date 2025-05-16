@@ -85,7 +85,11 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                         post.isPinned,
                         postImage.postImgUrl,
                         post.circle.id,
-                        post.circle.name))
+                        post.circle.name,
+                        Projections.constructor(Author.class,
+                                post.author.id,
+                                post.author.username,
+                                post.author.profileImgUrl)))
                 .from(post)
                 .leftJoin(postImage).on(postImage.post.id.eq(post.id),
                         postImage.status.eq(CommonStatus.ACTIVE))
@@ -125,7 +129,12 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                         post.commentCount,
                         post.isPinned,
                         postImage.postImgUrl,
-                        post.circle.id))
+                        post.circle.id,
+                                Projections.constructor(Author.class,
+                                        post.author.id,
+                                        post.author.username,
+                                        post.author.profileImgUrl))
+                        )
                 .from(comment)
                 .join(comment.post, post)
                 .leftJoin(postImage).on(postImage.post.id.eq(post.id),

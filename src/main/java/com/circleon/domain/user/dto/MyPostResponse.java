@@ -2,6 +2,7 @@ package com.circleon.domain.user.dto;
 
 import com.circleon.domain.post.PostType;
 
+import com.circleon.domain.post.dto.Author;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -24,6 +25,8 @@ public class MyPostResponse {
     private Long circleId;
 
     private String circleName;
+
+    private Author postAuthor;
 
     public void setPostImgUrl(String postImgUrl) {
         this.postImgUrl = postImgUrl;

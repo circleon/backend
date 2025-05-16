@@ -77,38 +77,4 @@ public class CircleScheduleController {
     }
 
 
-    @ExceptionHandler(CircleException.class)
-    public ResponseEntity<ErrorResponse> handleCircleException(CircleException e) {
-
-        CircleResponseStatus status = e.getStatus();
-
-        log.error("CircleException: {}", e.getMessage());
-
-        log.error("CircleException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
-
-
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode(status.getCode())
-                .errorMessage(status.getMessage())
-                .build();
-
-        return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
-    }
-
-    @ExceptionHandler(ScheduleException.class)
-    public ResponseEntity<ErrorResponse> handleScheduleException(ScheduleException e) {
-
-        ScheduleResponseStatus status = e.getStatus();
-
-        log.error("ScheduleException: {}", e.getMessage());
-
-        log.error("ScheduleException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
-
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode(status.getCode())
-                .errorMessage(status.getMessage())
-                .build();
-
-        return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
-    }
 }

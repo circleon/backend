@@ -66,22 +66,4 @@ public class CircleImageController {
                 .cacheControl(CacheControl.maxAge(1, TimeUnit.MINUTES).cachePublic())
                 .body(resource);
     }
-
-    @ExceptionHandler(CircleException.class)
-    public ResponseEntity<ErrorResponse> handleCircleException(CircleException e) {
-
-        CircleResponseStatus status = e.getStatus();
-
-        log.error("CircleException: {}", e.getMessage());
-
-        log.error("CircleException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
-
-
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode(status.getCode())
-                .errorMessage(status.getMessage())
-                .build();
-
-        return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
-    }
 }

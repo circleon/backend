@@ -93,32 +93,6 @@ public class CircleController {
         return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
     }
 
-//    @PutMapping("/{circleId}/recruiting")
-//    public ResponseEntity<SuccessResponse> updateRecruitingStatus(@LoginUser Long userId,
-//                                                                  @PathVariable Long circleId,
-//                                                                  @RequestBody RecruitingStatusUpdateRequest recruitingStatusUpdateRequest){
-//
-//        circleService.updateRecruitingStatus(userId, circleId, recruitingStatusUpdateRequest);
-//
-//        return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
-//    }
 
-    @ExceptionHandler(CircleException.class)
-    public ResponseEntity<ErrorResponse> handleCircleException(CircleException e) {
-
-        CircleResponseStatus status = e.getStatus();
-
-        log.error("CircleException: {}", e.getMessage());
-
-        log.error("CircleException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
-
-
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode(status.getCode())
-                .errorMessage(status.getMessage())
-                .build();
-
-        return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
-    }
 }
 

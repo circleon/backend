@@ -3,6 +3,16 @@ package com.circleon.config;
 import com.circleon.common.CommonResponseStatus;
 import com.circleon.common.dto.ErrorResponse;
 import com.circleon.common.exception.CommonException;
+import com.circleon.domain.admin.AdminResponseStatus;
+import com.circleon.domain.admin.exception.AdminException;
+import com.circleon.domain.circle.CircleResponseStatus;
+import com.circleon.domain.circle.exception.CircleException;
+import com.circleon.domain.post.PostResponseStatus;
+import com.circleon.domain.post.exception.PostException;
+import com.circleon.domain.report.ReportResponseStatus;
+import com.circleon.domain.report.exception.ReportException;
+import com.circleon.domain.schedule.ScheduleResponseStatus;
+import com.circleon.domain.schedule.exception.ScheduleException;
 import com.circleon.domain.user.UserResponseStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -17,6 +27,93 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(AdminException.class)
+    public ResponseEntity<ErrorResponse> handleCircleException(AdminException e) {
+
+        AdminResponseStatus status = e.getStatus();
+
+        log.error("AdminException: {}", e.getMessage());
+
+        log.error("AdminException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode(status.getCode())
+                .errorMessage(status.getMessage())
+                .build();
+
+        return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
+    }
+
+    @ExceptionHandler(ScheduleException.class)
+    public ResponseEntity<ErrorResponse> handleScheduleException(ScheduleException e) {
+
+        ScheduleResponseStatus status = e.getStatus();
+
+        log.error("ScheduleException: {}", e.getMessage());
+
+        log.error("ScheduleException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode(status.getCode())
+                .errorMessage(status.getMessage())
+                .build();
+
+        return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
+    }
+
+    @ExceptionHandler(ReportException.class)
+    public ResponseEntity<ErrorResponse> handleReportException(ReportException e) {
+
+        ReportResponseStatus status = e.getStatus();
+
+        log.error("ReportException: {}", e.getMessage());
+
+        log.error("ReportException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
+
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode(status.getCode())
+                .errorMessage(status.getMessage())
+                .build();
+
+        return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
+    }
+
+    @ExceptionHandler(PostException.class)
+    public ResponseEntity<ErrorResponse> handlePostException(PostException e) {
+
+        PostResponseStatus status = e.getStatus();
+
+        log.error("PostException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
+
+        log.error("PostException {}", e.getMessage());
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode(status.getCode())
+                .errorMessage(status.getMessage())
+                .build();
+
+        return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
+    }
+
+    @ExceptionHandler(CircleException.class)
+    public ResponseEntity<ErrorResponse> handleCircleException(CircleException e) {
+
+        CircleResponseStatus status = e.getStatus();
+
+        log.error("CircleException: {}", e.getMessage());
+
+        log.error("CircleException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
+
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode(status.getCode())
+                .errorMessage(status.getMessage())
+                .build();
+
+        return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
+    }
 
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)

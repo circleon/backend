@@ -53,21 +53,4 @@ public class AdminAuthController {
         return ResponseEntity.ok(adminInfo);
     }
 
-    @ExceptionHandler(AdminException.class)
-    public ResponseEntity<ErrorResponse> handleCircleException(AdminException e) {
-
-        AdminResponseStatus status = e.getStatus();
-
-        log.error("AdminException: {}", e.getMessage());
-
-        log.error("AdminException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
-
-
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode(status.getCode())
-                .errorMessage(status.getMessage())
-                .build();
-
-        return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
-    }
 }

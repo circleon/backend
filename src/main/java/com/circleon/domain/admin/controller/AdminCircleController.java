@@ -54,24 +54,4 @@ public class AdminCircleController {
         return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
     }
 
-
-
-
-    @ExceptionHandler(CircleException.class)
-    public ResponseEntity<ErrorResponse> handleCircleException(CircleException e) {
-
-        CircleResponseStatus status = e.getStatus();
-
-        log.error("CircleException: {}", e.getMessage());
-
-        log.error("CircleException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
-
-
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode(status.getCode())
-                .errorMessage(status.getMessage())
-                .build();
-
-        return ResponseEntity.status(status.getHttpStatusCode()).body(errorResponse);
-    }
 }

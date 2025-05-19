@@ -1,6 +1,7 @@
 package com.circleon.domain.user.entity;
 
 import com.circleon.common.BaseEntity;
+import com.circleon.domain.user.dto.UserDomain;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -38,5 +39,18 @@ public class User extends BaseEntity {
 
     @Column
     private String profileImgUrl;
+
+    public UserDomain toDomain(){
+        return UserDomain.builder()
+                .id(id)
+                .username(username)
+                .email(email)
+                .password(password)
+                .univCode(univCode)
+                .status(status)
+                .role(role)
+                .profileImgUrl(profileImgUrl)
+                .build();
+    }
 
 }

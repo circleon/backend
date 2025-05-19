@@ -28,4 +28,11 @@ public class UserDomain {
 
     private String profileImgUrl;
 
+    public void updateUserName(String username){
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("닉네임은 비어있을 수 없습니다.");
+        }
+        this.username = username;
+    }
+
 }

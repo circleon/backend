@@ -53,4 +53,14 @@ public class User extends BaseEntity {
                 .build();
     }
 
+    public void apply(UserDomain userDomain){
+        this.email = userDomain.getEmail();
+        this.username = userDomain.getUsername();
+        this.password = userDomain.getPassword();
+        this.univCode = userDomain.getUnivCode();
+        this.status = userDomain.getStatus();
+        this.role = userDomain.getRole();
+        this.profileImgUrl = userDomain.getProfileImgUrl();
+    }
+
 }

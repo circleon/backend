@@ -26,7 +26,7 @@ public class ImageManager {
     }
 
     @Transactional
-    public void saveImageMeta(Long userId, String path){
+    public void updateImageMeta(Long userId, String path){
         User user = userRepository.findByIdAndStatus(userId, UserStatus.ACTIVE)
                 .orElseThrow(() -> new UserException(UserResponseStatus.USER_NOT_FOUND));
         UserInfo userInfo = user.toUserInfo();
@@ -35,6 +35,9 @@ public class ImageManager {
     }
 
     public void deleteImage(String path){
-        if(path != null && !path.isEmpty()) userFileStore.deleteFile(path);
+        if(path == null || path.isEmpty()){
+            throw new CommonException(CommonResponseStatus.FILE_NOT_FOUND, "이미지 파일이 존재하지않습니다");
+        }
+        userFileStore.deleteFile(path);
     }
 }

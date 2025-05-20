@@ -33,4 +33,10 @@ public class UserController {
         userService.updateImage(userId, userImageUpdate.getImage());
         return ResponseEntity.ok(SuccessResponse.builder().message("success").build());
     }
+
+    @DeleteMapping("/me/image")
+    public ResponseEntity<SuccessResponse> deleteImage(@LoginUser Long userId) {
+        userService.deleteImage(userId);
+        return ResponseEntity.ok(SuccessResponse.builder().message("success").build());
+    }
 }

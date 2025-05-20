@@ -26,6 +26,8 @@ public enum CommonResponseStatus {
 
     FILE_EXTENSION_INVALID(HttpStatus.BAD_REQUEST.value(), "009", "허용되지 않은 확장자 파일입니다."),
 
+    FILE_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR.value(), "010", "이미지 삭제 실패"),
+
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(), "5", "서버 에러");
 
     private final int httpStatusCode;

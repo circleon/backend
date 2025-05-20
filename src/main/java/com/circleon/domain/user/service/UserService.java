@@ -1,6 +1,8 @@
 package com.circleon.domain.user.service;
 
 
+import com.circleon.common.CommonResponseStatus;
+import com.circleon.common.exception.CommonException;
 import com.circleon.domain.post.service.SignedUrlManager;
 import com.circleon.domain.user.ImageManager;
 import com.circleon.domain.user.UserResponseStatus;
@@ -49,7 +51,24 @@ public class UserService {
                 .toUserInfo()
                 .getProfileImgUrl();
         String url = imageManager.saveImage(image, userId);
-        imageManager.saveImageMeta(userId, url);
+        saveImageMetaOrRollBack(userId, url);
         imageManager.deleteImage(oldPath);
+    }
+
+    private void saveImageMetaOrRollBack(Long userId, String url) {
+        try{
+            imageManager.updateImageMeta(userId, url);
+        } catch (RuntimeException e) {
+            imageManager.deleteImage(url);
+        }
+    }
+
+    public void deleteImage(Long userId){
+        User user = userRepository.findByIdAndStatus(userId, UserStatus.ACTIVE)
+                .orElseThrow(() -> new UserException(UserResponseStatus.USER_NOT_FOUND));
+        UserInfo userInfo = user.toUserInfo();
+
+        imageManager.updateImageMeta(userId, null);
+        imageManager.deleteImage(userInfo.getProfileImgUrl());
     }
 }

@@ -20,7 +20,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final ImageManager imageManager;
-    private final SignedUrlManager signedUrlManager
+    private final SignedUrlManager signedUrlManager;
 
     @Transactional(readOnly = true)
     public UserInfo findMeById(Long loginId){

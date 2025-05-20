@@ -10,7 +10,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 @Builder
-public class UserDomain {
+public class UserInfo {
 
     private Long id;
 

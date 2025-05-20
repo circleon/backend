@@ -1,11 +1,9 @@
 package com.circleon.domain.user.entity;
 
 import com.circleon.common.BaseEntity;
-import com.circleon.domain.user.dto.UserDomain;
+import com.circleon.domain.user.dto.UserInfo;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Entity
@@ -40,8 +38,8 @@ public class User extends BaseEntity {
     @Column
     private String profileImgUrl;
 
-    public UserDomain toDomain(){
-        return UserDomain.builder()
+    public UserInfo toUserInfo(){
+        return UserInfo.builder()
                 .id(id)
                 .username(username)
                 .email(email)
@@ -53,14 +51,14 @@ public class User extends BaseEntity {
                 .build();
     }
 
-    public void apply(UserDomain userDomain){
-        this.email = userDomain.getEmail();
-        this.username = userDomain.getUsername();
-        this.password = userDomain.getPassword();
-        this.univCode = userDomain.getUnivCode();
-        this.status = userDomain.getStatus();
-        this.role = userDomain.getRole();
-        this.profileImgUrl = userDomain.getProfileImgUrl();
+    public void apply(UserInfo userInfo){
+        this.email = userInfo.getEmail();
+        this.username = userInfo.getUsername();
+        this.password = userInfo.getPassword();
+        this.univCode = userInfo.getUnivCode();
+        this.status = userInfo.getStatus();
+        this.role = userInfo.getRole();
+        this.profileImgUrl = userInfo.getProfileImgUrl();
     }
 
 }

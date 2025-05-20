@@ -21,13 +21,13 @@ public class UserResponse {
 
     private String profileImgUrl;
 
-    public static UserResponse from(UserDomain userDomain){
+    public static UserResponse from(UserInfo userInfo){
         return UserResponse.builder()
-                .id(userDomain.getId())
-                .username(userDomain.getUsername())
-                .email(userDomain.getEmail())
-                .univCode(userDomain.getUnivCode())
-                .profileImgUrl(userDomain.getProfileImgUrl())
+                .id(userInfo.getId())
+                .username(userInfo.getUsername())
+                .email(userInfo.getEmail())
+                .univCode(userInfo.getUnivCode())
+                .profileImgUrl(userInfo.getProfileImgUrl())
                 .build();
     }
 }

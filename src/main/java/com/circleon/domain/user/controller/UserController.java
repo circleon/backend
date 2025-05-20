@@ -17,13 +17,11 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<UserResponse> findMe(@LoginUser Long loginId) {
-        UserResponse userResponse = userService.findMeById(loginId);
-        return ResponseEntity.ok(userResponse);
+        return ResponseEntity.ok(UserResponse.from(userService.findMeById(loginId)));
     }
 
     @PutMapping("/me")
     public ResponseEntity<UserResponse> updateMe(@LoginUser Long userId, @RequestBody UserUpdate userUpdate) {
-        UserResponse userResponse = userService.updateMe(userId, userUpdate);
-        return ResponseEntity.ok(userResponse);
+        return ResponseEntity.ok(UserResponse.from(userService.updateMe(userId, userUpdate.getUsername())));
     }
 }

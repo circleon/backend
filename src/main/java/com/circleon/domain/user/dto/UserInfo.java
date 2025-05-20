@@ -35,4 +35,8 @@ public class UserInfo {
         this.username = username;
     }
 
+    public void updateProfileImgUrl(String profileImgUrl){
+        this.profileImgUrl = profileImgUrl;
+    }
+
 }

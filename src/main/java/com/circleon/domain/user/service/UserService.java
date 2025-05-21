@@ -1,6 +1,5 @@
 package com.circleon.domain.user.service;
 
-import com.circleon.domain.post.service.SignedUrlManager;
 import com.circleon.domain.user.UserImageManager;
 import com.circleon.domain.user.UserResponseStatus;
 import com.circleon.domain.user.dto.UserInfo;
@@ -20,7 +19,6 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserImageManager userImageManager;
-    private final SignedUrlManager signedUrlManager;
     private final UserFileStore userFileStore;
 
     @Transactional(readOnly = true)
@@ -28,9 +26,7 @@ public class UserService {
         UserInfo userInfo = userRepository.findByIdAndStatus(loginId, UserStatus.ACTIVE)
                 .orElseThrow(() -> new UserException(UserResponseStatus.USER_NOT_FOUND))
                 .toUserInfo();
-        String signedUrl = signedUrlManager.createSignedUrl(userInfo.getProfileImgUrl());
-        userInfo.updateProfileImgUrl(signedUrl);
-        return userInfo;
+        return userImageManager.createSignedUrl(userInfo);
     }
 
     @Transactional

@@ -22,6 +22,14 @@ public class UserImageManager {
     private final UserRepository userRepository;
     private final SignedUrlManager signedUrlManager;
 
+    public UserInfo createSignedUrl(UserInfo userInfo){
+        String originUrl = userInfo.getProfileImgUrl();
+        if(originUrl != null && !originUrl.isBlank()){
+            userInfo.updateProfileImgUrl(signedUrlManager.createSignedUrl(originUrl));
+        }
+        return userInfo;
+    }
+
     public String saveImage(MultipartFile file, Long userId) {
         if(!userFileStore.isValidFile(file)) throw new CommonException(CommonResponseStatus.FILE_NOT_FOUND, "이미지 파일이 필수입니다;");
         return userFileStore.storeThumbnail(file, userId);

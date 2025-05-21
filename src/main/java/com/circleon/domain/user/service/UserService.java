@@ -1,10 +1,7 @@
 package com.circleon.domain.user.service;
 
-
-import com.circleon.common.CommonResponseStatus;
-import com.circleon.common.exception.CommonException;
 import com.circleon.domain.post.service.SignedUrlManager;
-import com.circleon.domain.user.ImageManager;
+import com.circleon.domain.user.UserImageManager;
 import com.circleon.domain.user.UserResponseStatus;
 import com.circleon.domain.user.dto.UserInfo;
 import com.circleon.domain.user.entity.User;
@@ -12,6 +9,7 @@ import com.circleon.domain.user.entity.UserStatus;
 import com.circleon.domain.user.exception.UserException;
 import com.circleon.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,15 +19,15 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final ImageManager imageManager;
+    private final UserImageManager userImageManager;
     private final SignedUrlManager signedUrlManager;
+    private final UserFileStore userFileStore;
 
     @Transactional(readOnly = true)
     public UserInfo findMeById(Long loginId){
         UserInfo userInfo = userRepository.findByIdAndStatus(loginId, UserStatus.ACTIVE)
                 .orElseThrow(() -> new UserException(UserResponseStatus.USER_NOT_FOUND))
                 .toUserInfo();
-
         String signedUrl = signedUrlManager.createSignedUrl(userInfo.getProfileImgUrl());
         userInfo.updateProfileImgUrl(signedUrl);
         return userInfo;
@@ -50,16 +48,16 @@ public class UserService {
                 .orElseThrow(() -> new UserException(UserResponseStatus.USER_NOT_FOUND))
                 .toUserInfo()
                 .getProfileImgUrl();
-        String url = imageManager.saveImage(image, userId);
+        String url = userImageManager.saveImage(image, userId);
         saveImageMetaOrRollBack(userId, url);
-        imageManager.deleteImage(oldPath);
+        userImageManager.deleteImage(oldPath);
     }
 
     private void saveImageMetaOrRollBack(Long userId, String url) {
         try{
-            imageManager.updateImageMeta(userId, url);
+            userImageManager.updateImageMeta(userId, url);
         } catch (RuntimeException e) {
-            imageManager.deleteImage(url);
+            userImageManager.deleteImage(url);
         }
     }
 
@@ -67,8 +65,12 @@ public class UserService {
         User user = userRepository.findByIdAndStatus(userId, UserStatus.ACTIVE)
                 .orElseThrow(() -> new UserException(UserResponseStatus.USER_NOT_FOUND));
         UserInfo userInfo = user.toUserInfo();
+        userImageManager.updateImageMeta(userId, null);
+        userImageManager.deleteImage(userInfo.getProfileImgUrl());
+    }
 
-        imageManager.updateImageMeta(userId, null);
-        imageManager.deleteImage(userInfo.getProfileImgUrl());
+    public Resource loadImageAsResource(String filePath, String expires, String signature){
+        userImageManager.validateSignedImage(filePath, expires, signature);
+        return userFileStore.loadFileAsResource(filePath);
     }
 }

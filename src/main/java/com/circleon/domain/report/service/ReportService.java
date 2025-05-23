@@ -1,6 +1,5 @@
 package com.circleon.domain.report.service;
 
-import com.circleon.domain.circle.entity.MyCircle;
 import com.circleon.domain.circle.service.MyCircleDataService;
 import com.circleon.domain.report.ReportHandler;
 import com.circleon.domain.report.ReportResponseStatus;

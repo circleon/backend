@@ -8,8 +8,7 @@ import com.circleon.domain.post.dto.PostResponse;
 import com.circleon.domain.post.entity.Post;
 import com.circleon.domain.user.dto.CommentedPostResponse;
 import com.circleon.domain.user.dto.MyPostResponse;
-import com.circleon.domain.user.entity.User;
-import org.springframework.data.domain.Page;
+
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;

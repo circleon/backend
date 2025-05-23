@@ -1,4 +1,4 @@
-package com.circleon.domain.report.dto;
+package com.circleon.domain.admin.dto;
 
 import com.circleon.domain.report.ReportType;
 import com.circleon.domain.report.entity.Report;

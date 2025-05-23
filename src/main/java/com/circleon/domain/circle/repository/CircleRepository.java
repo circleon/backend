@@ -20,6 +20,8 @@ public interface CircleRepository extends JpaRepository<Circle, Long>, CircleRep
 
     Optional<Circle> findByIdAndCircleStatus(Long id, CircleStatus circleStatus);
 
+    List<Circle> findByIdIn(List<Long> ids);
+
     List<Circle> findAllByCircleStatus(CircleStatus circleStatus);
 
     Page<Circle> findAllByCircleStatus(CircleStatus circleStatus, Pageable pageable);

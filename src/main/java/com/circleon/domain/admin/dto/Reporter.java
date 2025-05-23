@@ -1,4 +1,4 @@
-package com.circleon.domain.report.dto;
+package com.circleon.domain.admin.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

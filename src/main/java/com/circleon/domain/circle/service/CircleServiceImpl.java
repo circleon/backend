@@ -60,21 +60,7 @@ public class CircleServiceImpl implements CircleService {
                 .orElseThrow(()->new CommonException(CommonResponseStatus.USER_NOT_FOUND));
 
 
-        //동아리 엔티티
-        Circle circle = Circle.builder()
-                .applicant(foundUser)
-                .name(circleCreateRequest.getCircleName())
-                .circleStatus(CircleStatus.ACTIVE)
-                .categoryType(circleCreateRequest.getCategory())
-                .introduction(circleCreateRequest.getIntroduction())
-                .summary(circleCreateRequest.getSummary())
-                .recruitmentStartDate(circleCreateRequest.getRecruitmentStartDate())
-                .recruitmentEndDate(circleCreateRequest.getRecruitmentEndDate())
-                .officialStatus(OfficialStatus.UNOFFICIAL)
-                .memberCount(1)
-                .build();
-
-        Circle savedCircle = circleRepository.save(circle);
+        Circle savedCircle = circleRepository.save(circleCreateRequest.toCircle(foundUser));
 
         MyCircle myCircle = MyCircle.builder()
                 .circleRole(CircleRole.PRESIDENT)

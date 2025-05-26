@@ -1,6 +1,10 @@
 package com.circleon.domain.circle.dto;
 
 import com.circleon.domain.circle.CategoryType;
+import com.circleon.domain.circle.CircleStatus;
+import com.circleon.domain.circle.OfficialStatus;
+import com.circleon.domain.circle.entity.Circle;
+import com.circleon.domain.user.entity.User;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -33,8 +37,26 @@ public class CircleCreateRequest {
 
     private LocalDateTime recruitmentEndDate;
 
+    private boolean recruiting;
+
     @Size(max = 1000, message = "소개글은 최대 1000자까지 입력할 수 있습니다.")
     private String introduction;
 
     private MultipartFile introductionImg;
+
+    public Circle toCircle(User user) {
+        return Circle.builder()
+                .applicant(user)
+                .name(circleName)
+                .circleStatus(CircleStatus.ACTIVE)
+                .categoryType(category)
+                .introduction(introduction)
+                .summary(summary)
+                .recruitmentStartDate(recruitmentStartDate)
+                .recruitmentEndDate(recruitmentEndDate)
+                .officialStatus(OfficialStatus.UNOFFICIAL)
+                .memberCount(1)
+                .isRecruiting(recruiting)
+                .build();
+    }
 }

@@ -25,6 +25,8 @@ public interface PostService {
 
     void softDeletePost(Long userId, Long circleId, Long postId);
 
+    PostImageResponse findPost(Long userId, Long circleId, Long postId);
+
     void deleteSoftDeletedPosts();
 
 }

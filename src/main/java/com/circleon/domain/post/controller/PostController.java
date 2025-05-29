@@ -17,6 +17,7 @@ import com.circleon.domain.post.exception.PostException;
 import com.circleon.domain.post.service.PostService;
 
 import jakarta.validation.Valid;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -66,6 +67,13 @@ public class PostController {
         PaginatedResponse<PostResponse> pagedPosts = postService.findPagedPosts(userId, circleId, postType, pageable);
 
         return ResponseEntity.ok(pagedPosts);
+    }
+
+    @GetMapping("/circles/{circleId}/posts/{postId}/img-url")
+    public ResponseEntity<PostImageResponse> findPostImage(@LoginUser Long userId,
+                                                           @PathVariable Long circleId,
+                                                           @PathVariable Long postId){
+        return ResponseEntity.ok(postService.findPost(userId, circleId, postId));
     }
 
     @PutMapping("/circles/{circleId}/posts/{postId}")

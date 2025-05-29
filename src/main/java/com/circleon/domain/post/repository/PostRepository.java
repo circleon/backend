@@ -23,4 +23,5 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
 
     Page<Post> findAllByCircleIn(List<Circle> circles, Pageable pageable);
 
+
 }

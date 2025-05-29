@@ -166,6 +166,20 @@ public class PostServiceImpl implements PostService {
         post.setIsPinned(postPinUpdateRequest.getIsPinned());
     }
 
+    @Override
+    public PostImageResponse findPost(Long userId, Long circleId, Long postId) {
+        MyCircle member = circleAuthValidator.validateMembership(userId, circleId);
+        Post post = postRepository
+                .findByIdAndCircleAndStatus(postId, member.getCircle(), CommonStatus.ACTIVE)
+                .orElseThrow(() -> new PostException(PostResponseStatus.POST_NOT_FOUND, "[findPost] 존재하지 않은 게시글입니다."));
+        PostImage postImage = postImageRepository.findByPost(post)
+                .orElseThrow(() -> new PostException(PostResponseStatus.POST_NOT_FOUND, "[findPost] 게시글 이미지가 존재하지않습니다"));
+        PostImageResponse postImageResponse = PostImageResponse.from(postImage);
+        String signedUrl = signedUrlManager.createSignedUrl(postImageResponse.getPostImgUrl());
+        postImageResponse.changeToSignedUrl(signedUrl);
+        return postImageResponse;
+    }
+
     //TODO 나중에 포스트 이미지랑 댓글은 스큐쥴러로 삭제
     @Override
     public void softDeletePost(Long userId, Long circleId, Long postId) {

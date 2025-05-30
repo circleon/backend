@@ -17,11 +17,14 @@ public class UserInfo {
 
     private UnivCode univCode;
 
+    private String profileImgUrl;
+
     public static UserInfo from(User user) {
         return UserInfo.builder()
                 .userId(user.getId())
                 .username(user.getUsername())
                 .univCode(user.getUnivCode())
+                .profileImgUrl(user.getProfileImgUrl())
                 .build();
     }
 }

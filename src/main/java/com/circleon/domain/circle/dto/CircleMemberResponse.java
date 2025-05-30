@@ -18,6 +18,8 @@ public class CircleMemberResponse {
 
     private String memberName;
 
+    private String memberImgUrl;
+
     private CircleRole circleRole;
 
     private LocalDateTime joinedAt;
@@ -28,6 +30,7 @@ public class CircleMemberResponse {
         return CircleMemberResponse.builder()
                 .memberId(myCircle.getId())
                 .memberName(myCircle.getUser().getUsername())
+                .memberImgUrl(myCircle.getUser().getProfileImgUrl())
                 .circleRole(myCircle.getCircleRole())
                 .joinedAt(myCircle.getJoinedAt())
                 .membershipStatus(myCircle.getMembershipStatus())

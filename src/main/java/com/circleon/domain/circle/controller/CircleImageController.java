@@ -26,8 +26,10 @@ import java.util.concurrent.TimeUnit;
 @RequestMapping("/api/circles")
 public class CircleImageController {
 
+    public static final int CACHE_MAX_AGE = 365;
     private final CircleImageService circleImageService;
     private final FileStore circleFileStore;
+
 
     @PutMapping("/{circleId}/images")
     public ResponseEntity<CircleImagesUpdateResponse> updateCircleImages(@Valid @ModelAttribute CircleImagesUpdateRequest circleImagesUpdateRequest,
@@ -63,7 +65,11 @@ public class CircleImageController {
 
         return ResponseEntity.ok()
                 .contentType(mediaType)
-                .cacheControl(CacheControl.maxAge(1, TimeUnit.MINUTES).cachePublic())
+                .cacheControl(CacheControl
+                        .maxAge(CACHE_MAX_AGE, TimeUnit.DAYS)
+                        .cachePublic()
+                        .immutable()
+                )
                 .body(resource);
     }
 }

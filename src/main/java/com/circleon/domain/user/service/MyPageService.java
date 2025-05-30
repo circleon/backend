@@ -68,7 +68,7 @@ public class MyPageService {
     public UserInfo findMeById(Long loginId){
         User user = userRepository.findByIdAndStatus(loginId, UserStatus.ACTIVE)
                 .orElseThrow(() -> new UserException(UserResponseStatus.USER_NOT_FOUND));
-        return userImageManager.createSignedUrl(user);
+        return UserInfo.from(user);
     }
 
     @Transactional

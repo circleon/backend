@@ -12,11 +12,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserImageManager userImageManager;
     private final UserFileStore userFileStore;
 
-    public Resource loadImageAsResource(String filePath, String expires, String signature){
-        userImageManager.validateSignedImage(filePath, expires, signature);
+    public Resource loadImageAsResource(String filePath){
         return userFileStore.loadFileAsResource(filePath);
     }
 }

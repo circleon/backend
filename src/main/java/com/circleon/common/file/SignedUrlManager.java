@@ -15,7 +15,7 @@ public class SignedUrlManager {
     @Value("${signed-url.secret}")
     private String signedUrlSecretKey;
 
-    private final long expiredTimeSec = 300L; // 5분
+    private final long expiredTimeSec = 3600L; // 1시간
 
     //생성
     public String createSignedUrl(String baseUrl){

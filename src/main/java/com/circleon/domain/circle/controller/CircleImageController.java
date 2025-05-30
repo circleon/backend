@@ -1,13 +1,10 @@
 package com.circleon.domain.circle.controller;
 
 import com.circleon.common.annotation.LoginUser;
-import com.circleon.common.dto.ErrorResponse;
 import com.circleon.common.dto.SuccessResponse;
 import com.circleon.common.file.FileStore;
-import com.circleon.domain.circle.CircleResponseStatus;
 import com.circleon.domain.circle.dto.CircleImagesUpdateRequest;
 import com.circleon.domain.circle.dto.CircleImagesUpdateResponse;
-import com.circleon.domain.circle.exception.CircleException;
 import com.circleon.domain.circle.service.CircleImageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

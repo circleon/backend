@@ -5,6 +5,7 @@ import com.circleon.common.CommonStatus;
 import com.circleon.common.dto.PaginatedResponse;
 import com.circleon.common.exception.CommonException;
 import com.circleon.common.file.FileStore;
+import com.circleon.common.file.SignedUrlManager;
 import com.circleon.domain.circle.CircleAuthValidator;
 import com.circleon.domain.circle.CircleRole;
 

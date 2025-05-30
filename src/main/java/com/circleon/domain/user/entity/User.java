@@ -38,27 +38,15 @@ public class User extends BaseEntity {
     @Column
     private String profileImgUrl;
 
-    public UserInfo toUserInfo(){
-        return UserInfo.builder()
-                .id(id)
-                .username(username)
-                .email(email)
-                .password(password)
-                .univCode(univCode)
-                .status(status)
-                .role(role)
-                .profileImgUrl(profileImgUrl)
-                .build();
+    public void updateUserName(String username){
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("닉네임은 비어있을 수 없습니다.");
+        }
+        this.username = username;
     }
 
-    public void apply(UserInfo userInfo){
-        this.email = userInfo.getEmail();
-        this.username = userInfo.getUsername();
-        this.password = userInfo.getPassword();
-        this.univCode = userInfo.getUnivCode();
-        this.status = userInfo.getStatus();
-        this.role = userInfo.getRole();
-        this.profileImgUrl = userInfo.getProfileImgUrl();
+    public void updateProfileImgUrl(String profileImgUrl){
+        this.profileImgUrl = profileImgUrl;
     }
 
 }

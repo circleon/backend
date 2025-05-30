@@ -2,7 +2,7 @@ package com.circleon.domain.user;
 
 import com.circleon.common.CommonResponseStatus;
 import com.circleon.common.exception.CommonException;
-import com.circleon.domain.post.service.SignedUrlManager;
+import com.circleon.common.file.SignedUrlManager;
 import com.circleon.domain.user.dto.UserInfo;
 import com.circleon.domain.user.entity.User;
 import com.circleon.domain.user.entity.UserStatus;
@@ -22,10 +22,11 @@ public class UserImageManager {
     private final UserRepository userRepository;
     private final SignedUrlManager signedUrlManager;
 
-    public UserInfo createSignedUrl(UserInfo userInfo){
+    public UserInfo createSignedUrl(User user){
+        UserInfo userInfo = UserInfo.from(user);
         String originUrl = userInfo.getProfileImgUrl();
         if(originUrl != null && !originUrl.isBlank()){
-            userInfo.updateProfileImgUrl(signedUrlManager.createSignedUrl(originUrl));
+            userInfo.changeImgUrlToSignedUrl(signedUrlManager.createSignedUrl(originUrl));
         }
         return userInfo;
     }
@@ -39,9 +40,7 @@ public class UserImageManager {
     public void updateImageMeta(Long userId, String path){
         User user = userRepository.findByIdAndStatus(userId, UserStatus.ACTIVE)
                 .orElseThrow(() -> new UserException(UserResponseStatus.USER_NOT_FOUND));
-        UserInfo userInfo = user.toUserInfo();
-        userInfo.updateProfileImgUrl(path);
-        user.apply(userInfo);
+        user.updateProfileImgUrl(path);
     }
 
     public void deleteImage(String path){

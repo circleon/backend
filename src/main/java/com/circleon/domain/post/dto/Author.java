@@ -1,5 +1,6 @@
 package com.circleon.domain.post.dto;
 
+import com.circleon.domain.user.dto.UserInfo;
 import lombok.*;
 
 @Getter
@@ -14,4 +15,5 @@ public class Author {
     private String authorName;
 
     private String authorProfileUrl;
+
 }

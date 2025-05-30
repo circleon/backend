@@ -23,32 +23,10 @@ import java.util.concurrent.TimeUnit;
 @RequestMapping("/api/users")
 public class UserController {
 
-    private final UserService userService;
-    private final UserFileStore userFileStore;
+    UserService userService;
+    UserFileStore userFileStore;
 
-    @GetMapping("/me")
-    public ResponseEntity<UserResponse> findMe(@LoginUser Long loginId) {
-        return ResponseEntity.ok(UserResponse.from(userService.findMeById(loginId)));
-    }
-
-    @PutMapping("/me")
-    public ResponseEntity<UserResponse> updateMe(@LoginUser Long userId, @RequestBody UserUpdate userUpdate) {
-        return ResponseEntity.ok(UserResponse.from(userService.updateMe(userId, userUpdate.getUsername())));
-    }
-
-    @PutMapping("/me/image")
-    public ResponseEntity<SuccessResponse> updateImage(@LoginUser Long userId, @Valid @ModelAttribute UserImageUpdate userImageUpdate) {
-        userService.updateImage(userId, userImageUpdate.getImage());
-        return ResponseEntity.ok(SuccessResponse.builder().message("success").build());
-    }
-
-    @DeleteMapping("/me/image")
-    public ResponseEntity<SuccessResponse> deleteImage(@LoginUser Long userId) {
-        userService.deleteImage(userId);
-        return ResponseEntity.ok(SuccessResponse.builder().message("success").build());
-    }
-
-    @GetMapping("/me/image/{directory}/{filename}")
+    @GetMapping("/{userId}/image/{directory}/{filename}")
     public ResponseEntity<Resource> findImage(@PathVariable String directory,
                                               @PathVariable String filename,
                                               @RequestParam String expires,

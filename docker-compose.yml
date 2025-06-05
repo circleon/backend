@@ -25,6 +25,7 @@ services:
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
       - LOG_PATH=${LOG_PATH}
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
       - TZ=Asia/Seoul
 
   nginx:

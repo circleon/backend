@@ -56,23 +56,23 @@ public class MyPageController {
         return ResponseEntity.ok(myCommentedPosts);
     }
 
-    @GetMapping("/me")
+    @GetMapping
     public ResponseEntity<UserResponse> findMe(@LoginUser Long loginId) {
         return ResponseEntity.ok(UserResponse.from(myPageService.findMeById(loginId)));
     }
 
-    @PutMapping("/me")
+    @PutMapping
     public ResponseEntity<UserResponse> updateMe(@LoginUser Long userId, @RequestBody UserUpdate userUpdate) {
         return ResponseEntity.ok(UserResponse.from(myPageService.updateMe(userId, userUpdate.getUsername())));
     }
 
-    @PutMapping("/me/image")
+    @PutMapping("/image")
     public ResponseEntity<SuccessResponse> updateImage(@LoginUser Long userId, @Valid @ModelAttribute UserImageUpdate userImageUpdate) {
         myPageService.updateImage(userId, userImageUpdate.getImage());
         return ResponseEntity.ok(SuccessResponse.builder().message("success").build());
     }
 
-    @DeleteMapping("/me/image")
+    @DeleteMapping("/image")
     public ResponseEntity<SuccessResponse> deleteImage(@LoginUser Long userId) {
         myPageService.deleteImage(userId);
         return ResponseEntity.ok(SuccessResponse.builder().message("success").build());

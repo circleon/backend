@@ -9,13 +9,16 @@ import com.circleon.domain.user.entity.UserStatus;
 import com.circleon.domain.user.exception.UserException;
 import com.circleon.domain.user.repository.UserRepository;
 import com.circleon.domain.user.service.UserFileStore;
+import io.jsonwebtoken.lang.Strings;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class UserImageManager {
 
     private final UserFileStore userFileStore;
@@ -44,10 +47,9 @@ public class UserImageManager {
     }
 
     public void deleteImage(String path){
-        if(path == null || path.isEmpty()){
-            throw new CommonException(CommonResponseStatus.FILE_NOT_FOUND, "이미지 파일이 존재하지않습니다");
+        if(Strings.hasText(path)){
+            userFileStore.deleteFile(path);
         }
-        userFileStore.deleteFile(path);
     }
 
     public void validateSignedImage(String filePath, String expires, String signature){

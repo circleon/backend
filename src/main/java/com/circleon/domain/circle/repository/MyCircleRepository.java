@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -25,6 +26,8 @@ public interface MyCircleRepository extends JpaRepository<MyCircle, Long>, MyCir
     Optional<MyCircle> findByIdAndCircleAndMembershipStatus(Long id, Circle circle, MembershipStatus membershipStatus);
 
     Optional<MyCircle> findByIdAndCircle(Long id, Circle circle);
+
+    List<MyCircle> findAllByUserAndMembershipStatus(User user, MembershipStatus membershipStatus);
 
     //데이터로더 용
     List<MyCircle> findAllByIdLessThanEqual(Long id);

@@ -4,6 +4,8 @@ import com.circleon.common.CommonStatus;
 
 import com.circleon.common.SortUtils;
 import com.circleon.common.dto.PaginatedResponse;
+import com.circleon.domain.circle.MembershipStatus;
+import com.circleon.domain.circle.entity.QMyCircle;
 import com.circleon.domain.post.PostType;
 import com.circleon.domain.post.dto.Author;
 import com.circleon.domain.post.dto.PostCount;
@@ -30,6 +32,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.circleon.domain.circle.entity.QCircle.*;
+import static com.circleon.domain.circle.entity.QMyCircle.myCircle;
 import static com.circleon.domain.post.entity.QComment.comment;
 import static com.circleon.domain.user.entity.QUser.*;
 import static com.circleon.domain.post.entity.QPost.*;
@@ -73,6 +76,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                 .fetch();
     }
 
+
     @Override
     public PaginatedResponse<MyPostResponse> findMyPosts(Long userId, Pageable pageable) {
 
@@ -93,6 +97,11 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                                 post.author.username,
                                 post.author.profileImgUrl)))
                 .from(post)
+                .join(myCircle).on(
+                        myCircle.user.id.eq(userId),
+                        myCircle.circle.id.eq(post.circle.id),
+                        myCircle.membershipStatus.eq(MembershipStatus.APPROVED)
+                )
                 .leftJoin(postImage).on(postImage.post.id.eq(post.id),
                         postImage.status.eq(CommonStatus.ACTIVE))
                 .where(
@@ -105,14 +114,19 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                 .fetch();
 
         Long totalPosts = Optional.ofNullable(
-                jpaQueryFactory
-                        .select(post.count())
-                        .from(post)
-                        .where(
-                                authorIdEq(userId),
-                                post.status.eq(CommonStatus.ACTIVE)
-                        )
-                        .fetchOne())
+                        jpaQueryFactory
+                                .select(post.count())
+                                .from(post)
+                                .join(myCircle).on(
+                                        myCircle.user.id.eq(userId),
+                                        myCircle.circle.id.eq(post.circle.id),
+                                        myCircle.membershipStatus.eq(MembershipStatus.APPROVED)
+                                )
+                                .where(
+                                        authorIdEq(userId),
+                                        post.status.eq(CommonStatus.ACTIVE)
+                                )
+                                .fetchOne())
                 .orElse(0L);
 
         Page<MyPostResponse> pagedPosts = new PageImpl<>(content, pageable, totalPosts);
@@ -142,6 +156,11 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                         )
                 .from(comment)
                 .join(comment.post, post)
+                .join(myCircle).on(
+                        myCircle.user.id.eq(userId),
+                        myCircle.circle.id.eq(post.circle.id),
+                        myCircle.membershipStatus.eq(MembershipStatus.APPROVED)
+                )
                 .leftJoin(postImage).on(postImage.post.id.eq(post.id),
                         postImage.status.eq(CommonStatus.ACTIVE))
                 .where(
@@ -159,6 +178,11 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                         .select(post.id.countDistinct())
                         .from(comment)
                         .join(comment.post, post)
+                        .join(myCircle).on(
+                                myCircle.user.id.eq(userId),
+                                myCircle.circle.id.eq(post.circle.id),
+                                myCircle.membershipStatus.eq(MembershipStatus.APPROVED)
+                        )
                         .where(
                                 comment.author.id.eq(userId),
                                 post.status.eq(CommonStatus.ACTIVE),

@@ -1,6 +1,8 @@
 package com.circleon.domain.user.service;
 
 import com.circleon.common.dto.PaginatedResponse;
+
+import com.circleon.domain.circle.repository.MyCircleRepository;
 import com.circleon.domain.post.repository.PostRepository;
 import com.circleon.common.file.SignedUrlManager;
 
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+
 @Service
 @RequiredArgsConstructor
 public class MyPageService {
@@ -28,6 +31,7 @@ public class MyPageService {
     private final SignedUrlManager signedUrlManager;
     private final UserRepository userRepository;
     private final UserImageManager userImageManager;
+    private final MyCircleRepository myCircleRepository;
 
     @Transactional(readOnly = true)
     public PaginatedResponse<MyPostResponse> findMyPosts(Long userId, Pageable pageable) {
@@ -35,7 +39,6 @@ public class MyPageService {
         //게시글 조회
         PaginatedResponse<MyPostResponse> myPosts = postRepository.findMyPosts(userId, pageable);
 
-        //signedUrl 생성
         myPosts.getContent().forEach(post -> {
             String originUrl = post.getPostImgUrl();
 

@@ -11,7 +11,7 @@ import lombok.Getter;
 @Getter
 public class UserResponse {
 
-    private Long id;
+    private Long userId;
 
     private String username;
 
@@ -23,7 +23,7 @@ public class UserResponse {
 
     public static UserResponse from(UserInfo userInfo){
         return UserResponse.builder()
-                .id(userInfo.getId())
+                .userId(userInfo.getId())
                 .username(userInfo.getUsername())
                 .email(userInfo.getEmail())
                 .univCode(userInfo.getUnivCode())

@@ -22,5 +22,12 @@ public interface AuthService {
 
     void logout(LogoutRequest logoutRequest);
 
+    CompletableFuture<PasswordResetPolicyResponse> sendAsyncVerificationCodeForPasswordReset(EmailVerificationRequest emailVerificationRequest);
+
+    PasswordResetCodeVerificationResponse verifyCodeForPasswordReset(PasswordResetCodeVerificationRequest codeVerificationRequest);
+
+    void updatePassword(PasswordResetRequest passwordResetRequest);
+
     void deleteExpiredRefreshTokens();
+
 }

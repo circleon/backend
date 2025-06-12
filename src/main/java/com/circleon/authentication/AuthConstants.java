@@ -3,9 +3,10 @@ package com.circleon.authentication;
 public final class AuthConstants {
 
     public static final String SOURCE_MAIL = "noreply@circleondev.site";
-    public static final int EXPIRATION_TIME = 5;
+    public static final long EXPIRATION_TIME = 5;
     public static final int ATTEMPT_THRESHOLD = 5;
     public static final int VERIFICATION_CODE_LENGTH = 6;
+    public static final long ATTEMPT_THRESHOLD_MINUTES = 1L;
     public static final long REFRESH_TOKEN_COMPROMISE_THRESHOLD = 1000L * 60 * 5;
 
     private AuthConstants() {

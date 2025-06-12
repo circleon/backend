@@ -7,9 +7,11 @@ import com.circleon.authentication.email.dto.EmailVerificationRequest;
 import com.circleon.authentication.email.dto.VerificationCodeRequest;
 import com.circleon.authentication.email.service.EmailService;
 import com.circleon.authentication.entity.EmailVerification;
+import com.circleon.authentication.entity.PasswordResetPolicy;
 import com.circleon.authentication.entity.UserRefreshToken;
 import com.circleon.authentication.jwt.JwtUtil;
 import com.circleon.authentication.repository.EmailVerificationRepository;
+import com.circleon.authentication.repository.PasswordResetPolicyRepository;
 import com.circleon.authentication.repository.UserRefreshTokenRepository;
 import com.circleon.common.CommonResponseStatus;
 import com.circleon.common.exception.CommonException;
@@ -35,7 +37,6 @@ import java.util.concurrent.CompletableFuture;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
 public class AuthServiceImpl implements AuthService{
 
     private final UserRepository userRepository;
@@ -44,7 +45,9 @@ public class AuthServiceImpl implements AuthService{
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final JwtUtil jwtUtil;
+    private final PasswordResetPolicyRepository passwordResetPolicyRepository;
 
+    @Transactional
     @Override
     public void registerUser(SignUpRequest signUpRequest) {
 
@@ -95,6 +98,7 @@ public class AuthServiceImpl implements AuthService{
     }
 
     //TODO 비동기 처리로 바꿔야함 성능때문에
+    @Transactional
     @Override
     public void sendVerificationEmail(EmailVerificationRequest emailVerificationRequest) {
 
@@ -135,6 +139,7 @@ public class AuthServiceImpl implements AuthService{
 
 
     @Override
+    @Transactional
     public CompletableFuture<Void> sendAsyncVerificationEmail(EmailVerificationRequest emailVerificationRequest) {
 
         // 먼저 이메일 중복 여부 체크
@@ -159,13 +164,8 @@ public class AuthServiceImpl implements AuthService{
             createNewVerification(emailVerificationRequest, encryptedCode);
         }
 
-        //TODO 인증 메시지 포멧 다시 정하기
-        AwsSesEmailRequest awsSesEmailRequest = AwsSesEmailRequest.builder()
-                .sender(AuthConstants.SOURCE_MAIL)
-                .subject("[Circle On] 인증 코드")
-                .content(verificationCode)
-                .recipient(emailVerificationRequest.getEmail())
-                .build();
+        AwsSesEmailRequest awsSesEmailRequest =
+                createAwsEmailRequest(verificationCode, emailVerificationRequest.getEmail());
 
         return emailService.sendAsyncEmail(awsSesEmailRequest)
                 .exceptionally(throwable -> {
@@ -195,6 +195,7 @@ public class AuthServiceImpl implements AuthService{
     }
 
     @Override
+    @Transactional
     public void verifyVerificationCode(VerificationCodeRequest verificationCodeRequest) {
         EmailVerification emailVerification = emailVerificationRepository.findByEmail(verificationCodeRequest.getEmail())
                 .orElseThrow(() -> new UserException(UserResponseStatus.VERIFICATION_CODE_NOT_REQUESTED));
@@ -249,6 +250,7 @@ public class AuthServiceImpl implements AuthService{
         existingVerification.setVerified(false);
     }
 
+    @Transactional
     @Override
     public LoginResponse login(LoginRequest loginRequest) {
 
@@ -286,6 +288,7 @@ public class AuthServiceImpl implements AuthService{
                 .toLocalDateTime();
     }
 
+    @Transactional
     @Override
     public RefreshTokenResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
 
@@ -339,16 +342,99 @@ public class AuthServiceImpl implements AuthService{
         }
     }
 
+    @Override
+    public CompletableFuture<PasswordResetPolicyResponse> sendAsyncVerificationCodeForPasswordReset(EmailVerificationRequest emailVerificationRequest) {
+
+        User user = userRepository.findByEmailAndStatus(emailVerificationRequest.getEmail(), UserStatus.ACTIVE)
+                .orElseThrow(() -> new UserException(UserResponseStatus.USER_NOT_FOUND, "존재하지 않는 유저입니다"));
+
+        String verificationCode = emailService.generateVerificationCode();
+        String encryptedCode = passwordEncoder.encode(verificationCode);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime codeExpirationTime = LocalDateTime.now().plusMinutes(AuthConstants.EXPIRATION_TIME);
+
+        PasswordResetPolicy passwordResetPolicy = passwordResetPolicyRepository.findByUserId(user.getId())
+                .orElseGet(() -> PasswordResetPolicy.of(encryptedCode, user.getId(), now, codeExpirationTime));
+
+        if(passwordResetPolicy.isAttemptLimitReached(AuthConstants.ATTEMPT_THRESHOLD,
+                now.minusMinutes(AuthConstants.ATTEMPT_THRESHOLD_MINUTES))){
+            throw new UserException(UserResponseStatus.TOO_MANY_ATTEMPTS);
+        }
+
+        AwsSesEmailRequest awsSesEmailRequest = createAwsEmailRequest(verificationCode, user.getEmail());
+
+        return emailService.sendAsyncEmail(awsSesEmailRequest)
+                .thenApply(result->{
+                    passwordResetPolicy.startNewAttempt(encryptedCode, now, codeExpirationTime);
+                    PasswordResetPolicy savedPolicy = passwordResetPolicyRepository.save(passwordResetPolicy);
+                    return PasswordResetPolicyResponse.of(savedPolicy.getId());
+                })
+                .exceptionally(throwable -> {
+                    throw new UserException(UserResponseStatus.EMAIL_SERVICE_UNAVAILABLE, "[sendAsyncEmail] 이메일 전송 서비스 이용불가");
+                });
+    }
+
+    //TODO 인증 메시지 포멧 다시 정하기
+    private AwsSesEmailRequest createAwsEmailRequest(String verificationCode, String recipientEmail) {
+        return AwsSesEmailRequest.builder()
+                .sender(AuthConstants.SOURCE_MAIL)
+                .subject("[Circle On] 인증 코드")
+                .content(verificationCode)
+                .recipient(recipientEmail)
+                .build();
+    }
+
+    @Transactional
+    @Override
+    public PasswordResetCodeVerificationResponse verifyCodeForPasswordReset(PasswordResetCodeVerificationRequest codeVerificationRequest) {
+
+        PasswordResetPolicy policy = passwordResetPolicyRepository.findById(codeVerificationRequest.policyId())
+                .orElseThrow(() -> new UserException(UserResponseStatus.VERIFICATION_CODE_NOT_REQUESTED));
+
+        if(!policy.isCodeValid(LocalDateTime.now())){
+            throw new UserException(UserResponseStatus.VERIFICATION_CODE_EXPIRED);
+        }
+
+        if(!passwordEncoder.matches(codeVerificationRequest.code(), policy.getVerificationCode())){
+            throw new UserException(UserResponseStatus.INVALID_VERIFICATION_CODE);
+        }
+
+        policy.verify();
+        return PasswordResetCodeVerificationResponse.of(policy.getPublicId());
+    }
+
+    @Transactional
+    @Override
+    public void updatePassword(PasswordResetRequest passwordResetRequest) {
+
+        PasswordResetPolicy policy = passwordResetPolicyRepository.findByPublicId(passwordResetRequest.publicId())
+                .orElseThrow(() -> new UserException(UserResponseStatus.VERIFICATION_CODE_NOT_REQUESTED));
+
+        if(!policy.isVerified()){
+            throw new UserException(UserResponseStatus.INVALID_VERIFICATION_CODE);
+        }
+
+        if(!policy.isCodeValid(LocalDateTime.now())){
+            throw new UserException(UserResponseStatus.VERIFICATION_CODE_EXPIRED);
+        }
+
+        User user = userRepository.findByIdAndStatus(policy.getUserId(), UserStatus.ACTIVE)
+                .orElseThrow(() -> new UserException(UserResponseStatus.USER_NOT_FOUND));
+        user.updatePassword(passwordEncoder.encode(passwordResetRequest.newPassword()));
+
+        passwordResetPolicyRepository.delete(policy);
+    }
 
     //TODO 좀 더 고민
+    @Transactional
     @Override
     public void logout(LogoutRequest logoutRequest) {
         userRefreshTokenRepository.deleteByRefreshToken(logoutRequest.getRefreshToken());
     }
 
+    @Transactional
     @Override
     public void deleteExpiredRefreshTokens() {
-
         //날짜 만료 리프레쉬 토큰
         userRefreshTokenRepository.deleteExpiredRefreshTokens();
     }

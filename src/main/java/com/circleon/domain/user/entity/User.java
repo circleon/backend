@@ -38,6 +38,10 @@ public class User extends BaseEntity {
     @Column
     private String profileImgUrl;
 
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
     public void updateUserName(String username){
         if (username == null || username.isBlank()) {
             throw new IllegalArgumentException("닉네임은 비어있을 수 없습니다.");

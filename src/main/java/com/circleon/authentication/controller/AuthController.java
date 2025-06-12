@@ -86,4 +86,25 @@ public class AuthController {
         authService.logout(logoutRequest);
         return ResponseEntity.ok(SuccessResponse.builder().message("로그아웃 성공").build());
     }
+
+    @PostMapping("/password/verification")
+    public CompletableFuture<ResponseEntity<PasswordResetPolicyResponse>> sendVerificationCodeForPassword(
+            @Valid @RequestBody EmailVerificationRequest emailVerificationRequest) {
+        return authService.sendAsyncVerificationCodeForPasswordReset(emailVerificationRequest)
+                .thenApply(ResponseEntity::ok);
+    }
+
+    @PutMapping("/password/verification-code")
+    public ResponseEntity<PasswordResetCodeVerificationResponse> verifyCodeForPassword(
+            @Valid @RequestBody PasswordResetCodeVerificationRequest codeVerificationRequest){
+        return ResponseEntity.ok(authService.verifyCodeForPasswordReset(codeVerificationRequest));
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity<SuccessResponse> updatePassword(
+            @Valid @RequestBody PasswordResetRequest passwordResetRequest) {
+        authService.updatePassword(passwordResetRequest);
+        return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
+    }
+
 }

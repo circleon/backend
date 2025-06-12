@@ -25,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
@@ -401,6 +402,4 @@ class AuthServiceImplTest {
         assertEquals(UserResponseStatus.PASSWORD_MISMATCH, exception.getStatus());
 
     }
-
-
 }

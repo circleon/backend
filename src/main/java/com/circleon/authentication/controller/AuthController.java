@@ -1,24 +1,19 @@
 package com.circleon.authentication.controller;
 
-
 import com.circleon.authentication.dto.*;
 import com.circleon.authentication.email.dto.EmailVerificationRequest;
 import com.circleon.authentication.email.dto.VerificationCodeRequest;
-
 import com.circleon.authentication.service.AuthService;
 import com.circleon.common.CommonResponseStatus;
-import com.circleon.common.dto.ErrorResponse;
+import com.circleon.common.annotation.LoginUser;
 import com.circleon.common.dto.SuccessResponse;
 import com.circleon.common.exception.CommonException;
-import com.circleon.domain.user.UserResponseStatus;
-import com.circleon.domain.user.exception.UserException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 
@@ -104,6 +99,12 @@ public class AuthController {
     public ResponseEntity<SuccessResponse> updatePassword(
             @Valid @RequestBody PasswordResetRequest passwordResetRequest) {
         authService.updatePassword(passwordResetRequest);
+        return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
+    }
+
+    @DeleteMapping("/users/me")
+    public ResponseEntity<SuccessResponse> deleteMe(@LoginUser Long userId) {
+        authService.withdraw(userId);
         return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
     }
 

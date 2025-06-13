@@ -97,45 +97,6 @@ public class AuthServiceImpl implements AuthService{
                 .orElseThrow(() -> new UserException(UserResponseStatus.INVALID_UNIV_EMAIL_DOMAIN));
     }
 
-    //TODO 비동기 처리로 바꿔야함 성능때문에
-    @Transactional
-    @Override
-    public void sendVerificationEmail(EmailVerificationRequest emailVerificationRequest) {
-
-        // 먼저 이메일 중복 여부 체크
-        if(userRepository.existsByEmailAndStatus(emailVerificationRequest.getEmail(), UserStatus.ACTIVE)) {
-
-            throw new UserException(UserResponseStatus.EMAIL_DUPLICATE);
-        }
-
-        // 이메일 인증 테이블에서 이메일 존재 여부 확인
-        EmailVerification existingVerification = emailVerificationRepository
-                .findByEmail(emailVerificationRequest.getEmail())
-                .orElse(null);
-
-        //코드 생성
-        String verificationCode = emailService.generateVerificationCode();
-        String encryptedCode = passwordEncoder.encode(verificationCode);
-
-        if(existingVerification != null) { //존재
-
-            handleExistingVerification(existingVerification, encryptedCode);
-        }else{
-            //인증 코드 저장
-            createNewVerification(emailVerificationRequest, encryptedCode);
-        }
-
-
-        //TODO 인증 메시지 포멧 다시 정하기 + 보내고 나서 저장하는개 맞을듯?
-        AwsSesEmailRequest awsSesEmailRequest = AwsSesEmailRequest.builder()
-                .sender(AuthConstants.SOURCE_MAIL)
-                .subject("[Circle On] 인증 코드")
-                .content(verificationCode)
-                .recipient(emailVerificationRequest.getEmail())
-                .build();
-
-        emailService.sendEmail(awsSesEmailRequest);
-    }
 
 
     @Override
@@ -423,6 +384,14 @@ public class AuthServiceImpl implements AuthService{
         user.updatePassword(passwordEncoder.encode(passwordResetRequest.newPassword()));
 
         passwordResetPolicyRepository.delete(policy);
+    }
+
+    @Transactional
+    @Override
+    public void withdraw(Long userId) {
+        User user = userRepository.findByIdAndStatus(userId, UserStatus.ACTIVE)
+                .orElseThrow(() -> new UserException(UserResponseStatus.USER_NOT_FOUND));
+        user.withdraw();
     }
 
     //TODO 좀 더 고민

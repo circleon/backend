@@ -10,8 +10,6 @@ public interface AuthService {
 
     void registerUser(SignUpRequest signUpRequest);
 
-    void sendVerificationEmail(EmailVerificationRequest emailVerificationRequest);
-
     CompletableFuture<Void> sendAsyncVerificationEmail(EmailVerificationRequest emailVerificationRequest);
 
     void verifyVerificationCode(VerificationCodeRequest verificationCodeRequest);
@@ -27,6 +25,8 @@ public interface AuthService {
     PasswordResetCodeVerificationResponse verifyCodeForPasswordReset(PasswordResetCodeVerificationRequest codeVerificationRequest);
 
     void updatePassword(PasswordResetRequest passwordResetRequest);
+
+    void withdraw(Long userId);
 
     void deleteExpiredRefreshTokens();
 

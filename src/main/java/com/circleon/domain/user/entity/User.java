@@ -53,4 +53,8 @@ public class User extends BaseEntity {
         this.profileImgUrl = profileImgUrl;
     }
 
+    public void withdraw(){
+        status = UserStatus.DEACTIVATED;
+    }
+
 }

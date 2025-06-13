@@ -1,32 +1,19 @@
 package com.circleon.domain.circle.controller;
 
-
 import com.circleon.common.PageableValidator;
 import com.circleon.common.annotation.LoginUser;
-import com.circleon.common.dto.ErrorResponse;
 import com.circleon.common.dto.PaginatedResponse;
 import com.circleon.common.dto.SuccessResponse;
-
-
 import com.circleon.domain.circle.CategoryType;
-
-import com.circleon.domain.circle.CircleResponseStatus;
-
 import com.circleon.domain.circle.OfficialStatus;
 import com.circleon.domain.circle.dto.*;
-import com.circleon.domain.circle.exception.CircleException;
-
 import com.circleon.domain.circle.service.CircleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.data.domain.Pageable;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-
 import java.util.List;
 
 
@@ -93,6 +80,12 @@ public class CircleController {
         return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
     }
 
+    @DeleteMapping("/{circleId}")
+    public ResponseEntity<SuccessResponse> deleteCircle(@LoginUser Long userId,
+                                                        @PathVariable Long circleId) {
+        circleService.deleteCircle(userId, circleId);
+        return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
+    }
 
 }
 

@@ -74,6 +74,9 @@ public class Circle extends BaseEntity {
         if (this.memberCount > 0) {
             this.memberCount--;
         }
+    }
 
+    public void delete(){
+        circleStatus = CircleStatus.INACTIVE;
     }
 }

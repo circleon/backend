@@ -28,6 +28,8 @@ public interface CircleRepository extends JpaRepository<Circle, Long>, CircleRep
 
     Page<Circle> findAllByCategoryTypeAndCircleStatus(CategoryType categoryType, CircleStatus circleStatus, Pageable pageable);
 
+    boolean existsByIdAndCircleStatus(Long id, CircleStatus circleStatus);
+
     @EntityGraph(attributePaths = "applicant")
     Page<Circle> findAllByCircleStatusAndCategoryTypeAndOfficialStatus(CircleStatus circleStatus, CategoryType categoryType, OfficialStatus officialStatus, Pageable pageable);
 

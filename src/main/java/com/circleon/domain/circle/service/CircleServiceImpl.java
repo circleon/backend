@@ -36,7 +36,6 @@ import java.util.Optional;
 
 @Service
 @Slf4j
-@Transactional
 @RequiredArgsConstructor
 public class CircleServiceImpl implements CircleService {
 
@@ -52,6 +51,7 @@ public class CircleServiceImpl implements CircleService {
     private final CircleAuthValidator circleAuthValidator;
 
 
+    @Transactional
     @Override
     public void createCircle(Long applicantId, CircleCreateRequest circleCreateRequest) {
 
@@ -73,7 +73,6 @@ public class CircleServiceImpl implements CircleService {
         myCircle.initJoinedAt();
 
         myCircleRepository.save(myCircle);
-
 
         //프로필 이미지 유효할때
         if(circleFileStore.isValidFile(circleCreateRequest.getProfileImg())) {
@@ -106,6 +105,8 @@ public class CircleServiceImpl implements CircleService {
     }
 
 //    @Cacheable(value = "circles", key = "(#categoryType ?: 'ALL') + ':' + #pageable.getPageNumber()")
+
+    @Transactional
     @Override
     public PaginatedResponse<CircleResponse> findPagedCircles(Pageable pageable, CategoryType categoryType) {
 
@@ -132,6 +133,7 @@ public class CircleServiceImpl implements CircleService {
         }
     }
 
+    @Transactional
     @Override
     public CircleInfoUpdateResponse updateCircleInfo(Long userId, Long circleId, CircleInfoUpdateRequest circleInfoUpdateRequest) {
 
@@ -168,6 +170,7 @@ public class CircleServiceImpl implements CircleService {
         return thumbnailUrl;
     }
 
+    @Transactional
     @Override
     public CircleDetailResponse findCircleDetail(Long userId, Long circleId) {
 
@@ -189,6 +192,7 @@ public class CircleServiceImpl implements CircleService {
 
     }
 
+    @Transactional
     @Override
     public List<CircleSimpleResponse> findAllCirclesSimple() {
 
@@ -198,7 +202,7 @@ public class CircleServiceImpl implements CircleService {
     }
 
 
-
+    @Transactional
     @Override
     public void updateOfficialStatus(Long userId, Long circleId, OfficialStatus officialStatus) {
 
@@ -214,15 +218,14 @@ public class CircleServiceImpl implements CircleService {
         president.getCircle().setOfficialStatus(officialStatus);
     }
 
-//    @Override
-//    public void updateRecruitingStatus(Long userId, Long circleId, RecruitingStatusUpdateRequest recruitingStatusUpdateRequest) {
-//
-//        //가입 유저인지 체크 + 회장 권한 체크
-//        MyCircle president = circleAuthValidator.validatePresidentAccess(userId, circleId);
-//
-//        president.getCircle().setRecruiting(recruitingStatusUpdateRequest.isRecruiting());
-//    }
+    @Transactional
+    @Override
+    public void deleteCircle(Long userId, Long circleId) {
+        Circle circle = circleAuthValidator.validatePresidentAccess(userId, circleId).getCircle();
+        circle.delete();
+    }
 
+    @Transactional
     @Override
     public void deleteSoftDeletedCircles() {
 

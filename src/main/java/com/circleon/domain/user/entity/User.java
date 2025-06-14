@@ -5,6 +5,8 @@ import com.circleon.domain.user.dto.UserInfo;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Objects;
+
 @Getter
 @Entity
 @Setter
@@ -54,7 +56,11 @@ public class User extends BaseEntity {
     }
 
     public void withdraw(){
+        if(Objects.isNull(id)){
+            throw new IllegalStateException("회원 탈퇴는 저장된 사용자에게만 적용할 수 있습니다.");
+        }
         status = UserStatus.DEACTIVATED;
+        email = email + "#DEACTIVATED#" + id;
     }
 
 }

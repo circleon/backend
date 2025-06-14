@@ -134,23 +134,6 @@ public class AuthServiceImpl implements AuthService{
                 });
     }
 
-    private void rollbackResult(String email) {
-        EmailVerification emailVerification = emailVerificationRepository.findByEmail(email)
-                .orElse(null);
-
-        if(emailVerification != null) {
-            int updatedAttemptCount = emailVerification.getAttemptCount() - 1;
-
-            if(updatedAttemptCount > 0){
-
-                emailVerification.setAttemptCount(updatedAttemptCount);
-                emailVerification.setExpirationTime(LocalDateTime.now());
-                emailVerificationRepository.save(emailVerification);
-            }else {
-                emailVerificationRepository.delete(emailVerification);
-            }
-        }
-    }
 
     @Override
     @Transactional
@@ -166,45 +149,6 @@ public class AuthServiceImpl implements AuthService{
             throw new UserException(UserResponseStatus.INVALID_VERIFICATION_CODE);
         }
         emailVerification.verify();
-    }
-
-    // 새로운 인증 정보 생성
-    private void createNewVerification(EmailVerificationRequest emailVerificationRequest, String verificationCode) {
-        EmailVerification emailVerification = EmailVerification.builder()
-                .email(emailVerificationRequest.getEmail())
-                .verificationCode(verificationCode)
-                .expirationTime(LocalDateTime.now().plusMinutes(AuthConstants.EXPIRATION_TIME))
-                .attemptCount(1)
-                .isVerified(false)
-                .lastAttemptTime(LocalDateTime.now())
-                .build();
-
-        emailVerificationRepository.save(emailVerification);
-    }
-
-    // 기존 인증 정보 처리
-    private void handleExistingVerification(EmailVerification existingVerification, String verificationCode) {
-        //하루 지나면 초기화
-        if(existingVerification.getLastAttemptTime().isBefore(LocalDateTime.now().minusDays(1))) {
-            existingVerification.resetAttemptCount();
-        }
-
-        if(existingVerification.getExpirationTime().isAfter(LocalDateTime.now())){
-            //아직 인증 코드가 유효
-            throw new UserException(UserResponseStatus.VERIFICATION_CODE_NOT_EXPIRED);
-        }
-
-        if(existingVerification.getAttemptCount() >= AuthConstants.ATTEMPT_THRESHOLD){
-            // 회수 제한
-            throw new UserException(UserResponseStatus.TOO_MANY_ATTEMPTS);
-        }
-
-        // 시도 횟수 증가 및 인증 코드 갱신
-        existingVerification.incrementAttemptCount();
-        existingVerification.setExpirationTime(LocalDateTime.now().plusMinutes(AuthConstants.EXPIRATION_TIME));
-        existingVerification.setLastAttemptTime(LocalDateTime.now());
-        existingVerification.setVerificationCode(verificationCode);
-        existingVerification.setVerified(false);
     }
 
     @Transactional

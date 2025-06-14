@@ -39,13 +39,6 @@ public class AuthController {
                 .thenApply(e->ResponseEntity.ok(SuccessResponse.builder().message("Success").build()));
     }
 
-//    @PostMapping("/verification")
-//    public ResponseEntity<SuccessResponse> sendVerificationEmail(@Valid @RequestBody EmailVerificationRequest emailVerificationRequest) {
-//
-//        authService.sendVerificationEmail(emailVerificationRequest);
-//        return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
-//    }
-
     @PutMapping("/verification-code")
     public ResponseEntity<SuccessResponse> verifyCode(@Valid @RequestBody VerificationCodeRequest verificationCodeRequest) {
         authService.verifyVerificationCode(verificationCodeRequest);

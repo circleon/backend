@@ -41,8 +41,8 @@ public class PasswordResetPolicy {
     @Column(nullable = false)
     private boolean verified;
 
-    public boolean isAttemptLimitReached(int countLimit, LocalDateTime codeExpirationAt) {
-        if(lastAttemptAt.isBefore(codeExpirationAt)){
+    public boolean isAttemptLimitReached(int countLimit, LocalDateTime resetThresholdAt) {
+        if(lastAttemptAt.isBefore(resetThresholdAt)){
             resetAttemptCount();
         }
         return attemptCount >= countLimit;

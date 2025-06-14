@@ -87,6 +87,7 @@ public class AuthServiceImpl implements AuthService{
         if(!emailVerification.isVerified()){
             throw new UserException(UserResponseStatus.VERIFICATION_CODE_NOT_REQUESTED);
         }
+
         return emailVerification;
     }
 
@@ -97,42 +98,38 @@ public class AuthServiceImpl implements AuthService{
                 .orElseThrow(() -> new UserException(UserResponseStatus.INVALID_UNIV_EMAIL_DOMAIN));
     }
 
-
-
     @Override
-    @Transactional
     public CompletableFuture<Void> sendAsyncVerificationEmail(EmailVerificationRequest emailVerificationRequest) {
 
-        // 먼저 이메일 중복 여부 체크
         if(userRepository.existsByEmailAndStatus(emailVerificationRequest.getEmail(), UserStatus.ACTIVE)) {
-
             throw new UserException(UserResponseStatus.EMAIL_DUPLICATE);
         }
 
-        // 이메일 인증 테이블에서 이메일 존재 여부 확인
-        EmailVerification existingVerification = emailVerificationRepository
-                .findByEmail(emailVerificationRequest.getEmail())
-                .orElse(null);
-
-        //코드 생성
         String verificationCode = emailService.generateVerificationCode();
         String encryptedCode = passwordEncoder.encode(verificationCode);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime codeExpirationTime = LocalDateTime.now().plusMinutes(AuthConstants.EXPIRATION_TIME);
 
-        if(existingVerification != null) { //존재
-            handleExistingVerification(existingVerification, encryptedCode);
-        }else{
-            //인증 코드 저장
-            createNewVerification(emailVerificationRequest, encryptedCode);
+        EmailVerification emailVerification = emailVerificationRepository
+                .findByEmail(emailVerificationRequest.getEmail())
+                .orElseGet(()->EmailVerification
+                        .of(emailVerificationRequest.getEmail(), encryptedCode, codeExpirationTime, now)
+                );
+
+        if(emailVerification.isAttemptLimitReached(AuthConstants.ATTEMPT_THRESHOLD,
+                now.minusMinutes(AuthConstants.ATTEMPT_THRESHOLD_MINUTES))){
+            throw new UserException(UserResponseStatus.TOO_MANY_ATTEMPTS);
         }
 
         AwsSesEmailRequest awsSesEmailRequest =
                 createAwsEmailRequest(verificationCode, emailVerificationRequest.getEmail());
 
         return emailService.sendAsyncEmail(awsSesEmailRequest)
+                .thenAccept(result->{
+                    emailVerification.startNewAttempt(encryptedCode, now, codeExpirationTime);
+                    emailVerificationRepository.save(emailVerification);
+                })
                 .exceptionally(throwable -> {
-
-                    rollbackResult(emailVerificationRequest.getEmail());
-
                     throw new UserException(UserResponseStatus.EMAIL_SERVICE_UNAVAILABLE, "[sendAsyncEmail] 이메일 전송 서비스 이용불가");
                 });
     }
@@ -161,15 +158,14 @@ public class AuthServiceImpl implements AuthService{
         EmailVerification emailVerification = emailVerificationRepository.findByEmail(verificationCodeRequest.getEmail())
                 .orElseThrow(() -> new UserException(UserResponseStatus.VERIFICATION_CODE_NOT_REQUESTED));
 
-        if(emailVerification.getExpirationTime().isBefore(LocalDateTime.now())) {
+        if(!emailVerification.isCodeValid(LocalDateTime.now())) {
             throw new UserException(UserResponseStatus.VERIFICATION_CODE_EXPIRED);
         }
 
         if(!passwordEncoder.matches(verificationCodeRequest.getCode(), emailVerification.getVerificationCode())){
             throw new UserException(UserResponseStatus.INVALID_VERIFICATION_CODE);
         }
-
-        emailVerification.setVerified(true);
+        emailVerification.verify();
     }
 
     // 새로운 인증 정보 생성

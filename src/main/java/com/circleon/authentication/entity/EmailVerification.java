@@ -1,16 +1,15 @@
 package com.circleon.authentication.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @Entity
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class EmailVerification {
 
@@ -36,13 +35,41 @@ public class EmailVerification {
     @Column(nullable = false)
     private boolean isVerified;
 
-    @Builder
-    public EmailVerification(String email, String verificationCode, LocalDateTime expirationTime, int attemptCount, boolean isVerified, LocalDateTime lastAttemptTime) {
-        this.email = email;
+    public static EmailVerification of(String email,
+                                       String verificationCode,
+                                       LocalDateTime expirationTime,
+                                       LocalDateTime now) {
+        return EmailVerification.builder()
+                .email(email)
+                .verificationCode(verificationCode)
+                .expirationTime(expirationTime)
+                .lastAttemptTime(now)
+                .attemptCount(0)
+                .isVerified(false)
+                .build();
+    }
+
+    public boolean isAttemptLimitReached(int countLimit, LocalDateTime resetThresholdTime) {
+        if(lastAttemptTime.isBefore(resetThresholdTime)) {
+            resetAttemptCount();
+        }
+        return attemptCount >= countLimit;
+    }
+
+    public void startNewAttempt(String verificationCode, LocalDateTime now, LocalDateTime codeExpirationTime) {
         this.verificationCode = verificationCode;
-        this.expirationTime = expirationTime;
-        this.attemptCount = attemptCount;
-        this.lastAttemptTime = lastAttemptTime;
+        this.lastAttemptTime = now;
+        this.expirationTime = codeExpirationTime;
+        attemptCount++;
+        isVerified = false;
+    }
+
+    public boolean isCodeValid(LocalDateTime now) {
+        return expirationTime.isAfter(now);
+    }
+
+    public void verify(){
+        isVerified = true;
     }
 
     public void incrementAttemptCount() {

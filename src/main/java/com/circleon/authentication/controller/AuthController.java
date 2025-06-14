@@ -46,7 +46,7 @@ public class AuthController {
 //        return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
 //    }
 
-    @PostMapping("/verification-code")
+    @PutMapping("/verification-code")
     public ResponseEntity<SuccessResponse> verifyCode(@Valid @RequestBody VerificationCodeRequest verificationCodeRequest) {
         authService.verifyVerificationCode(verificationCodeRequest);
         return ResponseEntity.ok(SuccessResponse.builder().message("인증 성공").build());

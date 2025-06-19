@@ -3,7 +3,9 @@ package com.circleon.authentication.controller;
 import com.circleon.authentication.dto.*;
 import com.circleon.authentication.email.dto.EmailVerificationRequest;
 import com.circleon.authentication.email.dto.VerificationCodeRequest;
+import com.circleon.authentication.service.AuthPasswordService;
 import com.circleon.authentication.service.AuthService;
+import com.circleon.authentication.service.AuthSignUpService;
 import com.circleon.common.CommonResponseStatus;
 import com.circleon.common.annotation.LoginUser;
 import com.circleon.common.dto.SuccessResponse;
@@ -24,10 +26,12 @@ import java.util.concurrent.CompletableFuture;
 public class AuthController {
 
     private final AuthService authService;
+    private final AuthSignUpService authSignUpService;
+    private final AuthPasswordService authPasswordService;
 
     @PostMapping("/signup")
     public ResponseEntity<SuccessResponse> signup(@Valid @RequestBody SignUpRequest signUpRequest) {
-        authService.registerUser(signUpRequest);
+        authSignUpService.registerUser(signUpRequest);
         return ResponseEntity.ok(SuccessResponse.builder().message("signup success").build());
     }
 
@@ -35,13 +39,13 @@ public class AuthController {
     public CompletableFuture<ResponseEntity<SuccessResponse>> sendVerificationEmail(@Valid @RequestBody EmailVerificationRequest emailVerificationRequest) {
 
 
-        return authService.sendAsyncVerificationEmail(emailVerificationRequest)
+        return authSignUpService.sendAsyncVerificationEmail(emailVerificationRequest)
                 .thenApply(e->ResponseEntity.ok(SuccessResponse.builder().message("Success").build()));
     }
 
     @PutMapping("/verification-code")
     public ResponseEntity<SuccessResponse> verifyCode(@Valid @RequestBody VerificationCodeRequest verificationCodeRequest) {
-        authService.verifyVerificationCode(verificationCodeRequest);
+        authSignUpService.verifyVerificationCode(verificationCodeRequest);
         return ResponseEntity.ok(SuccessResponse.builder().message("인증 성공").build());
     }
 
@@ -78,20 +82,20 @@ public class AuthController {
     @PostMapping("/password/verification")
     public CompletableFuture<ResponseEntity<PasswordResetPolicyResponse>> sendVerificationCodeForPassword(
             @Valid @RequestBody EmailVerificationRequest emailVerificationRequest) {
-        return authService.sendAsyncVerificationCodeForPasswordReset(emailVerificationRequest)
+        return authPasswordService.sendAsyncVerificationCodeForPasswordReset(emailVerificationRequest)
                 .thenApply(ResponseEntity::ok);
     }
 
     @PutMapping("/password/verification-code")
     public ResponseEntity<PasswordResetCodeVerificationResponse> verifyCodeForPassword(
             @Valid @RequestBody PasswordResetCodeVerificationRequest codeVerificationRequest){
-        return ResponseEntity.ok(authService.verifyCodeForPasswordReset(codeVerificationRequest));
+        return ResponseEntity.ok(authPasswordService.verifyCodeForPasswordReset(codeVerificationRequest));
     }
 
     @PutMapping("/password")
     public ResponseEntity<SuccessResponse> updatePassword(
             @Valid @RequestBody PasswordResetRequest passwordResetRequest) {
-        authService.updatePassword(passwordResetRequest);
+        authPasswordService.updatePassword(passwordResetRequest);
         return ResponseEntity.ok(SuccessResponse.builder().message("Success").build());
     }
 

@@ -1,5 +1,6 @@
 package com.circleon.authentication.email.dto;
 
+import com.circleon.authentication.AuthConstants;
 import com.circleon.authentication.email.validation.UnivEmail;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -22,5 +23,4 @@ public class EmailVerificationRequest {
     public EmailVerificationRequest(String email) {
         this.email = email;
     }
-
 }

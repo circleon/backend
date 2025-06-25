@@ -8,9 +8,11 @@ import com.circleon.domain.post.dto.CommentSearchResponse;
 import com.circleon.domain.post.entity.Comment;
 import com.circleon.domain.post.entity.Post;
 
+import com.circleon.domain.user.entity.UserStatus;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,8 +45,14 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom{
                         comment.updatedAt,
                         Projections.constructor(Author.class,
                                 comment.author.id,
-                                comment.author.username,
-                                comment.author.profileImgUrl
+                                new CaseBuilder()
+                                        .when(comment.author.status.eq(UserStatus.ACTIVE))
+                                        .then(comment.author.username)
+                                        .otherwise("알수없음"),
+                                new CaseBuilder()
+                                        .when(comment.author.status.eq(UserStatus.ACTIVE))
+                                        .then(comment.author.profileImgUrl)
+                                        .otherwise((String) null)
                         ))
                 )
                 .from(comment)

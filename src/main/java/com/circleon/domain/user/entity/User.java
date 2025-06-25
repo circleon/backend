@@ -40,6 +40,10 @@ public class User extends BaseEntity {
     @Column
     private String profileImgUrl;
 
+    public boolean isActive(){
+        return status == UserStatus.ACTIVE;
+    }
+
     public void updatePassword(String password) {
         this.password = password;
     }

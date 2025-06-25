@@ -15,9 +15,11 @@ import com.circleon.domain.post.entity.Post;
 import com.circleon.domain.user.dto.CommentedPostResponse;
 import com.circleon.domain.user.dto.MyPostResponse;
 
+import com.circleon.domain.user.entity.UserStatus;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,8 +61,14 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                         post.commentCount,
                         Projections.constructor(Author.class,
                                 post.author.id,
-                                post.author.username,
-                                post.author.profileImgUrl
+                                new CaseBuilder()
+                                        .when(post.author.status.eq(UserStatus.ACTIVE))
+                                        .then(post.author.username)
+                                        .otherwise("알수없음"),
+                                new CaseBuilder()
+                                        .when(post.author.status.eq(UserStatus.ACTIVE))
+                                        .then( post.author.profileImgUrl)
+                                        .otherwise((String) null)
                         )))
                 .from(post)
                 .join(post.author, user)

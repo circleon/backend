@@ -7,6 +7,10 @@ import com.circleon.authentication.jwt.JwtUtil;
 import com.circleon.authentication.repository.UserRefreshTokenRepository;
 import com.circleon.common.CommonResponseStatus;
 import com.circleon.common.exception.CommonException;
+import com.circleon.domain.circle.CircleRole;
+import com.circleon.domain.circle.MembershipStatus;
+import com.circleon.domain.circle.entity.MyCircle;
+import com.circleon.domain.circle.repository.MyCircleRepository;
 import com.circleon.domain.user.UserResponseStatus;
 import com.circleon.domain.user.entity.User;
 import com.circleon.domain.user.entity.UserStatus;
@@ -21,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +34,7 @@ public class AuthService{
 
     private final UserRepository userRepository;
     private final UserRefreshTokenRepository userRefreshTokenRepository;
+    private final MyCircleRepository myCircleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
@@ -126,7 +132,22 @@ public class AuthService{
     public void withdraw(Long userId) {
         User user = userRepository.findByIdAndStatus(userId, UserStatus.ACTIVE)
                 .orElseThrow(() -> new UserException(UserResponseStatus.USER_NOT_FOUND));
+
+        if(isPresident(user)){
+            throw new UserException(UserResponseStatus.PRESIDENT_WITHDRAWAL_NOT_ALLOWED);
+        }
+
         user.withdraw();
+    }
+
+    private Boolean isPresident(User user) {
+        return myCircleRepository
+                .findFirstByUserAndCircleRoleAndMembershipStatus(
+                        user,
+                        CircleRole.PRESIDENT,
+                        MembershipStatus.APPROVED)
+                .map(myCircle -> myCircle.getCircle().isActive())
+                .orElse(false);
     }
 
     //TODO 좀 더 고민

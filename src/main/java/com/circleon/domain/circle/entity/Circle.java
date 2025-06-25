@@ -66,6 +66,10 @@ public class Circle extends BaseEntity {
     @JoinColumn(name = "applicant_id", nullable = false)
     private User applicant;
 
+    public boolean isActive() {
+        return circleStatus == CircleStatus.ACTIVE;
+    }
+
     public void incrementMemberCount() {
         this.memberCount++;
     }

@@ -13,7 +13,7 @@
 
 ### 🔹 Infrastructure
 
-![Infrastructure](./docs/system_architecture_v1.png)
+![Infrastructure](./docs/infra.png)
 
 ---
 

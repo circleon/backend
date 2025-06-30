@@ -12,13 +12,8 @@
 ## 🏛️ Architecture
 
 ### 🔹 Infrastructure
+
 ![Infrastructure](./docs/system_architecture_v1.png)
-
-### 🔹 Software Architecture
-![Software Architecture](./docs/Software_Architecture.png)
-
-> **Note**: 각 도메인의 의존성을 줄이기 위해 다른 도메인의 Repository 직접 접근 불가능  
-> **DataService**를 통해 허용된 메서드만 사용 가능
 
 ---
 

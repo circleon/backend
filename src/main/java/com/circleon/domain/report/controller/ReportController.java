@@ -1,17 +1,10 @@
 package com.circleon.domain.report.controller;
 
 import com.circleon.common.annotation.LoginUser;
-import com.circleon.common.dto.ErrorResponse;
 import com.circleon.common.dto.SuccessResponse;
-import com.circleon.domain.circle.CircleResponseStatus;
-import com.circleon.domain.circle.exception.CircleException;
-import com.circleon.domain.post.PostResponseStatus;
-import com.circleon.domain.post.exception.PostException;
-import com.circleon.domain.report.ReportResponseStatus;
 import com.circleon.domain.report.ReportType;
 import com.circleon.domain.report.dto.CreateReportCommand;
 import com.circleon.domain.report.dto.ReportCreateRequest;
-import com.circleon.domain.report.exception.ReportException;
 import com.circleon.domain.report.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

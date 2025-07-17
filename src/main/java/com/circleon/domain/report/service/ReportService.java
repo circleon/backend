@@ -1,10 +1,10 @@
 package com.circleon.domain.report.service;
 
-import com.circleon.domain.circle.service.MyCircleDataService;
 import com.circleon.domain.report.ReportHandler;
 import com.circleon.domain.report.ReportResponseStatus;
 import com.circleon.domain.report.ReportType;
 import com.circleon.domain.report.dto.CreateReportCommand;
+import com.circleon.domain.admin.dto.ReportFindRequest;
 import com.circleon.domain.report.entity.Report;
 import com.circleon.domain.report.exception.ReportException;
 import com.circleon.domain.report.repository.ReportRepository;
@@ -14,6 +14,7 @@ import com.circleon.domain.user.entity.User;
 import com.circleon.domain.user.entity.UserStatus;
 import com.circleon.domain.user.exception.UserException;
 import com.circleon.domain.user.repository.UserRepository;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,19 +27,15 @@ public class ReportService {
 
     private final ReportRepository reportRepository;
 
-    private final MyCircleDataService myCircleDataService;
-
     private final UserRepository userRepository;
 
     private final Map<ReportType, ReportHandler> handlerMap;
 
     public ReportService(List<ReportHandler> handlers,
                          ReportRepository reportRepository,
-                         MyCircleDataService myCircleDataService,
                          UserRepository userRepository) {
         this.handlerMap = handlers.stream().collect(Collectors.toMap(ReportHandler::getType, h -> h));
         this.reportRepository = reportRepository;
-        this.myCircleDataService = myCircleDataService;
         this.userRepository = userRepository;
     }
 

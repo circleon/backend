@@ -2,6 +2,7 @@ package com.circleon.domain.admin.service;
 
 import com.circleon.domain.admin.dto.CircleInfo;
 import com.circleon.domain.admin.dto.CircleReportResponse;
+import com.circleon.domain.admin.dto.ReportFindRequest;
 import com.circleon.domain.admin.dto.ReportInfo;
 import com.circleon.domain.circle.entity.Circle;
 import com.circleon.domain.circle.repository.CircleRepository;
@@ -26,8 +27,9 @@ public class AdminReportService {
     private final CircleRepository circleRepository;
 
     @Transactional(readOnly = true)
-    public Page<CircleReportResponse> findCircleReports(boolean handled, Pageable pageable){
-        Page<Report> reports = reportRepository.findReports(ReportType.CIRCLE, handled, pageable);
+    public Page<CircleReportResponse> findCircleReports(ReportFindRequest reportFindRequest, Pageable pageable){
+        Page<Report> reports =
+                reportRepository.findReports(reportFindRequest.type(), reportFindRequest.handled(), pageable);
 
         List<Long> circleIds = reports.getContent().stream()
                 .map(Report::getTargetId)

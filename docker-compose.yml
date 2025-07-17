@@ -1,7 +1,7 @@
 services:
   backend:
     build: .
-    image: circle-on-backend:dev
+    image: circle-on-backend
     container_name: backend
     restart: always
     logging:
@@ -22,8 +22,6 @@ services:
       - AWS_SES_SECRET_ACCESS_KEY=${AWS_SES_SECRET_ACCESS_KEY}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - SIGNED_URL_SECRET_KEY=${SIGNED_URL_SECRET_KEY}
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
       - LOG_PATH=${LOG_PATH}
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
       - TZ=Asia/Seoul

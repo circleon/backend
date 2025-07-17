@@ -22,7 +22,6 @@ public class SignedUrlManager {
 
         long now = Instant.now().getEpochSecond();
 
-        //5분 정규화
         long rounded = (now / expiredTimeSec) * expiredTimeSec;
 
         long expires = rounded + expiredTimeSec;

@@ -9,6 +9,14 @@ build/
 application-dev.properties
 *.env
 build-local.sh
+logback-local.xml
+*.log
+logs/
+
+/certbot
+*.pem
+*.key
+*.json
 
 ### mac ###
 .DS_Store

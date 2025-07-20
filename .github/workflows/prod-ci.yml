@@ -19,7 +19,7 @@ jobs:
           java-version: '21'
           distribution: 'zulu'
 
-      - name: Build with Gradle (Test Profile)
+      - name: Build with Gradle
         run: ./gradlew clean build
         env:
           SPRING_PROFILES_ACTIVE: ci

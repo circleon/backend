@@ -20,7 +20,7 @@ jobs:
           java-version: '21'
           distribution: 'zulu'
 
-      - name: Build with Gradle (Test Profile)
+      - name: Build with Gradle
         run: ./gradlew clean build
         env:
           SPRING_PROFILES_ACTIVE: ci
@@ -28,18 +28,18 @@ jobs:
       - name: Deploy Docker files to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.EC2_DEV_HOST_PROD }}
-          username: ${{ secrets.EC2_DEV_USER_PROD }}
-          key: ${{ secrets.EC2_DEV_SSH_KEY_PROD }}
+          host: ${{ secrets.EC2_HOST_PROD }}
+          username: ${{ secrets.EC2_USER_PROD }}
+          key: ${{ secrets.EC2_SSH_KEY_PROD }}
           port: 22
           source: "Dockerfile,docker-compose.yml,prometheus.yml,build/libs/circle-on-0.0.1-SNAPSHOT.jar"
           target: "~/circle-on"
 
       - name: Create .env file
         run: |
-          echo "DB_URL=${{ secrets.DB_URL_DEV_PROD }}" > .env
-          echo "DB_USERNAME=${{ secrets.DB_USERNAME_DEV_PROD }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD_DEV_PROD }}" >> .env
+          echo "DB_URL=${{ secrets.DB_URL_PROD }}" > .env
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME_PROD }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD_PROD }}" >> .env
           echo "AWS_SES_ACCESS_KEY=${{ secrets.AWS_SES_ACCESS_KEY_PROD }}" >> .env
           echo "AWS_SES_SECRET_ACCESS_KEY=${{ secrets.AWS_SES_SECRET_ACCESS_KEY_PROD }}" >> .env
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY_PROD }}" >> .env
@@ -51,13 +51,14 @@ jobs:
           echo "EMAIL=${{ secrets.EMAIL_PROD }}" >> .env
           echo "SIGNED_URL_SECRET_KEY=${{ secrets.SIGNED_URL_SECRET_KEY_PROD }}" >> .env
           echo "SPRING_PROFILES_ACTIVE=prod" >> .env
+          echo "CERTBOT_DOMAIN=api.circle-on.site" >> .env
 
       - name: Upload .env to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.EC2_DEV_HOST_PROD }}
-          username: ${{ secrets.EC2_DEV_USER_PROD }}
-          key: ${{ secrets.EC2_DEV_SSH_KEY_PROD }}
+          host: ${{ secrets.EC2_HOST_PROD }}
+          username: ${{ secrets.EC2_USER_PROD }}
+          key: ${{ secrets.EC2_SSH_KEY_PROD }}
           port: 22
           source: ".env"
           target: "~/circle-on"
@@ -65,9 +66,9 @@ jobs:
       - name: Run Docker Compose on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.EC2_DEV_HOST_PROD }}
-          username: ${{ secrets.EC2_DEV_USER_PROD }}
-          key: ${{ secrets.EC2_DEV_SSH_KEY_PROD }}
+          host: ${{ secrets.EC2_HOST_PROD }}
+          username: ${{ secrets.EC2_USER_PROD }}
+          key: ${{ secrets.EC2_SSH_KEY_PROD }}
           port: 22
           script: |
             mkdir -p ~/circle-on

@@ -75,6 +75,7 @@ jobs:
             cd ~/circle-on
             
             docker compose stop backend prometheus grafana
+            
             docker compose rm -f backend prometheus grafana
             
             docker compose up --build -d backend

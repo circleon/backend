@@ -14,6 +14,7 @@ import com.circleon.domain.user.entity.UnivCode;
 import com.circleon.domain.user.entity.User;
 import com.circleon.domain.user.entity.UserStatus;
 import com.circleon.domain.user.exception.UserException;
+import com.circleon.domain.user.repository.UserPolicyAgreementRepository;
 import com.circleon.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,6 +33,7 @@ public class AuthSignUpService {
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationRepository emailVerificationRepository;
     private final EmailService emailService;
+    private final UserPolicyAgreementRepository userPolicyAgreementRepository;
 
     @Transactional
     public void registerUser(SignUpRequest signUpRequest) {
@@ -61,7 +63,7 @@ public class AuthSignUpService {
                 .build();
 
         userRepository.save(user);
-
+        userPolicyAgreementRepository.save(signUpRequest.toUserPolicyAgreement(user.getId()));
         emailVerificationRepository.delete(emailVerification);
     }
 

@@ -1,6 +1,9 @@
 package com.circleon.authentication.dto;
 
 import com.circleon.authentication.email.validation.UnivEmail;
+import com.circleon.domain.user.entity.UserPolicyAgreement;
+import jakarta.persistence.Column;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -29,10 +32,18 @@ public class SignUpRequest {
     @NotBlank
     private String username;
 
-    @Builder
-    public SignUpRequest(String email, String password, String username) {
-        this.email = email;
-        this.password = password;
-        this.username = username;
+    private boolean serviceTerms;
+
+    private boolean privacyPolicies;
+
+    private boolean communityRules;
+
+    @AssertTrue(message = "서비스 이용약관, 개인정보 처리방침, 커뮤니티 이용규칙에 모두 동의해야 합니다.")
+    public boolean isValidUserPolicyAgreement() {
+        return serviceTerms && privacyPolicies && communityRules;
+    }
+
+    public UserPolicyAgreement toUserPolicyAgreement(Long userId) {
+        return UserPolicyAgreement.create(serviceTerms, privacyPolicies, communityRules, userId);
     }
 }

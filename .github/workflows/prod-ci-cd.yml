@@ -81,3 +81,4 @@ jobs:
             docker compose up --build -d backend
             docker compose up -d prometheus grafana
             
+            docker restart nginx

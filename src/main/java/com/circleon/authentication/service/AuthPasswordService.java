@@ -1,6 +1,7 @@
 package com.circleon.authentication.service;
 
 import com.circleon.authentication.AuthConstants;
+import com.circleon.authentication.AuthMailProperties;
 import com.circleon.authentication.dto.PasswordResetCodeVerificationRequest;
 import com.circleon.authentication.dto.PasswordResetCodeVerificationResponse;
 import com.circleon.authentication.dto.PasswordResetPolicyResponse;
@@ -31,6 +32,7 @@ public class AuthPasswordService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final PasswordResetPolicyRepository passwordResetPolicyRepository;
+    private final AuthMailProperties authMailProperties;
 
     public CompletableFuture<PasswordResetPolicyResponse> sendAsyncVerificationCodeForPasswordReset(EmailVerificationRequest emailVerificationRequest) {
 
@@ -66,7 +68,7 @@ public class AuthPasswordService {
     //TODO 인증 메시지 포멧 다시 정하기
     private AwsSesEmailRequest createAwsEmailRequest(String verificationCode, String recipientEmail) {
         return AwsSesEmailRequest.builder()
-                .sender(AuthConstants.SOURCE_MAIL)
+                .sender(authMailProperties.getSourceMail())
                 .subject("[Circle On] 인증 코드")
                 .content(verificationCode)
                 .recipient(recipientEmail)

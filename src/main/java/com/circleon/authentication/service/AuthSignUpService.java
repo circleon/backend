@@ -1,6 +1,7 @@
 package com.circleon.authentication.service;
 
 import com.circleon.authentication.AuthConstants;
+import com.circleon.authentication.AuthMailProperties;
 import com.circleon.authentication.dto.SignUpRequest;
 import com.circleon.authentication.email.dto.AwsSesEmailRequest;
 import com.circleon.authentication.email.dto.EmailVerificationRequest;
@@ -34,6 +35,7 @@ public class AuthSignUpService {
     private final EmailVerificationRepository emailVerificationRepository;
     private final EmailService emailService;
     private final UserPolicyAgreementRepository userPolicyAgreementRepository;
+    private final AuthMailProperties authMailProperties;
 
     @Transactional
     public void registerUser(SignUpRequest signUpRequest) {
@@ -122,7 +124,7 @@ public class AuthSignUpService {
 
     private AwsSesEmailRequest createAwsEmailRequest(String verificationCode, String recipientEmail) {
         return AwsSesEmailRequest.builder()
-                .sender(AuthConstants.SOURCE_MAIL)
+                .sender(authMailProperties.getSourceMail())
                 .subject("[Circle On] 인증 코드")
                 .content(verificationCode)
                 .recipient(recipientEmail)

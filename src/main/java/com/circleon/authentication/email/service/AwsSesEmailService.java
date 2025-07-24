@@ -46,7 +46,7 @@ public class AwsSesEmailService implements EmailService{
         try{
             sesClient.sendEmail(emailRequest);
         }catch(Exception e){
-            throw new UserException(UserResponseStatus.EMAIL_SERVICE_UNAVAILABLE, "[sendAsyncEmail] 이메일 전송 서비스 이용불가");
+            throw new UserException(UserResponseStatus.EMAIL_SERVICE_UNAVAILABLE, "[sendAsyncEmail] 이메일 전송 서비스 이용불가", e);
         }
 
         return CompletableFuture.completedFuture(null);

@@ -38,6 +38,8 @@ public class GlobalExceptionHandler {
 
         log.error("AdminException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
 
+        log.error("AdminException", e);
+
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorCode(status.getCode())
                 .errorMessage(status.getMessage())
@@ -55,6 +57,7 @@ public class GlobalExceptionHandler {
 
         log.error("ScheduleException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
 
+        log.error("ScheduleException", e);
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorCode(status.getCode())
                 .errorMessage(status.getMessage())
@@ -72,6 +75,7 @@ public class GlobalExceptionHandler {
 
         log.error("ReportException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
 
+        log.error("ReportException", e);
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorCode(status.getCode())
@@ -90,6 +94,8 @@ public class GlobalExceptionHandler {
 
         log.error("PostException {}", e.getMessage());
 
+        log.error("PostException", e);
+
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorCode(status.getCode())
                 .errorMessage(status.getMessage())
@@ -107,6 +113,7 @@ public class GlobalExceptionHandler {
 
         log.error("CircleException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
 
+        log.error("CircleException", e);
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorCode(status.getCode())
@@ -125,6 +132,7 @@ public class GlobalExceptionHandler {
 
         log.error("UserException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
 
+        log.error("UserException", e);
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorCode(status.getCode())
@@ -157,6 +165,8 @@ public class GlobalExceptionHandler {
         log.error("CommonException: {}", e.getMessage());
 
         log.error("CommonException: {} {} {}", status.getHttpStatusCode(), status.getCode(), status.getMessage());
+
+        log.error("CommonException", e);
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorMessage(status.getMessage())

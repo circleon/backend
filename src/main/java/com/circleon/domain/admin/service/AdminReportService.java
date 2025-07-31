@@ -1,9 +1,11 @@
 package com.circleon.domain.admin.service;
 
+import com.circleon.domain.admin.AdminResponseStatus;
 import com.circleon.domain.admin.dto.CircleInfo;
 import com.circleon.domain.admin.dto.CircleReportResponse;
 import com.circleon.domain.admin.dto.ReportFindRequest;
 import com.circleon.domain.admin.dto.ReportInfo;
+import com.circleon.domain.admin.exception.AdminException;
 import com.circleon.domain.circle.entity.Circle;
 import com.circleon.domain.circle.repository.CircleRepository;
 import com.circleon.domain.report.ReportType;
@@ -46,5 +48,15 @@ public class AdminReportService {
             CircleInfo circleInfo = circle == null ? null : CircleInfo.from(circle);
             return CircleReportResponse.from(ReportInfo.from(report), circleInfo);
         });
+    }
+
+    @Transactional
+    public void handleReport(Long reportId){
+        Report report = reportRepository.findByIdAndHandled(reportId, false)
+                .orElseThrow(
+                        () -> new AdminException(
+                                AdminResponseStatus.REPORT_NOT_FOUND, "[handleReport] 신고가 존재하지 않습니다.")
+                );
+        report.handle();
     }
 }

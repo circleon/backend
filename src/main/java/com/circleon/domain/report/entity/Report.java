@@ -36,4 +36,7 @@ public class Report extends BaseEntity {
     @JoinColumn(name = "reporter_id", nullable = false)
     private User reporter;
 
+    public void handle(){
+        handled = true;
+    }
 }

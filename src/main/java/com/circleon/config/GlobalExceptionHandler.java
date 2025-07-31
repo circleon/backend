@@ -15,6 +15,8 @@ import com.circleon.domain.schedule.ScheduleResponseStatus;
 import com.circleon.domain.schedule.exception.ScheduleException;
 import com.circleon.domain.user.UserResponseStatus;
 import com.circleon.domain.user.exception.UserException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
@@ -204,6 +206,24 @@ public class GlobalExceptionHandler {
                     .errorMessage(errorMessage)
                     .build();
         }
+
+        return ResponseEntity.badRequest().body(errorResponse);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException ex) {
+
+        log.error("ConstraintViolationException", ex);
+
+        String errorMessage = ex.getConstraintViolations()
+                .stream()
+                .map(ConstraintViolation::getMessage)
+                .collect(Collectors.joining(", "));
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode(CommonResponseStatus.BAD_REQUEST.getCode())
+                .errorMessage(errorMessage)
+                .build();
 
         return ResponseEntity.badRequest().body(errorResponse);
     }

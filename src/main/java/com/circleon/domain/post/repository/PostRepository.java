@@ -6,6 +6,7 @@ import com.circleon.domain.post.entity.Post;
 import com.circleon.domain.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -23,4 +24,6 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
 
     Page<Post> findAllByCircleIn(List<Circle> circles, Pageable pageable);
 
+    @EntityGraph(attributePaths = "author")
+    List<Post> findByIdInAndStatus(List<Long> ids, CommonStatus status);
 }

@@ -26,4 +26,13 @@ public class CircleInfo {
                 .introduction(circle.getIntroduction())
                 .build();
     }
+
+    public static CircleInfo empty() {
+        return CircleInfo.builder()
+                .circleId(null)
+                .circleName("알 수 없음")
+                .summary("")
+                .introduction("")
+                .build();
+    }
 }

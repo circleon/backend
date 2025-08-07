@@ -4,6 +4,7 @@ import com.circleon.common.dto.PaginatedResponse;
 import com.circleon.common.dto.SuccessResponse;
 import com.circleon.domain.admin.dto.CircleReportResponse;
 
+import com.circleon.domain.admin.dto.PostReportResponse;
 import com.circleon.domain.admin.dto.ReportFindRequest;
 import com.circleon.domain.admin.service.AdminReportService;
 
@@ -30,6 +31,12 @@ public class AdminReportController {
     public ResponseEntity<PaginatedResponse<CircleReportResponse>> findCircleReports(ReportFindRequest request) {
         Page<CircleReportResponse> circleReports = reportService.findCircleReports(request, request.toCreatedAtDescPageable());
         return ResponseEntity.ok(PaginatedResponse.fromPage(circleReports));
+    }
+
+    @GetMapping("/reports/posts")
+    public ResponseEntity<PaginatedResponse<PostReportResponse>> findPostReports(ReportFindRequest request) {
+        Page<PostReportResponse> postReports = reportService.findPostReports(request, request.toCreatedAtDescPageable());
+        return ResponseEntity.ok(PaginatedResponse.fromPage(postReports));
     }
 
     @PutMapping("/reports/{reportId}/handle")

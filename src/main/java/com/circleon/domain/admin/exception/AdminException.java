@@ -16,4 +16,9 @@ public class AdminException extends RuntimeException {
         super(message);
         this.status = status;
     }
+
+    public AdminException(AdminResponseStatus status) {
+        super(status.getMessage());
+        this.status = status;
+    }
 }
